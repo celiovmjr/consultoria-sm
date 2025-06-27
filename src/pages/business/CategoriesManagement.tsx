@@ -31,51 +31,29 @@ const CategoriesManagement = () => {
 
   const columns = [
     {
-      accessorKey: 'name',
-      header: 'Nome',
-      cell: ({ row }: any) => (
+      key: 'name',
+      label: 'Nome',
+      render: (value: string, row: any) => (
         <div className="flex items-center space-x-2">
           <div 
             className="w-4 h-4 rounded-full" 
-            style={{ backgroundColor: row.original.color }}
+            style={{ backgroundColor: row.color }}
           />
-          <span className="font-medium">{row.getValue('name')}</span>
+          <span className="font-medium">{value}</span>
         </div>
       ),
     },
     {
-      accessorKey: 'description',
-      header: 'Descrição',
+      key: 'description',
+      label: 'Descrição',
     },
     {
-      accessorKey: 'servicesCount',
-      header: 'Serviços',
-      cell: ({ row }: any) => (
+      key: 'servicesCount',
+      label: 'Serviços',
+      render: (value: number) => (
         <Badge variant="secondary">
-          {row.getValue('servicesCount')} serviços
+          {value} serviços
         </Badge>
-      ),
-    },
-    {
-      id: 'actions',
-      header: 'Ações',
-      cell: ({ row }: any) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleEdit(row.original)}
-          >
-            <Edit2 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => handleDelete(row.original.id)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
       ),
     },
   ];
@@ -119,8 +97,8 @@ const CategoriesManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setCategories(categories.filter(cat => cat.id !== id));
+  const handleDelete = (category: any) => {
+    setCategories(categories.filter(cat => cat.id !== category.id));
     toast({
       title: "Categoria excluída",
       description: "A categoria foi excluída com sucesso.",
@@ -235,7 +213,12 @@ const CategoriesManagement = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable columns={columns} data={categories} />
+              <DataTable 
+                columns={columns} 
+                data={categories}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </CardContent>
           </Card>
         </div>
