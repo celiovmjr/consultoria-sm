@@ -88,15 +88,15 @@ const BusinessSidebar = () => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    collapsed ? "justify-center" : "",
+                    "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    collapsed ? "justify-center" : "space-x-3",
                     isActive(item.href)
                       ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <Icon className={cn(
-                    collapsed ? "w-5 h-5" : "w-6 h-6",
+                    collapsed ? "w-6 h-6" : "w-6 h-6",
                     isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
                   )} />
                   {!collapsed && <span>{item.title}</span>}

@@ -83,15 +83,15 @@ const AppointmentsManagement = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'no-show':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
     }
   };
 
@@ -111,14 +111,14 @@ const AppointmentsManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <BusinessSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Gestão de Agendamentos</h1>
-            <p className="text-gray-600">Acompanhe e gerencie todos os agendamentos</p>
+            <h1 className="text-3xl font-bold text-foreground">Gestão de Agendamentos</h1>
+            <p className="text-muted-foreground">Acompanhe e gerencie todos os agendamentos</p>
           </div>
 
           <Card className="border-0 shadow-lg">
@@ -177,7 +177,7 @@ const AppointmentsManagement = () => {
                           <div className="font-medium">
                             {new Date(appointment.date).toLocaleDateString('pt-BR')}
                           </div>
-                          <div className="text-sm text-gray-500 flex items-center">
+                          <div className="text-sm text-muted-foreground flex items-center">
                             <Clock className="w-3 h-3 mr-1" />
                             {appointment.time} ({appointment.duration}min)
                           </div>
@@ -185,7 +185,7 @@ const AppointmentsManagement = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <User className="w-4 h-4 mr-2 text-gray-400" />
+                          <User className="w-4 h-4 mr-2 text-muted-foreground" />
                           {appointment.client}
                         </div>
                       </TableCell>
@@ -207,7 +207,7 @@ const AppointmentsManagement = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleStatusChange(appointment.id, 'completed')}
-                                className="text-green-600"
+                                className="text-green-600 hover:text-green-700"
                               >
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Concluir
@@ -216,7 +216,7 @@ const AppointmentsManagement = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                                className="text-red-600"
+                                className="text-red-600 hover:text-red-700"
                               >
                                 <X className="w-3 h-3 mr-1" />
                                 Cancelar
@@ -224,7 +224,7 @@ const AppointmentsManagement = () => {
                             </>
                           )}
                           {appointment.status === 'completed' && (
-                            <Badge variant="outline" className="text-green-600">
+                            <Badge variant="outline" className="text-green-600 dark:text-green-400">
                               Finalizado
                             </Badge>
                           )}
