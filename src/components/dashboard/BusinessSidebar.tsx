@@ -25,6 +25,11 @@ const BusinessSidebar = () => {
       href: '/business/servicos',
     },
     {
+      title: 'Categorias',
+      icon: TrendingUp,
+      href: '/business/categorias',
+    },
+    {
       title: 'Profissionais',
       icon: Users,
       href: '/business/profissionais',

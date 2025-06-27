@@ -40,8 +40,11 @@ const App = () => (
           {/* Business Owner Routes */}
           <Route path="/business/dashboard" element={<BusinessDashboard />} />
           <Route path="/business/servicos" element={<ServicesManagement />} />
+          <Route path="/business/categorias" element={<CategoriesManagement />} />
           <Route path="/business/profissionais" element={<ProfessionalsManagement />} />
           <Route path="/business/agendamentos" element={<AppointmentsManagement />} />
+          <Route path="/business/relatorios" element={<BusinessReports />} />
+          <Route path="/business/configuracoes" element={<BusinessSettings />} />
           
           {/* Professional Routes */}
           <Route path="/professional/agenda" element={<ProfessionalDashboard />} />
