@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,13 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import { mockProfessionals, mockServices, Professional } from '@/lib/mockData';
 
 const ProfessionalsManagement = () => {
   const [professionals, setProfessionals] = useState<Professional[]>(mockProfessionals);
-  const [services] = useState(mockServices); // Use actual services from mockData
+  const [services] = useState(mockServices);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
   const [formData, setFormData] = useState({
@@ -100,18 +99,25 @@ const ProfessionalsManagement = () => {
     setProfessionals(professionals.filter(professional => professional.id !== professionalId));
   };
 
-  const handleServiceToggle = (serviceId: string, checked: boolean) => {
-    if (checked) {
+  const handleServiceAdd = (serviceId: string) => {
+    if (!formData.services.includes(serviceId)) {
       setFormData({ ...formData, services: [...formData.services, serviceId] });
-    } else {
-      setFormData({ ...formData, services: formData.services.filter(id => id !== serviceId) });
     }
+  };
+
+  const handleServiceRemove = (serviceId: string) => {
+    setFormData({ 
+      ...formData, 
+      services: formData.services.filter(id => id !== serviceId) 
+    });
   };
 
   const getServiceName = (serviceId: string) => {
     const service = services.find(s => s.id === serviceId);
     return service ? service.name : 'Serviço não encontrado';
   };
+
+  const availableServices = services.filter(service => !formData.services.includes(service.id));
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -207,19 +213,58 @@ const ProfessionalsManagement = () => {
                   
                   <div>
                     <Label>Serviços que pode realizar</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
-                      {services.map((service) => (
-                        <div key={service.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={service.id}
-                            checked={formData.services.includes(service.id)}
-                            onCheckedChange={(checked) => handleServiceToggle(service.id, checked as boolean)}
-                          />
-                          <Label htmlFor={service.id} className="text-sm">
-                            {service.name}
-                          </Label>
+                    <div className="space-y-3 mt-2">
+                      {/* Selected Services */}
+                      {formData.services.length > 0 && (
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Serviços Selecionados:</Label>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {formData.services.map((serviceId) => {
+                              const service = services.find(s => s.id === serviceId);
+                              return service ? (
+                                <Badge key={serviceId} variant="default" className="flex items-center gap-1">
+                                  {service.name}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleServiceRemove(serviceId)}
+                                    className="ml-1 hover:bg-white/20 rounded-full p-0.5"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
                         </div>
-                      ))}
+                      )}
+                      
+                      {/* Service Selector */}
+                      {availableServices.length > 0 && (
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">Adicionar Serviço:</Label>
+                          <Select onValueChange={handleServiceAdd}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Selecione um serviço" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-48 overflow-y-auto z-50">
+                              {availableServices.map((service) => (
+                                <SelectItem key={service.id} value={service.id} className="hover:bg-gray-50">
+                                  <div className="flex items-center justify-between w-full">
+                                    <span>{service.name}</span>
+                                    <span className="text-sm text-gray-500 ml-2">
+                                      {service.duration}min - R$ {service.price.toFixed(2)}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      
+                      {availableServices.length === 0 && formData.services.length > 0 && (
+                        <p className="text-sm text-gray-500">Todos os serviços disponíveis foram selecionados.</p>
+                      )}
                     </div>
                   </div>
                   
