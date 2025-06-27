@@ -10,6 +10,9 @@ import Register from "./pages/auth/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import BusinessManagement from "./pages/admin/BusinessManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
+import PlansManagement from "./pages/admin/PlansManagement";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminSettings from "./pages/admin/AdminSettings";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import ServicesManagement from "./pages/business/ServicesManagement";
 import CategoriesManagement from "./pages/business/CategoriesManagement";
@@ -41,6 +44,9 @@ const App = () => (
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/negocios" element={<BusinessManagement />} />
           <Route path="/admin/usuarios" element={<UsersManagement />} />
+          <Route path="/admin/planos" element={<PlansManagement />} />
+          <Route path="/admin/relatorios" element={<AdminReports />} />
+          <Route path="/admin/configuracoes" element={<AdminSettings />} />
           
           {/* Business Owner Routes */}
           <Route path="/business/dashboard" element={<BusinessDashboard />} />
