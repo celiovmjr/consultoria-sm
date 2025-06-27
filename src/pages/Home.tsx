@@ -124,7 +124,7 @@ const Home = () => {
                   Começar Gratuitamente
                 </Button>
               </Link>
-              <Link to="/demo">
+              <Link to="/login">
                 <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto border-2">
                   Ver Demonstração
                 </Button>
@@ -239,12 +239,14 @@ const Home = () => {
                     ))}
                   </ul>
                   
-                  <Button 
-                    className={`w-full ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' : ''}`}
-                    variant={plan.popular ? 'default' : 'outline'}
-                  >
-                    Começar Agora
-                  </Button>
+                  <Link to="/cadastro">
+                    <Button 
+                      className={`w-full ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' : ''}`}
+                      variant={plan.popular ? 'default' : 'outline'}
+                    >
+                      Começar Agora
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}

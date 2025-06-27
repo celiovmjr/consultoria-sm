@@ -25,17 +25,17 @@ const Footer = () => {
             <h3 className="text-lg font-semibold">Produto</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/recursos" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Recursos
                 </Link>
               </li>
               <li>
-                <Link to="/precos" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Preços
                 </Link>
               </li>
               <li>
-                <Link to="/demo" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Demo
                 </Link>
               </li>
@@ -47,17 +47,17 @@ const Footer = () => {
             <h3 className="text-lg font-semibold">Suporte</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/ajuda" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Central de Ajuda
                 </Link>
               </li>
               <li>
-                <Link to="/contato" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Contato
                 </Link>
               </li>
               <li>
-                <Link to="/status" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
                   Status do Sistema
                 </Link>
               </li>

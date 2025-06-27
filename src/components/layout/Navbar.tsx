@@ -28,28 +28,26 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              to="/recursos"
+              to="/"
               className={cn(
                 "text-gray-600 hover:text-blue-600 transition-colors",
-                isActive('/recursos') && "text-blue-600 font-medium"
+                isActive('/') && "text-blue-600 font-medium"
               )}
             >
               Recursos
             </Link>
             <Link
-              to="/precos"
+              to="/"
               className={cn(
-                "text-gray-600 hover:text-blue-600 transition-colors",
-                isActive('/precos') && "text-blue-600 font-medium"
+                "text-gray-600 hover:text-blue-600 transition-colors"
               )}
             >
               Preços
             </Link>
             <Link
-              to="/contato"
+              to="/"
               className={cn(
-                "text-gray-600 hover:text-blue-600 transition-colors",
-                isActive('/contato') && "text-blue-600 font-medium"
+                "text-gray-600 hover:text-blue-600 transition-colors"
               )}
             >
               Contato
@@ -87,21 +85,21 @@ const Navbar = () => {
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
               <Link
-                to="/recursos"
+                to="/"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Recursos
               </Link>
               <Link
-                to="/precos"
+                to="/"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 Preços
               </Link>
               <Link
-                to="/contato"
+                to="/"
                 className="text-gray-600 hover:text-blue-600 transition-colors"
                 onClick={() => setIsOpen(false)}
               >

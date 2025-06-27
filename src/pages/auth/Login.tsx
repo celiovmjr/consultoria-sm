@@ -96,7 +96,7 @@ const Login = () => {
                     Lembrar de mim
                   </Label>
                 </div>
-                <Link to="/recuperar-senha" className="text-sm text-blue-600 hover:text-blue-700">
+                <Link to="/login" className="text-sm text-blue-600 hover:text-blue-700">
                   Esqueceu a senha?
                 </Link>
               </div>
