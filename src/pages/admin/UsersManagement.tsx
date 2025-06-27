@@ -1,18 +1,44 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, Search, Plus, Edit, Trash2, Mail, Phone, Building } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
+import { useToast } from '@/hooks/use-toast';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  type: 'Business Owner' | 'Professional' | 'Client';
+  business: string;
+  status: 'Ativo' | 'Inativo' | 'Pendente';
+  createdAt: string;
+  lastLogin: string;
+}
 
 const UsersManagement = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    type: 'Client' as 'Business Owner' | 'Professional' | 'Client',
+    business: '',
+    status: 'Ativo' as 'Ativo' | 'Inativo' | 'Pendente'
+  });
 
-  const users = [
+  const [users, setUsers] = useState<User[]>([
     {
-      id: 1,
+      id: '1',
       name: 'Maria Silva',
       email: 'maria@email.com',
       phone: '(11) 99999-9999',
@@ -23,7 +49,7 @@ const UsersManagement = () => {
       lastLogin: '22/12/2024'
     },
     {
-      id: 2,
+      id: '2',
       name: 'João Santos',
       email: 'joao@email.com',
       phone: '(11) 88888-8888',
@@ -34,7 +60,7 @@ const UsersManagement = () => {
       lastLogin: '21/12/2024'
     },
     {
-      id: 3,
+      id: '3',
       name: 'Ana Costa',
       email: 'ana@email.com',
       phone: '(11) 77777-7777',
@@ -45,7 +71,7 @@ const UsersManagement = () => {
       lastLogin: '22/12/2024'
     },
     {
-      id: 4,
+      id: '4',
       name: 'Carlos Lima',
       email: 'carlos@email.com',
       phone: '(11) 66666-6666',
@@ -56,7 +82,7 @@ const UsersManagement = () => {
       lastLogin: 'Nunca'
     },
     {
-      id: 5,
+      id: '5',
       name: 'Patricia Oliveira',
       email: 'patricia@email.com',
       phone: '(11) 55555-5555',
@@ -66,7 +92,71 @@ const UsersManagement = () => {
       createdAt: '18/12/2024',
       lastLogin: '22/12/2024'
     }
-  ];
+  ]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingUser) {
+      setUsers(users.map(user => 
+        user.id === editingUser.id 
+          ? { ...user, ...formData, lastLogin: new Date().toLocaleDateString('pt-BR') }
+          : user
+      ));
+      toast({
+        title: "Usuário atualizado",
+        description: "As informações do usuário foram atualizadas com sucesso.",
+      });
+    } else {
+      const newUser: User = {
+        id: Date.now().toString(),
+        ...formData,
+        createdAt: new Date().toLocaleDateString('pt-BR'),
+        lastLogin: 'Nunca'
+      };
+      setUsers([...users, newUser]);
+      toast({
+        title: "Usuário criado",
+        description: "O novo usuário foi criado com sucesso.",
+      });
+    }
+    
+    resetForm();
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      type: user.type,
+      business: user.business,
+      status: user.status
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (userId: string) => {
+    setUsers(users.filter(user => user.id !== userId));
+    toast({
+      title: "Usuário excluído",
+      description: "O usuário foi removido com sucesso.",
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      type: 'Client',
+      business: '',
+      status: 'Ativo'
+    });
+    setEditingUser(null);
+    setIsDialogOpen(false);
+  };
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,10 +266,104 @@ const UsersManagement = () => {
                     Gerencie todos os usuários cadastrados na plataforma
                   </CardDescription>
                 </div>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Usuário
-                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => resetForm()} className="bg-gradient-to-r from-blue-600 to-purple-600">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Usuário
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {editingUser ? 'Atualize as informações do usuário' : 'Cadastre um novo usuário na plataforma'}
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Nome Completo</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({...formData, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="email">E-mail</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="phone">Telefone</Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="type">Tipo de Usuário</Label>
+                        <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value as any})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Client">Cliente</SelectItem>
+                            <SelectItem value="Professional">Profissional</SelectItem>
+                            <SelectItem value="Business Owner">Proprietário</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="business">Negócio</Label>
+                        <Input
+                          id="business"
+                          value={formData.business}
+                          onChange={(e) => setFormData({...formData, business: e.target.value})}
+                          placeholder="Nome do negócio (se aplicável)"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Ativo">Ativo</SelectItem>
+                            <SelectItem value="Inativo">Inativo</SelectItem>
+                            <SelectItem value="Pendente">Pendente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="flex space-x-2 pt-4">
+                        <Button type="submit" className="flex-1">
+                          {editingUser ? 'Atualizar' : 'Criar'} Usuário
+                        </Button>
+                        <Button type="button" variant="outline" onClick={resetForm}>
+                          Cancelar
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent>
@@ -240,11 +424,11 @@ const UsersManagement = () => {
                       </div>
 
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
                           <Edit className="w-4 h-4 mr-1" />
                           Editar
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => handleDelete(user.id)}>
                           <Trash2 className="w-4 h-4 mr-1" />
                           Excluir
                         </Button>

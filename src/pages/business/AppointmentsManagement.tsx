@@ -3,117 +3,112 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Edit, Trash2, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Calendar, Search, Filter, Clock, User, CheckCircle, X } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
-import { mockAppointments, mockProfessionals, mockServices, Appointment, Professional, Service } from '@/lib/mockData';
+import { useToast } from '@/hooks/use-toast';
+
+interface Appointment {
+  id: string;
+  date: string;
+  time: string;
+  client: string;
+  service: string;
+  professional: string;
+  duration: number;
+  price: number;
+  status: 'confirmed' | 'completed' | 'cancelled' | 'no-show';
+}
 
 const AppointmentsManagement = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
-  const [professionals] = useState<Professional[]>(mockProfessionals);
-  const [services] = useState<Service[]>(mockServices);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
-  const [formData, setFormData] = useState({
-    clientName: '',
-    clientPhone: '',
-    clientEmail: '',
-    serviceId: '',
-    professionalId: '',
-    date: '',
-    time: '',
-    status: 'scheduled' as 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no-show'
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  
+  const [appointments, setAppointments] = useState<Appointment[]>([
+    {
+      id: '1',
+      date: '2024-12-27',
+      time: '09:00',
+      client: 'Ana Silva',
+      service: 'Corte Feminino',
+      professional: 'Maria Costa',
+      duration: 60,
+      price: 45.00,
+      status: 'confirmed'
+    },
+    {
+      id: '2',
+      date: '2024-12-27',
+      time: '10:30',
+      client: 'João Santos',
+      service: 'Barba',
+      professional: 'Carlos Lima',
+      duration: 30,
+      price: 25.00,
+      status: 'completed'
+    },
+    {
+      id: '3',
+      date: '2024-12-27',
+      time: '14:00',
+      client: 'Patricia Oliveira',
+      service: 'Escova',
+      professional: 'Ana Costa',
+      duration: 45,
+      price: 35.00,
+      status: 'confirmed'
+    }
+  ]);
+
+  const filteredAppointments = appointments.filter(appointment => {
+    const matchesSearch = appointment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  const statusOptions = [
-    { value: 'scheduled', label: 'Agendado', color: 'bg-blue-100 text-blue-800' },
-    { value: 'confirmed', label: 'Confirmado', color: 'bg-green-100 text-green-800' },
-    { value: 'completed', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
-    { value: 'cancelled', label: 'Cancelado', color: 'bg-red-100 text-red-800' },
-    { value: 'no-show', label: 'Não compareceu', color: 'bg-gray-100 text-gray-800' }
-  ];
+  const handleStatusChange = (appointmentId: string, newStatus: 'confirmed' | 'completed' | 'cancelled' | 'no-show') => {
+    setAppointments(appointments.map(appointment =>
+      appointment.id === appointmentId ? { ...appointment, status: newStatus } : appointment
+    ));
+    toast({
+      title: "Status atualizado",
+      description: `Agendamento marcado como ${getStatusText(newStatus)}.`,
+    });
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingAppointment) {
-      // Update existing appointment
-      setAppointments(appointments.map(appointment => 
-        appointment.id === editingAppointment.id 
-          ? { ...appointment, ...formData }
-          : appointment
-      ));
-    } else {
-      // Create new appointment
-      const newAppointment: Appointment = {
-        id: Date.now().toString(),
-        ...formData,
-        businessId: '1',
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setAppointments([...appointments, newAppointment]);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'no-show':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
-    
-    resetForm();
   };
 
-  const resetForm = () => {
-    setFormData({
-      clientName: '',
-      clientPhone: '',
-      clientEmail: '',
-      serviceId: '',
-      professionalId: '',
-      date: '',
-      time: '',
-      status: 'scheduled'
-    });
-    setEditingAppointment(null);
-    setIsDialogOpen(false);
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'Confirmado';
+      case 'completed':
+        return 'Concluído';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'no-show':
+        return 'Faltou';
+      default:
+        return 'Pendente';
+    }
   };
-
-  const handleEdit = (appointment: Appointment) => {
-    setEditingAppointment(appointment);
-    setFormData({
-      clientName: appointment.clientName,
-      clientPhone: appointment.clientPhone,
-      clientEmail: appointment.clientEmail,
-      serviceId: appointment.serviceId,
-      professionalId: appointment.professionalId,
-      date: appointment.date,
-      time: appointment.time,
-      status: appointment.status
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (appointmentId: string) => {
-    setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
-  };
-
-  const getProfessionalName = (professionalId: string) => {
-    const professional = professionals.find(p => p.id === professionalId);
-    return professional ? professional.name : 'Profissional não encontrado';
-  };
-
-  const getServiceName = (serviceId: string) => {
-    const service = services.find(s => s.id === serviceId);
-    return service ? service.name : 'Serviço não encontrado';
-  };
-
-  const getStatusInfo = (status: string) => {
-    return statusOptions.find(option => option.value === status) || statusOptions[0];
-  };
-
-  const timeSlots = [
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -121,219 +116,122 @@ const AppointmentsManagement = () => {
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestão de Agendamentos</h1>
-              <p className="text-gray-600">Gerencie todos os agendamentos do seu negócio</p>
-            </div>
-            
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Agendamento
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingAppointment ? 'Editar Agendamento' : 'Novo Agendamento'}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingAppointment ? 'Edite as informações do agendamento' : 'Crie um novo agendamento manual'}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="clientName">Nome do Cliente</Label>
-                      <Input
-                        id="clientName"
-                        value={formData.clientName}
-                        onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                        placeholder="Ex: Maria Silva"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="clientPhone">Telefone</Label>
-                      <Input
-                        id="clientPhone"
-                        value={formData.clientPhone}
-                        onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
-                        placeholder="(11) 99999-9999"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="clientEmail">E-mail</Label>
-                    <Input
-                      id="clientEmail"
-                      type="email"
-                      value={formData.clientEmail}
-                      onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
-                      placeholder="maria@email.com"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="serviceId">Serviço</Label>
-                      <Select value={formData.serviceId} onValueChange={(value) => setFormData({ ...formData, serviceId: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um serviço" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {services.map((service) => (
-                            <SelectItem key={service.id} value={service.id}>
-                              {service.name} - R$ {service.price.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="professionalId">Profissional</Label>
-                      <Select value={formData.professionalId} onValueChange={(value) => setFormData({ ...formData, professionalId: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um profissional" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {professionals.map((professional) => (
-                            <SelectItem key={professional.id} value={professional.id}>
-                              {professional.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="date">Data</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="time">Horário</Label>
-                      <Select value={formData.time} onValueChange={(value) => setFormData({ ...formData, time: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um horário" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as any })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex space-x-2 pt-4">
-                    <Button type="submit" className="flex-1">
-                      {editingAppointment ? 'Atualizar' : 'Criar'} Agendamento
-                    </Button>
-                    <Button type="button" variant="outline" onClick={resetForm}>
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Gestão de Agendamentos</h1>
+            <p className="text-gray-600">Acompanhe e gerencie todos os agendamentos</p>
           </div>
 
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                Agendamentos
+                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                Lista de Agendamentos
               </CardTitle>
               <CardDescription>
-                {appointments.length} agendamentos registrados
+                {appointments.length} agendamentos cadastrados
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Buscar por cliente ou serviço..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-48">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Filtrar por status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Status</SelectItem>
+                    <SelectItem value="confirmed">Confirmado</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                    <SelectItem value="no-show">Faltou</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Data/Hora</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Serviço</TableHead>
                     <TableHead>Profissional</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Horário</TableHead>
+                    <TableHead>Preço</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {appointments.map((appointment) => {
-                    const statusInfo = getStatusInfo(appointment.status);
-                    return (
-                      <TableRow key={appointment.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{appointment.clientName}</div>
-                            <div className="text-sm text-gray-500">{appointment.clientPhone}</div>
+                  {filteredAppointments.map((appointment) => (
+                    <TableRow key={appointment.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {new Date(appointment.date).toLocaleDateString('pt-BR')}
                           </div>
-                        </TableCell>
-                        <TableCell>{getServiceName(appointment.serviceId)}</TableCell>
-                        <TableCell>{getProfessionalName(appointment.professionalId)}</TableCell>
-                        <TableCell>{new Date(appointment.date).toLocaleDateString('pt-BR')}</TableCell>
-                        <TableCell>{appointment.time}</TableCell>
-                        <TableCell>
-                          <Badge className={statusInfo.color}>
-                            {statusInfo.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleEdit(appointment)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDelete(appointment.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {appointment.time} ({appointment.duration}min)
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-2 text-gray-400" />
+                          {appointment.client}
+                        </div>
+                      </TableCell>
+                      <TableCell>{appointment.service}</TableCell>
+                      <TableCell>{appointment.professional}</TableCell>
+                      <TableCell className="font-medium">
+                        R$ {appointment.price.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(appointment.status)}>
+                          {getStatusText(appointment.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          {appointment.status === 'confirmed' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(appointment.id, 'completed')}
+                                className="text-green-600"
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Concluir
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(appointment.id, 'cancelled')}
+                                className="text-red-600"
+                              >
+                                <X className="w-3 h-3 mr-1" />
+                                Cancelar
+                              </Button>
+                            </>
+                          )}
+                          {appointment.status === 'completed' && (
+                            <Badge variant="outline" className="text-green-600">
+                              Finalizado
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>

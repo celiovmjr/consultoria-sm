@@ -2,321 +2,269 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, Phone, Star, User, Scissors, Heart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Calendar, Clock, MapPin, Phone, Star, User } from 'lucide-react';
 
 const BusinessLanding = () => {
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
 
   const businessInfo = {
     name: 'Salão Bella Vista',
-    description: 'O melhor em beleza e bem-estar para você. Profissionais especializados e ambiente acolhedor.',
-    address: 'Rua das Flores, 123 - Centro, São Paulo',
-    phone: '(11) 3333-4444',
-    whatsapp: '(11) 99999-9999',
+    description: 'Salão de beleza especializado em cabelos e estética com mais de 10 anos de experiência.',
+    address: 'Rua das Flores, 123 - Centro',
+    phone: '(11) 99999-9999',
     rating: 4.8,
-    reviews: 156,
-    instagram: '@salaobella',
-    facebook: 'Salão Bella Vista',
+    reviews: 127,
+    workingHours: 'Seg-Sex: 9h às 18h | Sáb: 9h às 17h'
   };
 
   const services = [
-    {
-      id: 1,
-      category: 'Cabelos',
-      icon: Scissors,
-      items: [
-        { name: 'Corte Feminino', duration: '60 min', price: 'R$ 45' },
-        { name: 'Corte Masculino', duration: '45 min', price: 'R$ 35' },
-        { name: 'Escova', duration: '45 min', price: 'R$ 25' },
-        { name: 'Coloração', duration: '120 min', price: 'R$ 80' },
-        { name: 'Luzes', duration: '150 min', price: 'R$ 120' },
-      ]
-    },
-    {
-      id: 2,
-      category: 'Unhas',
-      icon: Heart,
-      items: [
-        { name: 'Manicure', duration: '45 min', price: 'R$ 25' },
-        { name: 'Pedicure', duration: '60 min', price: 'R$ 30' },
-        { name: 'Esmaltação em Gel', duration: '60 min', price: 'R$ 35' },
-        { name: 'Unha Decorada', duration: '90 min', price: 'R$ 45' },
-      ]
-    },
-    {
-      id: 3,
-      category: 'Estética',
-      icon: Star,
-      items: [
-        { name: 'Limpeza de Pele', duration: '90 min', price: 'R$ 80' },
-        { name: 'Hidratação Facial', duration: '60 min', price: 'R$ 60' },
-        { name: 'Massagem Relaxante', duration: '60 min', price: 'R$ 70' },
-        { name: 'Drenagem Linfática', duration: '90 min', price: 'R$ 90' },
-      ]
-    },
+    { id: '1', name: 'Corte Feminino', price: 45.00, duration: 60, category: 'Cabelos' },
+    { id: '2', name: 'Corte Masculino', price: 25.00, duration: 30, category: 'Cabelos' },
+    { id: '3', name: 'Coloração', price: 85.00, duration: 120, category: 'Cabelos' },
+    { id: '4', name: 'Escova', price: 35.00, duration: 45, category: 'Cabelos' },
+    { id: '5', name: 'Hidratação', price: 55.00, duration: 75, category: 'Cabelos' },
+    { id: '6', name: 'Manicure', price: 20.00, duration: 45, category: 'Unhas' },
+    { id: '7', name: 'Pedicure', price: 25.00, duration: 60, category: 'Unhas' }
   ];
 
   const professionals = [
-    {
-      name: 'Ana Costa',
-      specialty: 'Especialista em Cabelo',
-      experience: '8 anos',
-      photo: '/placeholder.svg',
-      rating: 4.9,
-    },
-    {
-      name: 'Maria Silva',
-      specialty: 'Nail Designer',
-      experience: '5 anos',
-      photo: '/placeholder.svg',
-      rating: 4.8,
-    },
-    {
-      name: 'Lucia Mendes',
-      specialty: 'Esteticista',
-      experience: '10 anos',
-      photo: '/placeholder.svg',
-      rating: 4.9,
-    },
+    { id: '1', name: 'Maria Costa', specialties: ['Cabelos', 'Coloração'], rating: 4.9 },
+    { id: '2', name: 'Ana Silva', specialties: ['Cabelos', 'Escova'], rating: 4.8 },
+    { id: '3', name: 'Carla Lima', specialties: ['Unhas'], rating: 4.7 }
   ];
 
-  const workingHours = [
-    { day: 'Segunda', hours: '09:00 - 18:00' },
-    { day: 'Terça', hours: '09:00 - 18:00' },
-    { day: 'Quarta', hours: '09:00 - 18:00' },
-    { day: 'Quinta', hours: '09:00 - 20:00' },
-    { day: 'Sexta', hours: '09:00 - 20:00' },
-    { day: 'Sábado', hours: '08:00 - 17:00' },
-    { day: 'Domingo', hours: 'Fechado' },
+  const availableTimes = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
   ];
+
+  const groupedServices = services.reduce((acc, service) => {
+    if (!acc[service.category]) {
+      acc[service.category] = [];
+    }
+    acc[service.category].push(service);
+    return acc;
+  }, {} as Record<string, typeof services>);
+
+  const selectedServiceData = services.find(s => s.id === selectedService);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                {businessInfo.name}
-              </h1>
-              <div className="flex items-center mt-1">
+              <h1 className="text-3xl font-bold text-gray-900">{businessInfo.name}</h1>
+              <p className="text-gray-600 mt-2">{businessInfo.description}</p>
+              
+              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
                 <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`w-4 h-4 ${i < Math.floor(businessInfo.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                    />
-                  ))}
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {businessInfo.address}
                 </div>
-                <span className="ml-2 text-sm text-gray-600">
-                  {businessInfo.rating} ({businessInfo.reviews} avaliações)
-                </span>
+                <div className="flex items-center">
+                  <Phone className="w-4 h-4 mr-1" />
+                  {businessInfo.phone}
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {businessInfo.workingHours}
+                </div>
+              </div>
+              
+              <div className="flex items-center mt-3">
+                <div className="flex items-center">
+                  <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                  <span className="ml-1 font-medium">{businessInfo.rating}</span>
+                </div>
+                <span className="text-gray-600 ml-2">({businessInfo.reviews} avaliações)</span>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-              <Calendar className="w-4 h-4 mr-2" />
-              Agendar Agora
-            </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Hero Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Sua beleza em boas mãos
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {businessInfo.description}
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-lg px-8 py-4 h-auto"
-            >
-              <Calendar className="w-5 h-5 mr-2" />
-              Agendar Horário
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="text-lg px-8 py-4 h-auto border-2"
-            >
-              <Phone className="w-5 h-5 mr-2" />
-              WhatsApp
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Nossos Serviços
-            </h2>
-            <p className="text-xl text-gray-600">
-              Tratamentos especializados para realçar sua beleza natural
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {services.map((category) => {
-              const Icon = category.icon;
-              return (
-                <Card key={category.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Icon className="w-8 h-8 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl">{category.category}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {category.items.map((service, index) => (
-                        <div 
-                          key={index} 
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                          onClick={() => setSelectedService(service.name)}
-                        >
-                          <div>
-                            <p className="font-semibold text-gray-900">{service.name}</p>
-                            <p className="text-sm text-gray-600 flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {service.duration}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-pink-600">{service.price}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Professionals Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Nossa Equipe
-            </h2>
-            <p className="text-xl text-gray-600">
-              Profissionais experientes e apaixonados pela beleza
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {professionals.map((professional, index) => (
-              <Card key={index} className="border-0 shadow-lg text-center">
-                <CardContent className="p-8">
-                  <div className="w-24 h-24 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <User className="w-12 h-12 text-gray-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{professional.name}</h3>
-                  <p className="text-gray-600 mb-2">{professional.specialty}</p>
-                  <p className="text-sm text-gray-500 mb-4">{professional.experience} de experiência</p>
-                  <div className="flex items-center justify-center">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-4 h-4 ${i < Math.floor(professional.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                        />
-                      ))}
-                    </div>
-                    <span className="ml-2 text-sm text-gray-600">{professional.rating}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact & Hours Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <Card className="border-0 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Services */}
+          <div className="lg:col-span-2">
+            <Card className="border-0 shadow-lg mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center text-2xl">
-                  <MapPin className="w-6 h-6 mr-2 text-pink-600" />
-                  Contato & Localização
-                </CardTitle>
+                <CardTitle>Nossos Serviços</CardTitle>
+                <CardDescription>Escolha o serviço desejado</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-gray-500 mr-3" />
-                  <span className="text-gray-700">{businessInfo.address}</span>
-                </div>
-                <div className="flex items-center">
-                  <Phone className="w-5 h-5 text-gray-500 mr-3" />
-                  <span className="text-gray-700">{businessInfo.phone}</span>
-                </div>
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 mb-3">Siga-nos nas redes sociais:</p>
-                  <div className="flex space-x-4">
-                    <span className="text-pink-600">{businessInfo.instagram}</span>
-                    <span className="text-blue-600">{businessInfo.facebook}</span>
-                  </div>
+              <CardContent>
+                <div className="space-y-6">
+                  {Object.entries(groupedServices).map(([category, categoryServices]) => (
+                    <div key={category}>
+                      <h3 className="font-semibold text-lg text-gray-900 mb-4">{category}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categoryServices.map((service) => (
+                          <div
+                            key={service.id}
+                            className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                              selectedService === service.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => setSelectedService(service.id)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-medium text-gray-900">{service.name}</h4>
+                                <p className="text-sm text-gray-600">{service.duration} minutos</p>
+                              </div>
+                              <span className="font-semibold text-green-600">
+                                R$ {service.price.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Working Hours */}
+            {/* Professionals */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center text-2xl">
-                  <Clock className="w-6 h-6 mr-2 text-purple-600" />
-                  Horário de Funcionamento
-                </CardTitle>
+                <CardTitle>Nossa Equipe</CardTitle>
+                <CardDescription>Conheça nossos profissionais</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {workingHours.map((schedule, index) => (
-                    <div key={index} className="flex items-center justify-between py-2">
-                      <span className="font-medium text-gray-900">{schedule.day}</span>
-                      <span className={`${schedule.hours === 'Fechado' ? 'text-red-600' : 'text-gray-700'}`}>
-                        {schedule.hours}
-                      </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {professionals.map((professional) => (
+                    <div key={professional.id} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full flex items-center justify-center">
+                          <User className="w-6 h-6 text-gray-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{professional.name}</h4>
+                          <div className="flex items-center mt-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-gray-600 ml-1">{professional.rating}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-1">
+                          {professional.specialties.map((specialty) => (
+                            <Badge key={specialty} variant="secondary" className="text-xs">
+                              {specialty}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-pink-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Pronta para se sentir ainda mais bela?
-          </h2>
-          <p className="text-xl text-pink-100 mb-8">
-            Agende seu horário agora e desfrute de uma experiência única de beleza e bem-estar
-          </p>
-          <Button size="lg" variant="secondary" className="text-lg px-8 py-4 h-auto">
-            <Calendar className="w-5 h-5 mr-2" />
-            Agendar Meu Horário
-          </Button>
+          {/* Booking Panel */}
+          <div>
+            <Card className="border-0 shadow-lg sticky top-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                  Agendar Horário
+                </CardTitle>
+                <CardDescription>
+                  {selectedServiceData 
+                    ? `${selectedServiceData.name} - R$ ${selectedServiceData.price.toFixed(2)}`
+                    : 'Selecione um serviço para continuar'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {selectedService ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Data
+                      </label>
+                      <Input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+
+                    {selectedDate && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Horário Disponível
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {availableTimes.map((time) => (
+                            <Button
+                              key={time}
+                              variant={selectedTime === time ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedTime(time)}
+                              className="text-xs"
+                            >
+                              {time}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedTime && (
+                      <div className="pt-4 border-t">
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Serviço:</span>
+                            <span className="font-medium">{selectedServiceData?.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Data:</span>
+                            <span className="font-medium">
+                              {new Date(selectedDate).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Horário:</span>
+                            <span className="font-medium">{selectedTime}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Duração:</span>
+                            <span className="font-medium">{selectedServiceData?.duration} min</span>
+                          </div>
+                          <div className="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span className="text-green-600">R$ {selectedServiceData?.price.toFixed(2)}</span>
+                          </div>
+                        </div>
+                        
+                        <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600">
+                          Confirmar Agendamento
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">Selecione um serviço para ver os horários disponíveis</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };
