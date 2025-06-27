@@ -9,6 +9,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import BusinessManagement from "./pages/admin/BusinessManagement";
+import UsersManagement from "./pages/admin/UsersManagement";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import ServicesManagement from "./pages/business/ServicesManagement";
 import CategoriesManagement from "./pages/business/CategoriesManagement";
@@ -39,6 +40,7 @@ const App = () => (
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/negocios" element={<BusinessManagement />} />
+          <Route path="/admin/usuarios" element={<UsersManagement />} />
           
           {/* Business Owner Routes */}
           <Route path="/business/dashboard" element={<BusinessDashboard />} />
