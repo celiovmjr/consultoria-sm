@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X } from 'lucide-react';
+import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -21,9 +20,9 @@ const BusinessSidebar = () => {
       href: '/business/agendamentos',
     },
     {
-      title: 'Filiais',
-      icon: Building,
-      href: '/business/filiais',
+      title: 'Serviços',
+      icon: Scissors,
+      href: '/business/servicos',
     },
     {
       title: 'Profissionais',
@@ -31,19 +30,14 @@ const BusinessSidebar = () => {
       href: '/business/profissionais',
     },
     {
-      title: 'Serviços',
-      icon: Scissors,
-      href: '/business/servicos',
+      title: 'Relatórios',
+      icon: TrendingUp,
+      href: '/business/relatorios',
     },
     {
-      title: 'Horários',
-      icon: Clock,
-      href: '/business/horarios',
-    },
-    {
-      title: 'Landing Page',
+      title: 'Configurações',
       icon: Settings,
-      href: '/business/landing',
+      href: '/business/configuracoes',
     },
   ];
 

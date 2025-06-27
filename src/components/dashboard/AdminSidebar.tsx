@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, BarChart3, Building, Users, Settings, CreditCard, Menu, X } from 'lucide-react';
+import { Calendar, BarChart3, Building, Users, Settings, CreditCard, Menu, X, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +28,11 @@ const AdminSidebar = () => {
       title: 'Planos',
       icon: CreditCard,
       href: '/admin/planos',
+    },
+    {
+      title: 'Relatórios',
+      icon: TrendingUp,
+      href: '/admin/relatorios',
     },
     {
       title: 'Configurações',
