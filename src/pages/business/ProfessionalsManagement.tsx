@@ -120,15 +120,15 @@ const ProfessionalsManagement = () => {
   const availableServices = services.filter(service => !formData.services.includes(service.id));
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <BusinessSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestão de Profissionais</h1>
-              <p className="text-gray-600">Gerencie a equipe do seu negócio</p>
+              <h1 className="text-3xl font-bold text-foreground">Gestão de Profissionais</h1>
+              <p className="text-muted-foreground">Gerencie a equipe do seu negócio</p>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -281,9 +281,9 @@ const ProfessionalsManagement = () => {
             </Dialog>
           </div>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-lg bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-card-foreground">
                 <Users className="w-5 h-5 mr-2 text-blue-600" />
                 Profissionais Cadastrados
               </CardTitle>

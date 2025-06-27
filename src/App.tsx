@@ -1,9 +1,7 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -29,49 +27,52 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/cadastro" element={<Register />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/negocios" element={<BusinessManagement />} />
-          <Route path="/admin/usuarios" element={<UsersManagement />} />
-          <Route path="/admin/planos" element={<PlansManagement />} />
-          <Route path="/admin/relatorios" element={<AdminReports />} />
-          <Route path="/admin/configuracoes" element={<AdminSettings />} />
-          
-          {/* Business Owner Routes */}
-          <Route path="/business/dashboard" element={<BusinessDashboard />} />
-          <Route path="/business/servicos" element={<ServicesManagement />} />
-          <Route path="/business/categorias" element={<CategoriesManagement />} />
-          <Route path="/business/profissionais" element={<ProfessionalsManagement />} />
-          <Route path="/business/agendamentos" element={<AppointmentsManagement />} />
-          <Route path="/business/relatorios" element={<BusinessReports />} />
-          <Route path="/business/configuracoes" element={<BusinessSettings />} />
-          
-          {/* Professional Routes */}
-          <Route path="/professional/agenda" element={<ProfessionalDashboard />} />
-          <Route path="/professional/historico" element={<AppointmentHistory />} />
-          <Route path="/professional/indisponibilidades" element={<Unavailability />} />
-          <Route path="/professional/perfil" element={<ProfessionalProfile />} />
-          
-          {/* Client Routes */}
-          <Route path="/business/:slug" element={<BusinessLanding />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Register />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/negocios" element={<BusinessManagement />} />
+              <Route path="/admin/usuarios" element={<UsersManagement />} />
+              <Route path="/admin/planos" element={<PlansManagement />} />
+              <Route path="/admin/relatorios" element={<AdminReports />} />
+              <Route path="/admin/configuracoes" element={<AdminSettings />} />
+              
+              {/* Business Owner Routes */}
+              <Route path="/business/dashboard" element={<BusinessDashboard />} />
+              <Route path="/business/servicos" element={<ServicesManagement />} />
+              <Route path="/business/categorias" element={<CategoriesManagement />} />
+              <Route path="/business/profissionais" element={<ProfessionalsManagement />} />
+              <Route path="/business/agendamentos" element={<AppointmentsManagement />} />
+              <Route path="/business/relatorios" element={<BusinessReports />} />
+              <Route path="/business/configuracoes" element={<BusinessSettings />} />
+              
+              {/* Professional Routes */}
+              <Route path="/professional/agenda" element={<ProfessionalDashboard />} />
+              <Route path="/professional/historico" element={<AppointmentHistory />} />
+              <Route path="/professional/indisponibilidades" element={<Unavailability />} />
+              <Route path="/professional/perfil" element={<ProfessionalProfile />} />
+              
+              {/* Client Routes */}
+              <Route path="/business/:slug" element={<BusinessLanding />} />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
+        </Router>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
