@@ -11,11 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Edit, Trash2, Users } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
-import { mockProfessionals, mockServices, Professional, Service } from '@/lib/mockData';
+import { mockProfessionals, mockServices, Professional } from '@/lib/mockData';
 
 const ProfessionalsManagement = () => {
   const [professionals, setProfessionals] = useState<Professional[]>(mockProfessionals);
-  const [services] = useState<Service[]>(mockServices);
+  const [services] = useState(mockServices); // Use actual services from mockData
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
   const [formData, setFormData] = useState({

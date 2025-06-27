@@ -4,12 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Calendar, Clock, MapPin, Phone, Star, User } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar, Clock, MapPin, Phone, Star, User, UserPlus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const BusinessLanding = () => {
+  const { toast } = useToast();
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const businessInfo = {
     name: 'Salão Bella Vista',
@@ -52,6 +66,55 @@ const BusinessLanding = () => {
 
   const selectedServiceData = services.find(s => s.id === selectedService);
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Login realizado com sucesso!",
+      description: "Bem-vindo de volta!",
+    });
+    setIsLoginDialogOpen(false);
+    setLoginData({ email: '', password: '' });
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (registerData.password !== registerData.confirmPassword) {
+      toast({
+        title: "Erro no cadastro",
+        description: "As senhas não coincidem.",
+        variant: "destructive"
+      });
+      return;
+    }
+    toast({
+      title: "Cadastro realizado com sucesso!",
+      description: "Sua conta foi criada. Agora você pode fazer agendamentos.",
+    });
+    setIsRegisterDialogOpen(false);
+    setRegisterData({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
+  };
+
+  const handleBooking = () => {
+    if (!selectedService || !selectedDate || !selectedTime) {
+      toast({
+        title: "Dados incompletos",
+        description: "Por favor, selecione um serviço, data e horário.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    toast({
+      title: "Agendamento confirmado!",
+      description: `Seu agendamento para ${selectedServiceData?.name} foi confirmado para ${new Date(selectedDate).toLocaleDateString('pt-BR')} às ${selectedTime}.`,
+    });
+    
+    // Reset form
+    setSelectedService(null);
+    setSelectedDate('');
+    setSelectedTime('');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -84,6 +147,121 @@ const BusinessLanding = () => {
                 </div>
                 <span className="text-gray-600 ml-2">({businessInfo.reviews} avaliações)</span>
               </div>
+            </div>
+            
+            <div className="mt-4 md:mt-0 flex space-x-2">
+              <Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <User className="w-4 h-4 mr-2" />
+                    Entrar
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Entrar na sua conta</DialogTitle>
+                    <DialogDescription>
+                      Faça login para gerenciar seus agendamentos
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                      <Label htmlFor="login-email">E-mail</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        value={loginData.email}
+                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="login-password">Senha</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      Entrar
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={isRegisterDialogOpen} onOpenChange={setIsRegisterDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Cadastrar-se
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Criar sua conta</DialogTitle>
+                    <DialogDescription>
+                      Cadastre-se para fazer agendamentos online
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div>
+                      <Label htmlFor="register-name">Nome Completo</Label>
+                      <Input
+                        id="register-name"
+                        value={registerData.name}
+                        onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="register-email">E-mail</Label>
+                      <Input
+                        id="register-email"
+                        type="email"
+                        value={registerData.email}
+                        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="register-phone">Telefone</Label>
+                      <Input
+                        id="register-phone"
+                        value={registerData.phone}
+                        onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                        placeholder="(11) 99999-9999"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="register-password">Senha</Label>
+                      <Input
+                        id="register-password"
+                        type="password"
+                        value={registerData.password}
+                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="register-confirm-password">Confirmar Senha</Label>
+                      <Input
+                        id="register-confirm-password"
+                        type="password"
+                        value={registerData.confirmPassword}
+                        onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      Criar Conta
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -248,7 +426,10 @@ const BusinessLanding = () => {
                           </div>
                         </div>
                         
-                        <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600">
+                        <Button 
+                          className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600"
+                          onClick={handleBooking}
+                        >
                           Confirmar Agendamento
                         </Button>
                       </div>
