@@ -81,7 +81,7 @@ const ProfessionalSidebar = () => {
                   )}
                 >
                   <Icon className={cn(
-                    collapsed ? "w-6 h-6" : "w-6 h-6",
+                    collapsed ? "w-8 h-8" : "w-6 h-6",
                     isActive(item.href) ? "text-purple-700 dark:text-purple-400" : "text-muted-foreground"
                   )} />
                   {!collapsed && <span>{item.title}</span>}

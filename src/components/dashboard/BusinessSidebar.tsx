@@ -96,7 +96,7 @@ const BusinessSidebar = () => {
                   )}
                 >
                   <Icon className={cn(
-                    collapsed ? "w-6 h-6" : "w-6 h-6",
+                    collapsed ? "w-8 h-8" : "w-6 h-6",
                     isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
                   )} />
                   {!collapsed && <span>{item.title}</span>}
