@@ -1,4 +1,3 @@
-
 // Mock data to simulate SQLite database
 export interface Business {
   id: string;
@@ -25,6 +24,8 @@ export interface Professional {
   commission: number;
   status: 'active' | 'inactive';
   createdAt: string;
+  storeId?: string;
+  storeName?: string;
 }
 
 export interface Service {
