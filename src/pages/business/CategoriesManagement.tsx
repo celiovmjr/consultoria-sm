@@ -7,14 +7,23 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
 
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  servicesCount: number;
+  color: string;
+}
+
 const CategoriesManagement = () => {
   const { toast } = useToast();
-  const [categories, setCategories] = useState([
+  const [categories, setCategories] = useState<Category[]>([
     { id: 1, name: 'Cabelos', description: 'Serviços relacionados a cabelos', servicesCount: 8, color: '#3b82f6' },
     { id: 2, name: 'Unhas', description: 'Manicure e pedicure', servicesCount: 5, color: '#ef4444' },
     { id: 3, name: 'Estética', description: 'Tratamentos estéticos', servicesCount: 12, color: '#10b981' },
@@ -22,7 +31,7 @@ const CategoriesManagement = () => {
   ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -33,7 +42,7 @@ const CategoriesManagement = () => {
     {
       key: 'name',
       label: 'Nome',
-      render: (value: string, row: any) => (
+      render: (value: string, row: Category) => (
         <div className="flex items-center space-x-2">
           <div 
             className="w-4 h-4 rounded-full" 
@@ -72,7 +81,7 @@ const CategoriesManagement = () => {
         description: "A categoria foi atualizada com sucesso.",
       });
     } else {
-      const newCategory = {
+      const newCategory: Category = {
         id: Math.max(...categories.map(c => c.id)) + 1,
         ...formData,
         servicesCount: 0
@@ -87,7 +96,7 @@ const CategoriesManagement = () => {
     resetForm();
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
@@ -97,7 +106,7 @@ const CategoriesManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (category: any) => {
+  const handleDelete = (category: Category) => {
     setCategories(categories.filter(cat => cat.id !== category.id));
     toast({
       title: "Categoria excluída",
@@ -217,8 +226,64 @@ const CategoriesManagement = () => {
                 columns={columns} 
                 data={categories}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={(category) => {
+                  // O modal de confirmação será tratado pelo DataTable atualizado
+                }}
               />
+              
+              {/* Tabela customizada com modais de confirmação */}
+              <div className="space-y-4">
+                {categories.map((category) => (
+                  <div key={category.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div 
+                          className="w-6 h-6 rounded-full" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                          <p className="text-sm text-gray-600">{category.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Badge variant="secondary">
+                          {category.servicesCount} serviços
+                        </Badge>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
+                            <Edit2 className="w-4 h-4 mr-1" />
+                            Editar
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir a categoria "{category.name}"? 
+                                  Esta ação removerá a categoria de {category.servicesCount} serviços e não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(category)} className="bg-red-600 hover:bg-red-700">
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>

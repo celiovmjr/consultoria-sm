@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Building, Search, Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
@@ -25,6 +26,19 @@ interface Business {
 const BusinessManagement = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    owner: '',
+    email: '',
+    phone: '',
+    category: '',
+    plan: '',
+    status: 'active' as 'active' | 'inactive' | 'pending'
+  });
+
   const [businesses, setBusinesses] = useState<Business[]>([
     {
       id: '1',
@@ -55,6 +69,49 @@ const BusinessManagement = () => {
     business.owner.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newBusiness: Business = {
+      id: Date.now().toString(),
+      ...formData,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    setBusinesses([...businesses, newBusiness]);
+    toast({
+      title: "Negócio criado",
+      description: "O novo negócio foi criado com sucesso.",
+    });
+    resetForm();
+  };
+
+  const handleEdit = (business: Business) => {
+    setEditingBusiness(business);
+    setFormData({
+      name: business.name,
+      owner: business.owner,
+      email: business.email,
+      phone: business.phone,
+      category: business.category,
+      plan: business.plan,
+      status: business.status
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingBusiness) {
+      setBusinesses(businesses.map(business =>
+        business.id === editingBusiness.id ? { ...business, ...formData } : business
+      ));
+      toast({
+        title: "Negócio atualizado",
+        description: "As informações do negócio foram atualizadas com sucesso.",
+      });
+      resetForm();
+    }
+  };
+
   const handleStatusChange = (businessId: string, newStatus: 'active' | 'inactive') => {
     setBusinesses(businesses.map(business =>
       business.id === businessId ? { ...business, status: newStatus } : business
@@ -71,6 +128,21 @@ const BusinessManagement = () => {
       title: "Negócio excluído",
       description: "O negócio foi removido com sucesso.",
     });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      owner: '',
+      email: '',
+      phone: '',
+      category: '',
+      plan: '',
+      status: 'active'
+    });
+    setEditingBusiness(null);
+    setIsCreateDialogOpen(false);
+    setIsEditDialogOpen(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -109,10 +181,67 @@ const BusinessManagement = () => {
                     {businesses.length} negócios cadastrados
                   </CardDescription>
                 </div>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Negócio
-                </Button>
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600" onClick={() => resetForm()}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Negócio
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Novo Negócio</DialogTitle>
+                      <DialogDescription>
+                        Cadastre um novo negócio na plataforma
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleCreate} className="space-y-4">
+                      <Input
+                        placeholder="Nome do negócio"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        required
+                      />
+                      <Input
+                        placeholder="Nome do proprietário"
+                        value={formData.owner}
+                        onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                        required
+                      />
+                      <Input
+                        type="email"
+                        placeholder="E-mail"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        required
+                      />
+                      <Input
+                        placeholder="Telefone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        required
+                      />
+                      <Input
+                        placeholder="Categoria"
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        required
+                      />
+                      <Input
+                        placeholder="Plano"
+                        value={formData.plan}
+                        onChange={(e) => setFormData({...formData, plan: e.target.value})}
+                        required
+                      />
+                      <DialogFooter>
+                        <Button type="button" variant="outline" onClick={resetForm}>
+                          Cancelar
+                        </Button>
+                        <Button type="submit">Criar Negócio</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent>
@@ -169,7 +298,7 @@ const BusinessManagement = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(business)}>
                             <Edit className="w-4 h-4 mr-1" />
                             Editar
                           </Button>
@@ -192,15 +321,28 @@ const BusinessManagement = () => {
                               Ativar
                             </Button>
                           )}
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleDelete(business.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Excluir
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o negócio "{business.name}"? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(business.id)} className="bg-red-600 hover:bg-red-700">
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -209,6 +351,63 @@ const BusinessManagement = () => {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Edit Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Negócio</DialogTitle>
+                <DialogDescription>
+                  Atualize as informações do negócio
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUpdate} className="space-y-4">
+                <Input
+                  placeholder="Nome do negócio"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required
+                />
+                <Input
+                  placeholder="Nome do proprietário"
+                  value={formData.owner}
+                  onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                  required
+                />
+                <Input
+                  type="email"
+                  placeholder="E-mail"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  required
+                />
+                <Input
+                  placeholder="Telefone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  required
+                />
+                <Input
+                  placeholder="Categoria"
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  required
+                />
+                <Input
+                  placeholder="Plano"
+                  value={formData.plan}
+                  onChange={(e) => setFormData({...formData, plan: e.target.value})}
+                  required
+                />
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Salvar Alterações</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>
