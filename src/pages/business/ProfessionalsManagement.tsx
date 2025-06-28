@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, X, Store } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import { mockProfessionals, mockServices, Professional } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,13 @@ const ProfessionalsManagement = () => {
   const [services] = useState(mockServices);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
+  
+  // Mock data for stores
+  const stores = [
+    { id: '1', name: 'Filial Centro' },
+    { id: '2', name: 'Filial Shopping' }
+  ];
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,11 +33,13 @@ const ProfessionalsManagement = () => {
     commission: '',
     services: [] as string[],
     status: 'active' as 'active' | 'inactive',
-    storeId: '1' // Adicionando campo para loja/filial
+    storeId: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const selectedStore = stores.find(store => store.id === formData.storeId);
     
     if (editingProfessional) {
       // Update existing professional
@@ -40,7 +49,8 @@ const ProfessionalsManagement = () => {
               ...professional, 
               ...formData, 
               commission: parseInt(formData.commission),
-              services: formData.services
+              services: formData.services,
+              storeName: selectedStore?.name || ''
             }
           : professional
       ));
@@ -68,7 +78,9 @@ const ProfessionalsManagement = () => {
         },
         commission: parseInt(formData.commission),
         status: formData.status,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
+        storeId: formData.storeId,
+        storeName: selectedStore?.name || ''
       };
       setProfessionals([...professionals, newProfessional]);
       toast({
@@ -88,7 +100,7 @@ const ProfessionalsManagement = () => {
       commission: '',
       services: [],
       status: 'active',
-      storeId: '1'
+      storeId: ''
     });
     setEditingProfessional(null);
     setIsDialogOpen(false);
@@ -103,7 +115,7 @@ const ProfessionalsManagement = () => {
       commission: professional.commission.toString(),
       services: professional.services,
       status: professional.status,
-      storeId: '1'
+      storeId: professional.storeId || '1'
     });
     setIsDialogOpen(true);
   };
@@ -166,6 +178,22 @@ const ProfessionalsManagement = () => {
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
+                    <Label htmlFor="storeId">Loja/Filial</Label>
+                    <Select value={formData.storeId} onValueChange={(value) => setFormData({ ...formData, storeId: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a loja" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stores.map((store) => (
+                          <SelectItem key={store.id} value={store.id}>
+                            {store.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
                     <Label htmlFor="name">Nome Completo</Label>
                     <Input
                       id="name"
@@ -175,6 +203,7 @@ const ProfessionalsManagement = () => {
                       required
                     />
                   </div>
+                  
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -228,13 +257,15 @@ const ProfessionalsManagement = () => {
                     </div>
                   </div>
                   
+                  
+                  
                   <div>
                     <Label>Serviços que pode realizar</Label>
                     <div className="space-y-3 mt-2">
                       {/* Selected Services */}
                       {formData.services.length > 0 && (
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">Serviços Selecionados:</Label>
+                          <Label className="text-sm font-medium text-muted-foreground">Serviços Selecionados:</Label>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {formData.services.map((serviceId) => {
                               const service = services.find(s => s.id === serviceId);
@@ -258,17 +289,17 @@ const ProfessionalsManagement = () => {
                       {/* Service Selector */}
                       {availableServices.length > 0 && (
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">Adicionar Serviço:</Label>
+                          <Label className="text-sm font-medium text-muted-foreground">Adicionar Serviço:</Label>
                           <Select onValueChange={handleServiceAdd}>
                             <SelectTrigger className="mt-1">
                               <SelectValue placeholder="Selecione um serviço" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-48 overflow-y-auto z-50">
+                            <SelectContent className="bg-card border border-border shadow-lg max-h-48 overflow-y-auto z-50">
                               {availableServices.map((service) => (
-                                <SelectItem key={service.id} value={service.id} className="hover:bg-gray-50">
+                                <SelectItem key={service.id} value={service.id} className="hover:bg-accent">
                                   <div className="flex items-center justify-between w-full">
                                     <span>{service.name}</span>
-                                    <span className="text-sm text-gray-500 ml-2">
+                                    <span className="text-sm text-muted-foreground ml-2">
                                       {service.duration}min - R$ {service.price.toFixed(2)}
                                     </span>
                                   </div>
@@ -280,7 +311,7 @@ const ProfessionalsManagement = () => {
                       )}
                       
                       {availableServices.length === 0 && formData.services.length > 0 && (
-                        <p className="text-sm text-gray-500">Todos os serviços disponíveis foram selecionados.</p>
+                        <p className="text-sm text-muted-foreground">Todos os serviços disponíveis foram selecionados.</p>
                       )}
                     </div>
                   </div>
@@ -313,6 +344,7 @@ const ProfessionalsManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
+                    <TableHead>Loja/Filial</TableHead>
                     <TableHead>E-mail</TableHead>
                     <TableHead>Telefone</TableHead>
                     <TableHead>Comissão</TableHead>
@@ -325,6 +357,12 @@ const ProfessionalsManagement = () => {
                   {professionals.map((professional) => (
                     <TableRow key={professional.id}>
                       <TableCell className="font-medium">{professional.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
+                          <Store className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-sm">{professional.storeName || 'Não definida'}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{professional.email}</TableCell>
                       <TableCell>{professional.phone}</TableCell>
                       <TableCell>{professional.commission}%</TableCell>

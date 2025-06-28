@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -16,6 +17,8 @@ import ServicesManagement from "./pages/business/ServicesManagement";
 import CategoriesManagement from "./pages/business/CategoriesManagement";
 import ProfessionalsManagement from "./pages/business/ProfessionalsManagement";
 import AppointmentsManagement from "./pages/business/AppointmentsManagement";
+import StoresManagement from "./pages/business/StoresManagement";
+import LandingCustomization from "./pages/business/LandingCustomization";
 import BusinessReports from "./pages/business/BusinessReports";
 import BusinessSettings from "./pages/business/BusinessSettings";
 import ProfessionalDashboard from "./pages/professional/ProfessionalDashboard";
@@ -52,6 +55,8 @@ function App() {
               <Route path="/business/categorias" element={<CategoriesManagement />} />
               <Route path="/business/profissionais" element={<ProfessionalsManagement />} />
               <Route path="/business/agendamentos" element={<AppointmentsManagement />} />
+              <Route path="/business/lojas" element={<StoresManagement />} />
+              <Route path="/business/landing" element={<LandingCustomization />} />
               <Route path="/business/relatorios" element={<BusinessReports />} />
               <Route path="/business/configuracoes" element={<BusinessSettings />} />
               

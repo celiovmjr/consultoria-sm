@@ -82,7 +82,7 @@ const StoresManagement = () => {
       label: 'Endereço',
       render: (value: string) => (
         <div className="flex items-center space-x-1">
-          <MapPin className="w-3 h-3 text-gray-500" />
+          <MapPin className="w-3 h-3 text-muted-foreground" />
           <span className="text-sm">{value}</span>
         </div>
       ),
@@ -96,7 +96,7 @@ const StoresManagement = () => {
       label: 'Telefone',
       render: (value: string) => (
         <div className="flex items-center space-x-1">
-          <Phone className="w-3 h-3 text-gray-500" />
+          <Phone className="w-3 h-3 text-muted-foreground" />
           <span className="text-sm">{value}</span>
         </div>
       ),
@@ -106,7 +106,7 @@ const StoresManagement = () => {
       label: 'Status',
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          value ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
         }`}>
           {value ? 'Ativa' : 'Inativa'}
         </span>
@@ -182,15 +182,15 @@ const StoresManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <BusinessSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Lojas e Filiais</h1>
-              <p className="text-gray-600">Gerencie todas as unidades do seu negócio</p>
+              <h1 className="text-3xl font-bold text-foreground">Lojas e Filiais</h1>
+              <p className="text-muted-foreground">Gerencie todas as unidades do seu negócio</p>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
