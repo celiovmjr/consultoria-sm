@@ -36,14 +36,14 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard Administrativo</h1>
-            <p className="text-gray-600">Visão geral da plataforma</p>
+            <h1 className="text-3xl font-bold text-foreground">Dashboard Administrativo</h1>
+            <p className="text-muted-foreground">Visão geral da plataforma</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -54,8 +54,8 @@ const AdminDashboard = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                         <p className="text-sm text-green-600">{stat.change}</p>
                       </div>
                       <Icon className={`w-8 h-8 ${stat.color}`} />
@@ -79,15 +79,15 @@ const AdminDashboard = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm">Novo negócio cadastrado: Salão Bella Vista</span>
+                    <span className="text-sm text-foreground">Novo negócio cadastrado: Salão Bella Vista</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">125 novos usuários registrados hoje</span>
+                    <span className="text-sm text-foreground">125 novos usuários registrados hoje</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-sm">Pagamento processado: R$ 2.450,00</span>
+                    <span className="text-sm text-foreground">Pagamento processado: R$ 2.450,00</span>
                   </div>
                 </div>
               </CardContent>
@@ -101,15 +101,15 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Salão Bella Vista</span>
+                    <span className="font-medium text-foreground">Salão Bella Vista</span>
                     <span className="text-green-600">342 agendamentos</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Barbearia do João</span>
+                    <span className="font-medium text-foreground">Barbearia do João</span>
                     <span className="text-green-600">298 agendamentos</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Studio Hair</span>
+                    <span className="font-medium text-foreground">Studio Hair</span>
                     <span className="text-green-600">187 agendamentos</span>
                   </div>
                 </div>
