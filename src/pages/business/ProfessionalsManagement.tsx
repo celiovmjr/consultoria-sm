@@ -5,14 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import { mockProfessionals, mockServices, Professional } from '@/lib/mockData';
+import { useToast } from '@/hooks/use-toast';
 
 const ProfessionalsManagement = () => {
+  const { toast } = useToast();
   const [professionals, setProfessionals] = useState<Professional[]>(mockProfessionals);
   const [services] = useState(mockServices);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -23,7 +25,8 @@ const ProfessionalsManagement = () => {
     phone: '',
     commission: '',
     services: [] as string[],
-    status: 'active' as 'active' | 'inactive'
+    status: 'active' as 'active' | 'inactive',
+    storeId: '1' // Adicionando campo para loja/filial
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,6 +44,10 @@ const ProfessionalsManagement = () => {
             }
           : professional
       ));
+      toast({
+        title: "Profissional atualizado",
+        description: "As informações do profissional foram atualizadas com sucesso.",
+      });
     } else {
       // Create new professional
       const newProfessional: Professional = {
@@ -64,6 +71,10 @@ const ProfessionalsManagement = () => {
         createdAt: new Date().toISOString().split('T')[0]
       };
       setProfessionals([...professionals, newProfessional]);
+      toast({
+        title: "Profissional criado",
+        description: "O novo profissional foi adicionado com sucesso.",
+      });
     }
     
     resetForm();
@@ -76,7 +87,8 @@ const ProfessionalsManagement = () => {
       phone: '',
       commission: '',
       services: [],
-      status: 'active'
+      status: 'active',
+      storeId: '1'
     });
     setEditingProfessional(null);
     setIsDialogOpen(false);
@@ -90,13 +102,18 @@ const ProfessionalsManagement = () => {
       phone: professional.phone,
       commission: professional.commission.toString(),
       services: professional.services,
-      status: professional.status
+      status: professional.status,
+      storeId: '1'
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = (professionalId: string) => {
     setProfessionals(professionals.filter(professional => professional.id !== professionalId));
+    toast({
+      title: "Profissional excluído",
+      description: "O profissional foi removido com sucesso.",
+    });
   };
 
   const handleServiceAdd = (serviceId: string) => {
@@ -339,14 +356,35 @@ const ProfessionalsManagement = () => {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleDelete(professional.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o profissional "{professional.name}"? 
+                                  Esta ação removerá todos os agendamentos futuros associados e não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDelete(professional.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
