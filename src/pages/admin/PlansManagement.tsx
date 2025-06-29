@@ -8,142 +8,172 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { CreditCard, Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { CreditCard, Edit, Plus, Search, Trash2, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useToast } from '@/hooks/use-toast';
-
-interface Plan {
-  id: number;
-  name: string;
-  price: number;
-  features: string[];
-  maxProfessionals: number;
-  maxBusinesses: number;
-  isActive: boolean;
-  subscribersCount: number;
-}
+import { usePlans } from '@/hooks/usePlans';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const PlansManagement = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: plans = [], isLoading, error } = usePlans();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     price: 0,
     features: '',
-    maxProfessionals: 0,
-    maxBusinesses: 1,
-    isActive: true
+    max_professionals: 0,
+    max_businesses: 1,
+    is_active: true
   });
 
-  const [plans, setPlans] = useState<Plan[]>([
-    {
-      id: 1,
-      name: 'Básico',
-      price: 29.90,
-      features: ['Até 3 profissionais', 'Agendamentos ilimitados', 'Suporte por email'],
-      maxProfessionals: 3,
-      maxBusinesses: 1,
-      isActive: true,
-      subscribersCount: 145
-    },
-    {
-      id: 2,
-      name: 'Premium',
-      price: 79.90,
-      features: ['Até 10 profissionais', 'Relatórios avançados', 'Suporte prioritário', 'Integração com WhatsApp'],
-      maxProfessionals: 10,
-      maxBusinesses: 1,
-      isActive: true,
-      subscribersCount: 89
-    },
-    {
-      id: 3,
-      name: 'Enterprise',
-      price: 149.90,
-      features: ['Profissionais ilimitados', 'Múltiplos negócios', 'API dedicada', 'Suporte 24/7'],
-      maxProfessionals: -1,
-      maxBusinesses: -1,
-      isActive: true,
-      subscribersCount: 23
-    }
-  ]);
-
-  const handleCreatePlan = (e: React.FormEvent) => {
+  const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newPlan: Plan = {
-      id: Math.max(...plans.map(p => p.id)) + 1,
-      name: formData.name,
-      price: formData.price,
-      features: formData.features.split('\n').filter(f => f.trim()),
-      maxProfessionals: formData.maxProfessionals,
-      maxBusinesses: formData.maxBusinesses,
-      isActive: formData.isActive,
-      subscribersCount: 0
-    };
-    setPlans([...plans, newPlan]);
-    toast({
-      title: "Plano criado",
-      description: "O novo plano foi criado com sucesso.",
-    });
-    resetForm();
+    try {
+      console.log('Creating plan:', formData);
+      const { error } = await supabase
+        .from('plans')
+        .insert([{
+          name: formData.name,
+          price: formData.price,
+          features: formData.features.split('\n').filter(f => f.trim()),
+          max_professionals: formData.max_professionals,
+          max_businesses: formData.max_businesses,
+          is_active: formData.is_active
+        }]);
+
+      if (error) {
+        console.error('Error creating plan:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      toast({
+        title: "Plano criado",
+        description: "O novo plano foi criado com sucesso.",
+      });
+      resetForm();
+    } catch (error) {
+      console.error('Error creating plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar plano. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEditPlan = (plan: Plan) => {
+  const handleEditPlan = (plan: any) => {
     setSelectedPlan(plan);
     setFormData({
       name: plan.name,
       price: plan.price,
-      features: plan.features.join('\n'),
-      maxProfessionals: plan.maxProfessionals,
-      maxBusinesses: plan.maxBusinesses,
-      isActive: plan.isActive
+      features: Array.isArray(plan.features) ? plan.features.join('\n') : '',
+      max_professionals: plan.max_professionals,
+      max_businesses: plan.max_businesses,
+      is_active: plan.is_active
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdatePlan = (e: React.FormEvent) => {
+  const handleUpdatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedPlan) {
-      setPlans(plans.map(plan =>
-        plan.id === selectedPlan.id
-          ? {
-              ...plan,
-              name: formData.name,
-              price: formData.price,
-              features: formData.features.split('\n').filter(f => f.trim()),
-              maxProfessionals: formData.maxProfessionals,
-              maxBusinesses: formData.maxBusinesses,
-              isActive: formData.isActive
-            }
-          : plan
-      ));
+    if (!selectedPlan) return;
+
+    try {
+      console.log('Updating plan:', selectedPlan.id, formData);
+      const { error } = await supabase
+        .from('plans')
+        .update({
+          name: formData.name,
+          price: formData.price,
+          features: formData.features.split('\n').filter(f => f.trim()),
+          max_professionals: formData.max_professionals,
+          max_businesses: formData.max_businesses,
+          is_active: formData.is_active
+        })
+        .eq('id', selectedPlan.id);
+
+      if (error) {
+        console.error('Error updating plan:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
       toast({
         title: "Plano atualizado",
         description: "O plano foi atualizado com sucesso.",
       });
       resetForm();
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar plano. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleDeletePlan = (planId: number) => {
-    setPlans(plans.filter(plan => plan.id !== planId));
-    toast({
-      title: "Plano excluído",
-      description: "O plano foi removido com sucesso.",
-    });
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      console.log('Deleting plan:', planId);
+      const { error } = await supabase
+        .from('plans')
+        .delete()
+        .eq('id', planId);
+
+      if (error) {
+        console.error('Error deleting plan:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      toast({
+        title: "Plano excluído",
+        description: "O plano foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir plano. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleToggleStatus = (planId: number) => {
-    setPlans(plans.map(plan =>
-      plan.id === planId ? { ...plan, isActive: !plan.isActive } : plan
-    ));
-    toast({
-      title: "Status atualizado",
-      description: "O status do plano foi alterado com sucesso.",
-    });
+  const handleToggleStatus = async (planId: string, currentStatus: boolean) => {
+    try {
+      console.log('Toggling plan status:', planId, !currentStatus);
+      const { error } = await supabase
+        .from('plans')
+        .update({ is_active: !currentStatus })
+        .eq('id', planId);
+
+      if (error) {
+        console.error('Error toggling plan status:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      toast({
+        title: "Status atualizado",
+        description: "O status do plano foi alterado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error toggling plan status:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao alterar status. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const resetForm = () => {
@@ -151,9 +181,9 @@ const PlansManagement = () => {
       name: '',
       price: 0,
       features: '',
-      maxProfessionals: 0,
-      maxBusinesses: 1,
-      isActive: true
+      max_professionals: 0,
+      max_businesses: 1,
+      is_active: true
     });
     setSelectedPlan(null);
     setIsCreateDialogOpen(false);
@@ -163,6 +193,36 @@ const PlansManagement = () => {
   const filteredPlans = plans.filter(plan =>
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center">
+              <p className="text-red-600">Erro ao carregar planos: {error.message}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -235,8 +295,8 @@ const PlansManagement = () => {
                       id="maxProfessionals"
                       type="number"
                       placeholder="10"
-                      value={formData.maxProfessionals}
-                      onChange={(e) => setFormData({...formData, maxProfessionals: parseInt(e.target.value)})}
+                      value={formData.max_professionals}
+                      onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
                       required
                     />
                   </div>
@@ -271,12 +331,12 @@ const PlansManagement = () => {
                       <CreditCard className="w-5 h-5 mr-2 text-blue-600" />
                       {plan.name}
                     </CardTitle>
-                    <Badge variant={plan.isActive ? "default" : "secondary"}>
-                      {plan.isActive ? 'Ativo' : 'Inativo'}
+                    <Badge variant={plan.is_active ? "default" : "secondary"}>
+                      {plan.is_active ? 'Ativo' : 'Inativo'}
                     </Badge>
                   </div>
                   <CardDescription>
-                    {plan.subscribersCount} assinantes ativos
+                    {plan.subscribers_count} assinantes ativos
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -288,7 +348,7 @@ const PlansManagement = () => {
                     
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Recursos inclusos:</h4>
-                      {plan.features.map((feature, index) => (
+                      {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, index: number) => (
                         <div key={index} className="flex items-center text-sm text-gray-600">
                           <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                           {feature}
@@ -311,10 +371,10 @@ const PlansManagement = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleToggleStatus(plan.id)}
+                          onClick={() => handleToggleStatus(plan.id, plan.is_active)}
                           className="flex-1"
                         >
-                          {plan.isActive ? 'Desativar' : 'Ativar'}
+                          {plan.is_active ? 'Desativar' : 'Ativar'}
                         </Button>
                         
                         <AlertDialog>
@@ -382,8 +442,8 @@ const PlansManagement = () => {
                     <Input
                       id="editMaxProfessionals"
                       type="number"
-                      value={formData.maxProfessionals}
-                      onChange={(e) => setFormData({...formData, maxProfessionals: parseInt(e.target.value)})}
+                      value={formData.max_professionals}
+                      onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
                       required
                     />
                   </div>

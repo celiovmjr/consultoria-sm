@@ -7,127 +7,170 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Building, Search, Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
+import { Building, Search, Plus, Edit, Trash2, Mail, Phone, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useToast } from '@/hooks/use-toast';
-
-interface Business {
-  id: string;
-  name: string;
-  owner: string;
-  email: string;
-  phone: string;
-  category: string;
-  status: 'active' | 'inactive' | 'pending';
-  plan: string;
-  createdAt: string;
-}
+import { useBusinesses } from '@/hooks/useBusinesses';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const BusinessManagement = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: businesses = [], isLoading, error } = useBusinesses();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
+  const [editingBusiness, setEditingBusiness] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     owner: '',
     email: '',
     phone: '',
-    category: '',
+    description: '',
     plan: '',
     status: 'active' as 'active' | 'inactive' | 'pending'
   });
-
-  const [businesses, setBusinesses] = useState<Business[]>([
-    {
-      id: '1',
-      name: 'Salão Bella Vista',
-      owner: 'Maria Silva',
-      email: 'maria@bellavista.com',
-      phone: '(11) 99999-9999',
-      category: 'Salão de Beleza',
-      status: 'active',
-      plan: 'Premium',
-      createdAt: '2024-12-15'
-    },
-    {
-      id: '2',
-      name: 'Barbearia do João',
-      owner: 'João Santos',
-      email: 'joao@barbearia.com',
-      phone: '(11) 88888-8888',
-      category: 'Barbearia',
-      status: 'active',
-      plan: 'Basic',
-      createdAt: '2024-12-10'
-    }
-  ]);
 
   const filteredBusinesses = businesses.filter(business =>
     business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     business.owner.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newBusiness: Business = {
-      id: Date.now().toString(),
-      ...formData,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setBusinesses([...businesses, newBusiness]);
-    toast({
-      title: "Negócio criado",
-      description: "O novo negócio foi criado com sucesso.",
-    });
-    resetForm();
+    try {
+      console.log('Creating business:', formData);
+      const slug = formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      const { error } = await supabase
+        .from('businesses')
+        .insert([{
+          ...formData,
+          slug
+        }]);
+
+      if (error) {
+        console.error('Error creating business:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
+      toast({
+        title: "Negócio criado",
+        description: "O novo negócio foi criado com sucesso.",
+      });
+      resetForm();
+    } catch (error) {
+      console.error('Error creating business:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar negócio. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEdit = (business: Business) => {
+  const handleEdit = (business: any) => {
     setEditingBusiness(business);
     setFormData({
       name: business.name,
       owner: business.owner,
-      email: business.email,
-      phone: business.phone,
-      category: business.category,
+      email: business.email || '',
+      phone: business.phone || '',
+      description: business.description || '',
       plan: business.plan,
       status: business.status
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingBusiness) {
-      setBusinesses(businesses.map(business =>
-        business.id === editingBusiness.id ? { ...business, ...formData } : business
-      ));
+    if (!editingBusiness) return;
+
+    try {
+      console.log('Updating business:', editingBusiness.id, formData);
+      const { error } = await supabase
+        .from('businesses')
+        .update(formData)
+        .eq('id', editingBusiness.id);
+
+      if (error) {
+        console.error('Error updating business:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
       toast({
         title: "Negócio atualizado",
         description: "As informações do negócio foram atualizadas com sucesso.",
       });
       resetForm();
+    } catch (error) {
+      console.error('Error updating business:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar negócio. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleStatusChange = (businessId: string, newStatus: 'active' | 'inactive') => {
-    setBusinesses(businesses.map(business =>
-      business.id === businessId ? { ...business, status: newStatus } : business
-    ));
-    toast({
-      title: "Status atualizado",
-      description: `Status do negócio foi alterado para ${newStatus === 'active' ? 'ativo' : 'inativo'}.`,
-    });
+  const handleStatusChange = async (businessId: string, newStatus: 'active' | 'inactive') => {
+    try {
+      console.log('Updating business status:', businessId, newStatus);
+      const { error } = await supabase
+        .from('businesses')
+        .update({ status: newStatus })
+        .eq('id', businessId);
+
+      if (error) {
+        console.error('Error updating business status:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
+      toast({
+        title: "Status atualizado",
+        description: `Status do negócio foi alterado para ${newStatus === 'active' ? 'ativo' : 'inativo'}.`,
+      });
+    } catch (error) {
+      console.error('Error updating business status:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar status. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDelete = (businessId: string) => {
-    setBusinesses(businesses.filter(business => business.id !== businessId));
-    toast({
-      title: "Negócio excluído",
-      description: "O negócio foi removido com sucesso.",
-    });
+  const handleDelete = async (businessId: string) => {
+    try {
+      console.log('Deleting business:', businessId);
+      const { error } = await supabase
+        .from('businesses')
+        .delete()
+        .eq('id', businessId);
+
+      if (error) {
+        console.error('Error deleting business:', error);
+        throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
+      toast({
+        title: "Negócio excluído",
+        description: "O negócio foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting business:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir negócio. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const resetForm = () => {
@@ -136,7 +179,7 @@ const BusinessManagement = () => {
       owner: '',
       email: '',
       phone: '',
-      category: '',
+      description: '',
       plan: '',
       status: 'active'
     });
@@ -157,6 +200,36 @@ const BusinessManagement = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center">
+              <p className="text-red-600">Erro ao carregar negócios: {error.message}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -222,10 +295,9 @@ const BusinessManagement = () => {
                         required
                       />
                       <Input
-                        placeholder="Categoria"
-                        value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        required
+                        placeholder="Descrição"
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
                       />
                       <Input
                         placeholder="Plano"
@@ -260,7 +332,7 @@ const BusinessManagement = () => {
                   <TableRow>
                     <TableHead>Negócio</TableHead>
                     <TableHead>Proprietário</TableHead>
-                    <TableHead>Categoria</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
@@ -287,7 +359,7 @@ const BusinessManagement = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{business.category}</TableCell>
+                      <TableCell>{business.description}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{business.plan}</Badge>
                       </TableCell>
@@ -388,10 +460,9 @@ const BusinessManagement = () => {
                   required
                 />
                 <Input
-                  placeholder="Categoria"
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  required
+                  placeholder="Descrição"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
                 <Input
                   placeholder="Plano"
