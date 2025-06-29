@@ -123,36 +123,42 @@ export type Database = {
       }
       plans: {
         Row: {
+          commission_percentage: number | null
           created_at: string
           features: Json
           id: string
           is_active: boolean
           max_businesses: number
           max_professionals: number
+          max_stores: number
           name: string
           price: number
           subscribers_count: number
           updated_at: string
         }
         Insert: {
+          commission_percentage?: number | null
           created_at?: string
           features?: Json
           id?: string
           is_active?: boolean
           max_businesses: number
           max_professionals: number
+          max_stores?: number
           name: string
           price: number
           subscribers_count?: number
           updated_at?: string
         }
         Update: {
+          commission_percentage?: number | null
           created_at?: string
           features?: Json
           id?: string
           is_active?: boolean
           max_businesses?: number
           max_professionals?: number
+          max_stores?: number
           name?: string
           price?: number
           subscribers_count?: number

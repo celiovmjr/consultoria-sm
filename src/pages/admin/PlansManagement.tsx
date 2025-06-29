@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { CreditCard, Edit, Plus, Search, Trash2, Loader2 } from 'lucide-react';
+import { CreditCard, Edit, Plus, Search, Trash2, Loader2, Store, Users, Percent } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useToast } from '@/hooks/use-toast';
 import { usePlans } from '@/hooks/usePlans';
@@ -29,6 +28,8 @@ const PlansManagement = () => {
     features: '',
     max_professionals: 0,
     max_businesses: 1,
+    max_stores: 1,
+    commission_percentage: 0,
     is_active: true
   });
 
@@ -44,6 +45,8 @@ const PlansManagement = () => {
           features: formData.features.split('\n').filter(f => f.trim()),
           max_professionals: formData.max_professionals,
           max_businesses: formData.max_businesses,
+          max_stores: formData.max_stores,
+          commission_percentage: formData.commission_percentage,
           is_active: formData.is_active
         }]);
 
@@ -76,6 +79,8 @@ const PlansManagement = () => {
       features: Array.isArray(plan.features) ? plan.features.join('\n') : '',
       max_professionals: plan.max_professionals,
       max_businesses: plan.max_businesses,
+      max_stores: plan.max_stores || 1,
+      commission_percentage: plan.commission_percentage || 0,
       is_active: plan.is_active
     });
     setIsEditDialogOpen(true);
@@ -95,6 +100,8 @@ const PlansManagement = () => {
           features: formData.features.split('\n').filter(f => f.trim()),
           max_professionals: formData.max_professionals,
           max_businesses: formData.max_businesses,
+          max_stores: formData.max_stores,
+          commission_percentage: formData.commission_percentage,
           is_active: formData.is_active
         })
         .eq('id', selectedPlan.id);
@@ -183,6 +190,8 @@ const PlansManagement = () => {
       features: '',
       max_professionals: 0,
       max_businesses: 1,
+      max_stores: 1,
+      commission_percentage: 0,
       is_active: true
     });
     setSelectedPlan(null);
@@ -289,14 +298,39 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="maxProfessionals">Profissionais</Label>
+                      <Input
+                        id="maxProfessionals"
+                        type="number"
+                        placeholder="10"
+                        value={formData.max_professionals}
+                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="maxStores">Filiais/Lojas</Label>
+                      <Input
+                        id="maxStores"
+                        type="number"
+                        placeholder="3"
+                        value={formData.max_stores}
+                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <Label htmlFor="maxProfessionals">Máximo de Profissionais</Label>
+                    <Label htmlFor="commission">Comissão (%)</Label>
                     <Input
-                      id="maxProfessionals"
+                      id="commission"
                       type="number"
-                      placeholder="10"
-                      value={formData.max_professionals}
-                      onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
+                      placeholder="3.5"
+                      step="0.01"
+                      value={formData.commission_percentage}
+                      onChange={(e) => setFormData({...formData, commission_percentage: parseFloat(e.target.value)})}
                       required
                     />
                   </div>
@@ -344,6 +378,31 @@ const PlansManagement = () => {
                     <div className="text-center">
                       <p className="text-3xl font-bold text-blue-600">R$ {plan.price}</p>
                       <p className="text-sm text-gray-600">por mês</p>
+                    </div>
+                    
+                    {/* Plan Limits */}
+                    <div className="grid grid-cols-3 gap-2 text-center py-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <div className="flex items-center justify-center mb-1">
+                          <Users className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <p className="text-sm font-medium">{plan.max_professionals === -1 ? '∞' : plan.max_professionals}</p>
+                        <p className="text-xs text-gray-500">Prof.</p>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-center mb-1">
+                          <Store className="w-4 h-4 text-green-600" />
+                        </div>
+                        <p className="text-sm font-medium">{plan.max_stores === -1 ? '∞' : plan.max_stores}</p>
+                        <p className="text-xs text-gray-500">Filiais</p>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-center mb-1">
+                          <Percent className="w-4 h-4 text-orange-600" />
+                        </div>
+                        <p className="text-sm font-medium">{plan.commission_percentage}%</p>
+                        <p className="text-xs text-gray-500">Comissão</p>
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
@@ -437,13 +496,36 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editMaxProfessionals">Profissionais</Label>
+                      <Input
+                        id="editMaxProfessionals"
+                        type="number"
+                        value={formData.max_professionals}
+                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editMaxStores">Filiais/Lojas</Label>
+                      <Input
+                        id="editMaxStores"
+                        type="number"
+                        value={formData.max_stores}
+                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <Label htmlFor="editMaxProfessionals">Máximo de Profissionais</Label>
+                    <Label htmlFor="editCommission">Comissão (%)</Label>
                     <Input
-                      id="editMaxProfessionals"
+                      id="editCommission"
                       type="number"
-                      value={formData.max_professionals}
-                      onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
+                      step="0.01"
+                      value={formData.commission_percentage}
+                      onChange={(e) => setFormData({...formData, commission_percentage: parseFloat(e.target.value)})}
                       required
                     />
                   </div>
