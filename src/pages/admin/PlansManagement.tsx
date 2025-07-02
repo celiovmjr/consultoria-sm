@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -393,14 +394,14 @@ const PlansManagement = () => {
                         <div className="flex items-center justify-center mb-1">
                           <Store className="w-4 h-4 text-green-600" />
                         </div>
-                        <p className="text-sm font-medium">{plan.max_stores === -1 ? '∞' : plan.max_stores}</p>
-                        <p className="text-xs text-gray-500">Filiais</p>
+                        <p className="text-sm font-medium">{plan.max_businesses === -1 ? '∞' : plan.max_businesses}</p>
+                        <p className="text-xs text-gray-500">Negócios</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
                           <Percent className="w-4 h-4 text-orange-600" />
                         </div>
-                        <p className="text-sm font-medium">{plan.commission_percentage}%</p>
+                        <p className="text-sm font-medium">{plan.commission_percentage || 0}%</p>
                         <p className="text-xs text-gray-500">Comissão</p>
                       </div>
                     </div>
