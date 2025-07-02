@@ -142,24 +142,24 @@ const UsersManagement = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
       case 'inactive':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
       case 'business_owner':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
       case 'professional':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
     }
   };
 
@@ -185,7 +185,7 @@ const UsersManagement = () => {
 
   if (usersError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex">
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -199,25 +199,25 @@ const UsersManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
-            <p className="text-gray-600">Administre todos os usuários da plataforma</p>
+            <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Usuários</h1>
+            <p className="text-muted-foreground">Administre todos os usuários da plataforma</p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="border-0 shadow-lg">
+            <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-muted-foreground">Total de Usuários</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalUsers.toLocaleString()}
                     </p>
                   </div>
@@ -226,11 +226,11 @@ const UsersManagement = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Proprietários</p>
+                    <p className="text-sm font-medium text-muted-foreground">Proprietários</p>
                     <p className="text-2xl font-bold text-purple-600">
                       {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : businessOwners.toLocaleString()}
                     </p>
@@ -240,11 +240,11 @@ const UsersManagement = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Profissionais</p>
+                    <p className="text-sm font-medium text-muted-foreground">Profissionais</p>
                     <p className="text-2xl font-bold text-blue-600">
                       {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalProfessionals.toLocaleString()}
                     </p>
@@ -254,11 +254,11 @@ const UsersManagement = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Clientes</p>
+                    <p className="text-sm font-medium text-muted-foreground">Clientes</p>
                     <p className="text-2xl font-bold text-green-600">
                       {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : clients.toLocaleString()}
                     </p>
@@ -270,15 +270,15 @@ const UsersManagement = () => {
           </div>
 
           {/* Main Content */}
-          <Card className="border-0 shadow-lg">
+          <Card className="border-border bg-card">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-foreground">
                     <Users className="w-5 h-5 mr-2 text-blue-600" />
                     Lista de Usuários
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-muted-foreground">
                     Gerencie todos os usuários cadastrados na plataforma
                   </CardDescription>
                 </div>
@@ -289,54 +289,57 @@ const UsersManagement = () => {
                       Novo Usuário
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="bg-background border-border">
                     <DialogHeader>
-                      <DialogTitle>
+                      <DialogTitle className="text-foreground">
                         {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
                       </DialogTitle>
-                      <DialogDescription>
+                      <DialogDescription className="text-muted-foreground">
                         {editingUser ? 'Atualize as informações do usuário' : 'Cadastre um novo usuário na plataforma'}
                       </DialogDescription>
                     </DialogHeader>
                     
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div>
-                        <Label htmlFor="name">Nome Completo</Label>
+                        <Label htmlFor="name" className="text-foreground">Nome Completo</Label>
                         <Input
                           id="name"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
                           required
+                          className="bg-background border-border text-foreground"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="email">E-mail</Label>
+                        <Label htmlFor="email" className="text-foreground">E-mail</Label>
                         <Input
                           id="email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                           required
+                          className="bg-background border-border text-foreground"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="phone">Telefone</Label>
+                        <Label htmlFor="phone" className="text-foreground">Telefone</Label>
                         <Input
                           id="phone"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          className="bg-background border-border text-foreground"
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="role">Tipo de Usuário</Label>
+                        <Label htmlFor="role" className="text-foreground">Tipo de Usuário</Label>
                         <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value as any})}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background border-border text-foreground">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background border-border">
                             <SelectItem value="business_owner">Proprietário</SelectItem>
                             <SelectItem value="professional">Profissional</SelectItem>
                             <SelectItem value="admin">Administrador</SelectItem>
@@ -345,12 +348,12 @@ const UsersManagement = () => {
                       </div>
                       
                       <div>
-                        <Label htmlFor="business_id">Negócio</Label>
+                        <Label htmlFor="business_id" className="text-foreground">Negócio</Label>
                         <Select value={formData.business_id} onValueChange={(value) => setFormData({...formData, business_id: value})}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background border-border text-foreground">
                             <SelectValue placeholder="Selecione um negócio (opcional)" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background border-border">
                             <SelectItem value="">Nenhum negócio</SelectItem>
                             {businesses.map((business) => (
                               <SelectItem key={business.id} value={business.id}>
@@ -362,12 +365,12 @@ const UsersManagement = () => {
                       </div>
                       
                       <div>
-                        <Label htmlFor="status">Status</Label>
+                        <Label htmlFor="status" className="text-foreground">Status</Label>
                         <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background border-border text-foreground">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background border-border">
                             <SelectItem value="active">Ativo</SelectItem>
                             <SelectItem value="inactive">Inativo</SelectItem>
                           </SelectContent>
@@ -390,12 +393,12 @@ const UsersManagement = () => {
             <CardContent>
               {/* Search */}
               <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   placeholder="Buscar por nome ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border-border text-foreground"
                 />
               </div>
 
@@ -407,7 +410,7 @@ const UsersManagement = () => {
               ) : (
                 <div className="space-y-4">
                   {filteredUsers.map((user) => (
-                    <div key={user.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={user.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors bg-card">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center space-x-4 mb-2">
@@ -415,8 +418,8 @@ const UsersManagement = () => {
                               <Users className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                              <h3 className="font-semibold text-foreground">{user.name}</h3>
+                              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                                 <span className="flex items-center">
                                   <Mail className="w-3 h-3 mr-1" />
                                   {user.email}
@@ -439,14 +442,14 @@ const UsersManagement = () => {
                               {user.status === 'active' ? 'Ativo' : 'Inativo'}
                             </Badge>
                             {user.business_id && (
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-muted-foreground">
                                 <Building className="w-3 h-3 inline mr-1" />
                                 {getBusinessName(user.business_id)}
                               </span>
                             )}
                           </div>
                           
-                          <div className="text-xs text-gray-500 mt-2 ml-14">
+                          <div className="text-xs text-muted-foreground mt-2 ml-14">
                             Cadastrado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
@@ -456,7 +459,7 @@ const UsersManagement = () => {
                             <Edit className="w-4 h-4 mr-1" />
                             Editar
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => handleDelete(user.id)}>
+                          <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDelete(user.id)}>
                             <Trash2 className="w-4 h-4 mr-1" />
                             Excluir
                           </Button>
@@ -469,8 +472,8 @@ const UsersManagement = () => {
 
               {!isLoading && filteredUsers.length === 0 && (
                 <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Nenhum usuário encontrado</p>
+                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nenhum usuário encontrado</p>
                 </div>
               )}
             </CardContent>
