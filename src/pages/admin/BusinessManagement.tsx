@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -191,19 +190,19 @@ const BusinessManagement = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'inactive':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex">
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -218,7 +217,7 @@ const BusinessManagement = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex">
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -232,25 +231,25 @@ const BusinessManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Negócios</h1>
-            <p className="text-gray-600">Administre todos os negócios da plataforma</p>
+            <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Negócios</h1>
+            <p className="text-muted-foreground">Administre todos os negócios da plataforma</p>
           </div>
 
-          <Card className="border-0 shadow-lg">
+          <Card className="border-border shadow-lg">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-foreground">
                     <Building className="w-5 h-5 mr-2 text-blue-600" />
                     Lista de Negócios
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-muted-foreground">
                     {businesses.length} negócios cadastrados
                   </CardDescription>
                 </div>
@@ -261,10 +260,10 @@ const BusinessManagement = () => {
                       Novo Negócio
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="bg-background border-border">
                     <DialogHeader>
-                      <DialogTitle>Novo Negócio</DialogTitle>
-                      <DialogDescription>
+                      <DialogTitle className="text-foreground">Novo Negócio</DialogTitle>
+                      <DialogDescription className="text-muted-foreground">
                         Cadastre um novo negócio na plataforma
                       </DialogDescription>
                     </DialogHeader>
@@ -274,12 +273,14 @@ const BusinessManagement = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         required
+                        className="bg-background border-border text-foreground"
                       />
                       <Input
                         placeholder="Nome do proprietário"
                         value={formData.owner}
                         onChange={(e) => setFormData({...formData, owner: e.target.value})}
                         required
+                        className="bg-background border-border text-foreground"
                       />
                       <Input
                         type="email"
@@ -287,23 +288,27 @@ const BusinessManagement = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         required
+                        className="bg-background border-border text-foreground"
                       />
                       <Input
                         placeholder="Telefone"
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         required
+                        className="bg-background border-border text-foreground"
                       />
                       <Input
                         placeholder="Descrição"
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="bg-background border-border text-foreground"
                       />
                       <Input
                         placeholder="Plano"
                         value={formData.plan}
                         onChange={(e) => setFormData({...formData, plan: e.target.value})}
                         required
+                        className="bg-background border-border text-foreground"
                       />
                       <DialogFooter>
                         <Button type="button" variant="outline" onClick={resetForm}>
@@ -318,33 +323,33 @@ const BusinessManagement = () => {
             </CardHeader>
             <CardContent>
               <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   placeholder="Buscar por nome ou proprietário..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border-border text-foreground"
                 />
               </div>
 
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Negócio</TableHead>
-                    <TableHead>Proprietário</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Plano</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
+                  <TableRow className="border-border">
+                    <TableHead className="text-muted-foreground">Negócio</TableHead>
+                    <TableHead className="text-muted-foreground">Proprietário</TableHead>
+                    <TableHead className="text-muted-foreground">Descrição</TableHead>
+                    <TableHead className="text-muted-foreground">Plano</TableHead>
+                    <TableHead className="text-muted-foreground">Status</TableHead>
+                    <TableHead className="text-muted-foreground">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredBusinesses.map((business) => (
-                    <TableRow key={business.id}>
+                    <TableRow key={business.id} className="border-border">
                       <TableCell>
                         <div>
-                          <div className="font-medium">{business.name}</div>
-                          <div className="text-sm text-gray-500 flex items-center">
+                          <div className="font-medium text-foreground">{business.name}</div>
+                          <div className="text-sm text-muted-foreground flex items-center">
                             <Mail className="w-3 h-3 mr-1" />
                             {business.email}
                           </div>
@@ -352,16 +357,16 @@ const BusinessManagement = () => {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{business.owner}</div>
-                          <div className="text-sm text-gray-500 flex items-center">
+                          <div className="font-medium text-foreground">{business.owner}</div>
+                          <div className="text-sm text-muted-foreground flex items-center">
                             <Phone className="w-3 h-3 mr-1" />
                             {business.phone}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{business.description}</TableCell>
+                      <TableCell className="text-foreground">{business.description}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{business.plan}</Badge>
+                        <Badge variant="outline" className="border-border text-foreground">{business.plan}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(business.status)}>
@@ -400,10 +405,10 @@ const BusinessManagement = () => {
                                 Excluir
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="bg-background border-border">
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogTitle className="text-foreground">Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription className="text-muted-foreground">
                                   Tem certeza que deseja excluir o negócio "{business.name}"? Esta ação não pode ser desfeita.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
@@ -426,10 +431,10 @@ const BusinessManagement = () => {
 
           {/* Edit Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent>
+            <DialogContent className="bg-background border-border">
               <DialogHeader>
-                <DialogTitle>Editar Negócio</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-foreground">Editar Negócio</DialogTitle>
+                <DialogDescription className="text-muted-foreground">
                   Atualize as informações do negócio
                 </DialogDescription>
               </DialogHeader>
@@ -439,12 +444,14 @@ const BusinessManagement = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
+                  className="bg-background border-border text-foreground"
                 />
                 <Input
                   placeholder="Nome do proprietário"
                   value={formData.owner}
                   onChange={(e) => setFormData({...formData, owner: e.target.value})}
                   required
+                  className="bg-background border-border text-foreground"
                 />
                 <Input
                   type="email"
@@ -452,23 +459,27 @@ const BusinessManagement = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
+                  className="bg-background border-border text-foreground"
                 />
                 <Input
                   placeholder="Telefone"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   required
+                  className="bg-background border-border text-foreground"
                 />
                 <Input
                   placeholder="Descrição"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="bg-background border-border text-foreground"
                 />
                 <Input
                   placeholder="Plano"
                   value={formData.plan}
                   onChange={(e) => setFormData({...formData, plan: e.target.value})}
                   required
+                  className="bg-background border-border text-foreground"
                 />
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={resetForm}>
