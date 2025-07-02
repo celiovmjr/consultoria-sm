@@ -100,9 +100,9 @@ export type Database = {
           name: string
           owner: string
           phone?: string | null
-          plan: string
+          plan?: string
           slug: string
-          status: string
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -130,7 +130,6 @@ export type Database = {
           is_active: boolean
           max_businesses: number
           max_professionals: number
-          max_stores: number
           name: string
           price: number
           subscribers_count: number
@@ -144,7 +143,6 @@ export type Database = {
           is_active?: boolean
           max_businesses: number
           max_professionals: number
-          max_stores?: number
           name: string
           price: number
           subscribers_count?: number
@@ -158,7 +156,6 @@ export type Database = {
           is_active?: boolean
           max_businesses?: number
           max_professionals?: number
-          max_stores?: number
           name?: string
           price?: number
           subscribers_count?: number
@@ -340,8 +337,8 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
-          role: string
-          status: string
+          role?: string
+          status?: string
           updated_at?: string
         }
         Update: {

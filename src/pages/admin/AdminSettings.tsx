@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,12 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Mail, Bell, Shield, CreditCard } from 'lucide-react';
+import { Settings, Mail, Bell, Shield, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettings = () => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const [platformSettings, setPlatformSettings] = useState({
     name: 'Agenda.AI',
@@ -27,7 +29,7 @@ const AdminSettings = () => {
     smtpHost: 'smtp.gmail.com',
     smtpPort: '587',
     smtpUsername: 'sistema@agenda.ai',
-    smtpPassword: '****',
+    smtpPassword: '',
     fromName: 'Agenda.AI',
     fromEmail: 'noreply@agenda.ai'
   });
@@ -40,29 +42,206 @@ const AdminSettings = () => {
     securityAlerts: true
   });
 
+  // Load settings on component mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    setIsLoading(true);
+    try {
+      // In a real implementation, you would load settings from a settings table
+      // For now, we'll use localStorage as a simple storage mechanism
+      const savedPlatformSettings = localStorage.getItem('platformSettings');
+      const savedEmailSettings = localStorage.getItem('emailSettings');
+      const savedNotifications = localStorage.getItem('notifications');
+
+      if (savedPlatformSettings) {
+        setPlatformSettings(JSON.parse(savedPlatformSettings));
+      }
+      if (savedEmailSettings) {
+        setEmailSettings(JSON.parse(savedEmailSettings));
+      }
+      if (savedNotifications) {
+        setNotifications(JSON.parse(savedNotifications));
+      }
+
+      console.log('Settings loaded successfully');
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar configurações.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveSettings = async (settingsType: string, settings: any) => {
+    setIsSaving(true);
+    try {
+      // In a real implementation, you would save to a settings table in Supabase
+      // For now, we'll use localStorage
+      localStorage.setItem(settingsType, JSON.stringify(settings));
+      
+      console.log(`${settingsType} saved:`, settings);
+      
+      toast({
+        title: "Configurações salvas",
+        description: "As configurações foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error(`Error saving ${settingsType}:`, error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar configurações. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handlePlatformSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Configurações atualizadas",
-      description: "As configurações da plataforma foram atualizadas com sucesso.",
-    });
+    saveSettings('platformSettings', platformSettings);
   };
 
   const handleEmailSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Configurações de email salvas",
-      description: "As configurações de email foram atualizadas com sucesso.",
-    });
+    saveSettings('emailSettings', emailSettings);
   };
 
   const handleNotificationsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Preferências salvas",
-      description: "Suas preferências de notificação foram atualizadas.",
-    });
+    saveSettings('notifications', notifications);
   };
+
+  const handleSystemReset = async () => {
+    if (window.confirm('Tem certeza que deseja resetar as configurações do sistema? Esta ação não pode ser desfeita.')) {
+      try {
+        localStorage.removeItem('platformSettings');
+        localStorage.removeItem('emailSettings');
+        localStorage.removeItem('notifications');
+        
+        // Reset to default values
+        setPlatformSettings({
+          name: 'Agenda.AI',
+          description: 'Plataforma completa para gestão de agendamentos',
+          supportEmail: 'suporte@agenda.ai',
+          maintenanceMode: false,
+          allowRegistrations: true,
+          requireEmailVerification: true
+        });
+        
+        setEmailSettings({
+          smtpHost: 'smtp.gmail.com',
+          smtpPort: '587',
+          smtpUsername: 'sistema@agenda.ai',
+          smtpPassword: '',
+          fromName: 'Agenda.AI',
+          fromEmail: 'noreply@agenda.ai'
+        });
+        
+        setNotifications({
+          newBusinessSignup: true,
+          paymentAlerts: true,
+          systemUpdates: true,
+          maintenanceAlerts: true,
+          securityAlerts: true
+        });
+
+        toast({
+          title: "Sistema resetado",
+          description: "As configurações foram restauradas para os valores padrão.",
+        });
+      } catch (error) {
+        console.error('Error resetting system:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao resetar configurações.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      // Clear browser cache
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
+      // Clear localStorage cache items
+      const cacheKeys = Object.keys(localStorage).filter(key => key.includes('cache'));
+      cacheKeys.forEach(key => localStorage.removeItem(key));
+      
+      toast({
+        title: "Cache limpo",
+        description: "O cache da aplicação foi limpo com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao limpar cache.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGenerateBackup = async () => {
+    try {
+      const backupData = {
+        platformSettings,
+        emailSettings,
+        notifications,
+        timestamp: new Date().toISOString(),
+        version: '1.0'
+      };
+
+      const dataStr = JSON.stringify(backupData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `backup-configuracoes-${Date.now()}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+
+      toast({
+        title: "Backup gerado",
+        description: "O backup das configurações foi gerado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error generating backup:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar backup.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -174,7 +353,8 @@ const AdminSettings = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full" disabled={isSaving}>
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Salvar Configurações
                     </Button>
                   </form>
@@ -195,6 +375,7 @@ const AdminSettings = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleEmailSettingsSubmit} className="space-y-4">
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="smtpHost">Servidor SMTP</Label>
@@ -233,7 +414,7 @@ const AdminSettings = () => {
                           type="password"
                           value={emailSettings.smtpPassword}
                           onChange={(e) => setEmailSettings({...emailSettings, smtpPassword: e.target.value})}
-                          required
+                          placeholder="Nova senha SMTP"
                         />
                       </div>
                     </div>
@@ -260,7 +441,8 @@ const AdminSettings = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full" disabled={isSaving}>
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Salvar Configurações de Email
                     </Button>
                   </form>
@@ -281,6 +463,7 @@ const AdminSettings = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleNotificationsSubmit} className="space-y-6">
+                    
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -338,7 +521,8 @@ const AdminSettings = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full" disabled={isSaving}>
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Salvar Preferências
                     </Button>
                   </form>
@@ -362,10 +546,10 @@ const AdminSettings = () => {
                     <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                       <h4 className="font-medium text-yellow-800 mb-2">Ações Administrativas</h4>
                       <div className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={handleGenerateBackup}>
                           Gerar Backup do Sistema
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={handleClearCache}>
                           Limpar Cache da Aplicação
                         </Button>
                         <Button variant="outline" className="w-full justify-start">
@@ -380,7 +564,7 @@ const AdminSettings = () => {
                         Estas ações são irreversíveis e podem afetar o funcionamento da plataforma.
                       </p>
                       <div className="space-y-2">
-                        <Button variant="destructive" className="w-full justify-start">
+                        <Button variant="destructive" className="w-full justify-start" onClick={handleSystemReset}>
                           Resetar Configurações do Sistema
                         </Button>
                         <Button variant="destructive" className="w-full justify-start">

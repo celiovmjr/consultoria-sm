@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,143 +7,123 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Plus, Edit, Trash2, Mail, Phone, Building } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2, Mail, Phone, Building, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useToast } from '@/hooks/use-toast';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  type: 'Business Owner' | 'Professional' | 'Client';
-  business: string;
-  status: 'Ativo' | 'Inativo' | 'Pendente';
-  createdAt: string;
-  lastLogin: string;
-}
+import { useUsers } from '@/hooks/useUsers';
+import { useBusinesses } from '@/hooks/useBusinesses';
+import { useProfessionals } from '@/hooks/useProfessionals';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const UsersManagement = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
+  const { data: businesses = [], isLoading: businessesLoading } = useBusinesses();
+  const { data: professionals = [], isLoading: professionalsLoading } = useProfessionals();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    type: 'Client' as 'Business Owner' | 'Professional' | 'Client',
-    business: '',
-    status: 'Ativo' as 'Ativo' | 'Inativo' | 'Pendente'
+    role: 'business_owner' as 'business_owner' | 'admin' | 'professional',
+    business_id: '',
+    status: 'active' as 'active' | 'inactive'
   });
 
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Maria Silva',
-      email: 'maria@email.com',
-      phone: '(11) 99999-9999',
-      type: 'Business Owner',
-      business: 'Salão Bella Vista',
-      status: 'Ativo',
-      createdAt: '15/12/2024',
-      lastLogin: '22/12/2024'
-    },
-    {
-      id: '2',
-      name: 'João Santos',
-      email: 'joao@email.com',
-      phone: '(11) 88888-8888',
-      type: 'Business Owner',
-      business: 'Barbearia do João',
-      status: 'Ativo',
-      createdAt: '10/12/2024',
-      lastLogin: '21/12/2024'
-    },
-    {
-      id: '3',
-      name: 'Ana Costa',
-      email: 'ana@email.com',
-      phone: '(11) 77777-7777',
-      type: 'Professional',
-      business: 'Salão Bella Vista',
-      status: 'Ativo',
-      createdAt: '05/12/2024',
-      lastLogin: '22/12/2024'
-    },
-    {
-      id: '4',
-      name: 'Carlos Lima',
-      email: 'carlos@email.com',
-      phone: '(11) 66666-6666',
-      type: 'Business Owner',
-      business: 'Studio Hair',
-      status: 'Pendente',
-      createdAt: '20/12/2024',
-      lastLogin: 'Nunca'
-    },
-    {
-      id: '5',
-      name: 'Patricia Oliveira',
-      email: 'patricia@email.com',
-      phone: '(11) 55555-5555',
-      type: 'Client',
-      business: '-',
-      status: 'Ativo',
-      createdAt: '18/12/2024',
-      lastLogin: '22/12/2024'
-    }
-  ]);
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Calculate totals
+  const totalUsers = users.length;
+  const businessOwners = users.filter(u => u.role === 'business_owner').length;
+  const totalProfessionals = professionals.length;
+  const clients = totalUsers - businessOwners; // Simplified calculation
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingUser) {
-      setUsers(users.map(user => 
-        user.id === editingUser.id 
-          ? { ...user, ...formData, lastLogin: new Date().toLocaleDateString('pt-BR') }
-          : user
-      ));
+    try {
+      if (editingUser) {
+        console.log('Updating user:', editingUser.id, formData);
+        const { error } = await supabase
+          .from('users')
+          .update(formData)
+          .eq('id', editingUser.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Usuário atualizado",
+          description: "As informações do usuário foram atualizadas com sucesso.",
+        });
+      } else {
+        console.log('Creating user:', formData);
+        const { error } = await supabase
+          .from('users')
+          .insert([formData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Usuário criado",
+          description: "O novo usuário foi criado com sucesso.",
+        });
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      resetForm();
+    } catch (error) {
+      console.error('Error saving user:', error);
       toast({
-        title: "Usuário atualizado",
-        description: "As informações do usuário foram atualizadas com sucesso.",
-      });
-    } else {
-      const newUser: User = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date().toLocaleDateString('pt-BR'),
-        lastLogin: 'Nunca'
-      };
-      setUsers([...users, newUser]);
-      toast({
-        title: "Usuário criado",
-        description: "O novo usuário foi criado com sucesso.",
+        title: "Erro",
+        description: "Erro ao salvar usuário. Tente novamente.",
+        variant: "destructive"
       });
     }
-    
-    resetForm();
   };
 
-  const handleEdit = (user: User) => {
+  const handleEdit = (user: any) => {
     setEditingUser(user);
     setFormData({
       name: user.name,
       email: user.email,
-      phone: user.phone,
-      type: user.type,
-      business: user.business,
+      phone: user.phone || '',
+      role: user.role,
+      business_id: user.business_id || '',
       status: user.status
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId));
-    toast({
-      title: "Usuário excluído",
-      description: "O usuário foi removido com sucesso.",
-    });
+  const handleDelete = async (userId: string) => {
+    try {
+      console.log('Deleting user:', userId);
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast({
+        title: "Usuário excluído",
+        description: "O usuário foi removido com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir usuário. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const resetForm = () => {
@@ -150,45 +131,72 @@ const UsersManagement = () => {
       name: '',
       email: '',
       phone: '',
-      type: 'Client',
-      business: '',
-      status: 'Ativo'
+      role: 'business_owner',
+      business_id: '',
+      status: 'active'
     });
     setEditingUser(null);
     setIsDialogOpen(false);
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.business.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Ativo':
+      case 'active':
         return 'bg-green-100 text-green-800';
-      case 'Pendente':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Inativo':
+      case 'inactive':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Business Owner':
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin':
         return 'bg-purple-100 text-purple-800';
-      case 'Professional':
+      case 'business_owner':
         return 'bg-blue-100 text-blue-800';
-      case 'Client':
-        return 'bg-gray-100 text-gray-800';
+      case 'professional':
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Administrador';
+      case 'business_owner':
+        return 'Proprietário';
+      case 'professional':
+        return 'Profissional';
+      default:
+        return role;
+    }
+  };
+
+  const getBusinessName = (businessId: string) => {
+    const business = businesses.find(b => b.id === businessId);
+    return business?.name || '-';
+  };
+
+  const isLoading = usersLoading || businessesLoading || professionalsLoading;
+
+  if (usersError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center">
+              <p className="text-red-600">Erro ao carregar usuários: {usersError.message}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -209,7 +217,9 @@ const UsersManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                    <p className="text-2xl font-bold text-gray-900">8,932</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalUsers.toLocaleString()}
+                    </p>
                   </div>
                   <Users className="w-8 h-8 text-blue-600" />
                 </div>
@@ -221,7 +231,9 @@ const UsersManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Proprietários</p>
-                    <p className="text-2xl font-bold text-purple-600">1,247</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : businessOwners.toLocaleString()}
+                    </p>
                   </div>
                   <Building className="w-8 h-8 text-purple-600" />
                 </div>
@@ -233,7 +245,9 @@ const UsersManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Profissionais</p>
-                    <p className="text-2xl font-bold text-blue-600">2,156</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalProfessionals.toLocaleString()}
+                    </p>
                   </div>
                   <Users className="w-8 h-8 text-blue-600" />
                 </div>
@@ -245,7 +259,9 @@ const UsersManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Clientes</p>
-                    <p className="text-2xl font-bold text-green-600">5,529</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : clients.toLocaleString()}
+                    </p>
                   </div>
                   <Users className="w-8 h-8 text-green-600" />
                 </div>
@@ -311,32 +327,38 @@ const UsersManagement = () => {
                           id="phone"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          required
                         />
                       </div>
                       
                       <div>
-                        <Label htmlFor="type">Tipo de Usuário</Label>
-                        <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value as any})}>
+                        <Label htmlFor="role">Tipo de Usuário</Label>
+                        <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value as any})}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Client">Cliente</SelectItem>
-                            <SelectItem value="Professional">Profissional</SelectItem>
-                            <SelectItem value="Business Owner">Proprietário</SelectItem>
+                            <SelectItem value="business_owner">Proprietário</SelectItem>
+                            <SelectItem value="professional">Profissional</SelectItem>
+                            <SelectItem value="admin">Administrador</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       
                       <div>
-                        <Label htmlFor="business">Negócio</Label>
-                        <Input
-                          id="business"
-                          value={formData.business}
-                          onChange={(e) => setFormData({...formData, business: e.target.value})}
-                          placeholder="Nome do negócio (se aplicável)"
-                        />
+                        <Label htmlFor="business_id">Negócio</Label>
+                        <Select value={formData.business_id} onValueChange={(value) => setFormData({...formData, business_id: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um negócio (opcional)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Nenhum negócio</SelectItem>
+                            {businesses.map((business) => (
+                              <SelectItem key={business.id} value={business.id}>
+                                {business.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       <div>
@@ -346,9 +368,8 @@ const UsersManagement = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Ativo">Ativo</SelectItem>
-                            <SelectItem value="Inativo">Inativo</SelectItem>
-                            <SelectItem value="Pendente">Pendente</SelectItem>
+                            <SelectItem value="active">Ativo</SelectItem>
+                            <SelectItem value="inactive">Inativo</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -371,74 +392,82 @@ const UsersManagement = () => {
               <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Buscar por nome, email ou negócio..."
+                  placeholder="Buscar por nome ou email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
 
-              {/* Users Table */}
-              <div className="space-y-4">
-                {filteredUsers.map((user) => (
-                  <div key={user.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-2">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                            <Users className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
-                              <span className="flex items-center">
-                                <Mail className="w-3 h-3 mr-1" />
-                                {user.email}
-                              </span>
-                              <span className="flex items-center">
-                                <Phone className="w-3 h-3 mr-1" />
-                                {user.phone}
-                              </span>
+              {/* Users List */}
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredUsers.map((user) => (
+                    <div key={user.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4 mb-2">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                              <Users className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                <span className="flex items-center">
+                                  <Mail className="w-3 h-3 mr-1" />
+                                  {user.email}
+                                </span>
+                                {user.phone && (
+                                  <span className="flex items-center">
+                                    <Phone className="w-3 h-3 mr-1" />
+                                    {user.phone}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
+                          
+                          <div className="flex flex-wrap items-center gap-2 ml-14">
+                            <Badge className={getRoleColor(user.role)}>
+                              {getRoleLabel(user.role)}
+                            </Badge>
+                            <Badge className={getStatusColor(user.status)}>
+                              {user.status === 'active' ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                            {user.business_id && (
+                              <span className="text-sm text-gray-600">
+                                <Building className="w-3 h-3 inline mr-1" />
+                                {getBusinessName(user.business_id)}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="text-xs text-gray-500 mt-2 ml-14">
+                            Cadastrado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                          </div>
                         </div>
-                        
-                        <div className="flex flex-wrap items-center gap-2 ml-14">
-                          <Badge className={getTypeColor(user.type)}>
-                            {user.type}
-                          </Badge>
-                          <Badge className={getStatusColor(user.status)}>
-                            {user.status}
-                          </Badge>
-                          {user.business !== '-' && (
-                            <span className="text-sm text-gray-600">
-                              <Building className="w-3 h-3 inline mr-1" />
-                              {user.business}
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="text-xs text-gray-500 mt-2 ml-14">
-                          Cadastrado em: {user.createdAt} | Último login: {user.lastLogin}
-                        </div>
-                      </div>
 
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
-                          <Edit className="w-4 h-4 mr-1" />
-                          Editar
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => handleDelete(user.id)}>
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Excluir
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
+                            <Edit className="w-4 h-4 mr-1" />
+                            Editar
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => handleDelete(user.id)}>
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Excluir
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {filteredUsers.length === 0 && (
+              {!isLoading && filteredUsers.length === 0 && (
                 <div className="text-center py-8">
                   <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">Nenhum usuário encontrado</p>

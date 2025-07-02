@@ -1,35 +1,105 @@
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/calendar';
+import { BarChart3, TrendingUp, Download, Calendar, DollarSign, Users, Building, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, DollarSign, Users, Building, Download, Calendar } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
+import { useBusinesses } from '@/hooks/useBusinesses';
+import { useUsers } from '@/hooks/useUsers';
+import { useAppointments } from '@/hooks/useAppointments';
+import { usePlans } from '@/hooks/usePlans';
 
 const AdminReports = () => {
-  const platformRevenue = [
-    { month: 'Jan', revenue: 45000, businesses: 120 },
-    { month: 'Fev', revenue: 52000, businesses: 135 },
-    { month: 'Mar', revenue: 48000, businesses: 128 },
-    { month: 'Abr', revenue: 61000, businesses: 145 },
-    { month: 'Mai', revenue: 68000, businesses: 158 },
-    { month: 'Jun', revenue: 75000, businesses: 172 },
-  ];
+  const [reportType, setReportType] = useState('revenue');
+  const [dateRange, setDateRange] = useState('last30days');
+  
+  const { data: businesses = [], isLoading: businessesLoading } = useBusinesses();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+  const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments();
+  const { data: plans = [], isLoading: plansLoading } = usePlans();
 
-  const planDistribution = [
-    { name: 'Básico', value: 60, color: '#8884d8' },
-    { name: 'Premium', value: 30, color: '#82ca9d' },
-    { name: 'Enterprise', value: 10, color: '#ffc658' },
-  ];
+  const isLoading = businessesLoading || usersLoading || appointmentsLoading || plansLoading;
 
-  const businessGrowth = [
-    { month: 'Jan', new: 15, churned: 3 },
-    { month: 'Fev', new: 22, churned: 5 },
-    { month: 'Mar', new: 18, churned: 7 },
-    { month: 'Abr', new: 28, churned: 4 },
-    { month: 'Mai', new: 32, churned: 6 },
-    { month: 'Jun', new: 25, churned: 8 },
-  ];
+  // Calculate revenue data
+  const revenueData = appointments
+    .filter(apt => apt.status === 'completed')
+    .reduce((acc, apt) => {
+      const date = new Date(apt.appointment_date);
+      const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      const revenue = apt.services?.price || 0;
+      
+      acc[monthKey] = (acc[monthKey] || 0) + revenue;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const monthlyRevenueData = Object.entries(revenueData).map(([month, revenue]) => ({
+    month,
+    revenue
+  })).slice(-6); // Last 6 months
+
+  // Calculate business growth data
+  const businessGrowthData = businesses.reduce((acc, business) => {
+    const date = new Date(business.created_at);
+    const monthKey = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    
+    acc[monthKey] = (acc[monthKey] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const monthlyBusinessData = Object.entries(businessGrowthData).map(([month, count]) => ({
+    month,
+    businesses: count
+  })).slice(-6);
+
+  // Calculate plan distribution
+  const planDistribution = plans.map(plan => ({
+    name: plan.name,
+    value: plan.subscribers_count,
+    color: getRandomColor()
+  }));
+
+  function getRandomColor() {
+    const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  // Calculate metrics
+  const totalRevenue = Object.values(revenueData).reduce((sum, revenue) => sum + revenue, 0);
+  const totalBusinesses = businesses.length;
+  const activeBusinesses = businesses.filter(b => b.status === 'active').length;
+  const totalUsers = users.length;
+  const totalAppointments = appointments.length;
+  const completedAppointments = appointments.filter(apt => apt.status === 'completed').length;
+
+  const handleExportReport = () => {
+    const reportData = {
+      reportType,
+      dateRange,
+      totalRevenue,
+      totalBusinesses,
+      activeBusinesses,
+      totalUsers,
+      totalAppointments,
+      completedAppointments,
+      monthlyRevenueData,
+      monthlyBusinessData,
+      planDistribution,
+      generatedAt: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(reportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `relatorio-admin-${reportType}-${Date.now()}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -37,150 +107,226 @@ const AdminReports = () => {
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Relatórios da Plataforma</h1>
-              <p className="text-gray-600">Análise completa do desempenho da plataforma</p>
-            </div>
-            <div className="flex space-x-4">
-              <Select defaultValue="month">
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="week">Esta Semana</SelectItem>
-                  <SelectItem value="month">Este Mês</SelectItem>
-                  <SelectItem value="quarter">Trimestre</SelectItem>
-                  <SelectItem value="year">Ano</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Exportar
-              </Button>
-            </div>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Relatórios Administrativos</h1>
+            <p className="text-gray-600">Análise completa de dados e métricas da plataforma</p>
           </div>
 
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Receita Total</p>
-                    <p className="text-2xl font-bold text-green-600">R$ 75.2K</p>
-                    <p className="text-sm text-green-600">+18% vs mês anterior</p>
-                  </div>
-                  <DollarSign className="w-8 h-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Negócios Ativos</p>
-                    <p className="text-2xl font-bold text-blue-600">172</p>
-                    <p className="text-sm text-blue-600">+9% vs mês anterior</p>
-                  </div>
-                  <Building className="w-8 h-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Usuários Totais</p>
-                    <p className="text-2xl font-bold text-purple-600">8,952</p>
-                    <p className="text-sm text-purple-600">+15% vs mês anterior</p>
-                  </div>
-                  <Users className="w-8 h-8 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Crescimento</p>
-                    <p className="text-2xl font-bold text-orange-600">+18.5%</p>
-                    <p className="text-sm text-orange-600">vs mês anterior</p>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Receita da Plataforma</CardTitle>
-                <CardDescription>Evolução da receita nos últimos 6 meses</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={platformRevenue}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`R$ ${value}`, 'Receita']} />
-                    <Line type="monotone" dataKey="revenue" stroke="#8884d8" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Distribuição de Planos</CardTitle>
-                <CardDescription>Planos mais populares</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={planDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {planDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-0 shadow-lg">
+          {/* Filters */}
+          <Card className="border-0 shadow-lg mb-8">
             <CardHeader>
-              <CardTitle>Crescimento de Negócios</CardTitle>
-              <CardDescription>Novos negócios vs. cancelamentos por mês</CardDescription>
+              <CardTitle className="flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+                Filtros de Relatório
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={businessGrowth}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="new" fill="#82ca9d" name="Novos" />
-                  <Bar dataKey="churned" fill="#ff7300" name="Cancelados" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Relatório</label>
+                  <Select value={reportType} onValueChange={setReportType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="revenue">Receita</SelectItem>
+                      <SelectItem value="growth">Crescimento</SelectItem>
+                      <SelectItem value="plans">Planos</SelectItem>
+                      <SelectItem value="users">Usuários</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                  <Select value={dateRange} onValueChange={setDateRange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="last7days">Últimos 7 dias</SelectItem>
+                      <SelectItem value="last30days">Últimos 30 dias</SelectItem>
+                      <SelectItem value="last3months">Últimos 3 meses</SelectItem>
+                      <SelectItem value="last6months">Últimos 6 meses</SelectItem>
+                      <SelectItem value="lastyear">Último ano</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button onClick={handleExportReport} className="w-full">
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar Relatório
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <>
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Receita Total</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">+12% vs período anterior</p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Negócios Ativos</p>
+                        <p className="text-2xl font-bold text-gray-900">{activeBusinesses}</p>
+                        <p className="text-xs text-gray-500 mt-1">de {totalBusinesses} total</p>
+                      </div>
+                      <Building className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
+                        <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
+                        <p className="text-xs text-green-600 mt-1">+8% vs mês anterior</p>
+                      </div>
+                      <Users className="w-8 h-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Agendamentos</p>
+                        <p className="text-2xl font-bold text-gray-900">{completedAppointments}</p>
+                        <p className="text-xs text-gray-500 mt-1">de {totalAppointments} total</p>
+                      </div>
+                      <Calendar className="w-8 h-8 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                      Receita Mensal
+                    </CardTitle>
+                    <CardDescription>
+                      Evolução da receita nos últimos meses
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={monthlyRevenueData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Receita']} />
+                        <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Building className="w-5 h-5 mr-2 text-blue-600" />
+                      Crescimento de Negócios
+                    </CardTitle>
+                    <CardDescription>
+                      Novos negócios cadastrados por mês
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={monthlyBusinessData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="businesses" fill="#3b82f6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Plan Distribution */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
+                    Distribuição de Planos
+                  </CardTitle>
+                  <CardDescription>
+                    Quantidade de assinantes por plano
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={planDistribution}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {planDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    
+                    <div className="space-y-4">
+                      {planDistribution.map((plan, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center">
+                            <div 
+                              className="w-4 h-4 rounded-full mr-3"
+                              style={{ backgroundColor: plan.color }}
+                            />
+                            <span className="font-medium">{plan.name}</span>
+                          </div>
+                          <span className="text-gray-600">{plan.value} assinantes</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </main>
     </div>
