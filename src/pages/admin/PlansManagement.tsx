@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,6 @@ const PlansManagement = () => {
     features: '',
     max_professionals: 0,
     max_businesses: 1,
-    max_stores: 1,
     commission_percentage: 0,
     is_active: true
   });
@@ -46,7 +44,6 @@ const PlansManagement = () => {
           features: formData.features.split('\n').filter(f => f.trim()),
           max_professionals: formData.max_professionals,
           max_businesses: formData.max_businesses,
-          max_stores: formData.max_stores,
           commission_percentage: formData.commission_percentage,
           is_active: formData.is_active
         }]);
@@ -80,7 +77,6 @@ const PlansManagement = () => {
       features: Array.isArray(plan.features) ? plan.features.join('\n') : '',
       max_professionals: plan.max_professionals,
       max_businesses: plan.max_businesses,
-      max_stores: plan.max_stores || 1,
       commission_percentage: plan.commission_percentage || 0,
       is_active: plan.is_active
     });
@@ -101,7 +97,6 @@ const PlansManagement = () => {
           features: formData.features.split('\n').filter(f => f.trim()),
           max_professionals: formData.max_professionals,
           max_businesses: formData.max_businesses,
-          max_stores: formData.max_stores,
           commission_percentage: formData.commission_percentage,
           is_active: formData.is_active
         })
@@ -191,7 +186,6 @@ const PlansManagement = () => {
       features: '',
       max_professionals: 0,
       max_businesses: 1,
-      max_stores: 1,
       commission_percentage: 0,
       is_active: true
     });
@@ -312,13 +306,13 @@ const PlansManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="maxStores">Filiais/Lojas</Label>
+                      <Label htmlFor="maxBusinesses">Negócios</Label>
                       <Input
-                        id="maxStores"
+                        id="maxBusinesses"
                         type="number"
-                        placeholder="3"
-                        value={formData.max_stores}
-                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
+                        placeholder="1"
+                        value={formData.max_businesses}
+                        onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value)})}
                         required
                       />
                     </div>
@@ -509,12 +503,12 @@ const PlansManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="editMaxStores">Filiais/Lojas</Label>
+                      <Label htmlFor="editMaxBusinesses">Negócios</Label>
                       <Input
-                        id="editMaxStores"
+                        id="editMaxBusinesses"
                         type="number"
-                        value={formData.max_stores}
-                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
+                        value={formData.max_businesses}
+                        onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value)})}
                         required
                       />
                     </div>
