@@ -2,11 +2,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Clock, Users, BarChart3, Smartphone, Shield, CheckCircle, Star } from 'lucide-react';
+import { Calendar, Clock, Users, BarChart3, Smartphone, Shield, CheckCircle, Star, Loader2 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { usePlans } from '@/hooks/usePlans';
 
 const Home = () => {
+  const { data: plansData = [], isLoading: plansLoading, error: plansError } = usePlans();
   const features = [
     {
       icon: Calendar,
@@ -61,48 +63,52 @@ const Home = () => {
     },
   ];
 
-  const plans = [
-    {
-      name: 'Starter',
-      price: 'R$ 49',
+  // Transform database plans to match UI format
+  const plans = plansData
+    .filter(plan => plan.is_active)
+    .map((plan, index) => ({
+      name: plan.name,
+      price: `R$ ${plan.price}`,
       period: '/mês',
-      description: 'Ideal para profissionais autônomos',
-      features: [
-        '1 profissional',
-        'Agendamentos ilimitados',
-        'Landing page personalizada',
-        'Relatórios básicos',
-        'Suporte por email',
-      ],
-    },
-    {
-      name: 'Professional',
-      price: 'R$ 99',
-      period: '/mês',
-      description: 'Perfeito para pequenos salões',
-      features: [
-        'Até 5 profissionais',
-        'Múltiplas filiais',
-        'Relatórios avançados',
-        'Integração WhatsApp',
-        'Suporte prioritário',
-      ],
-      popular: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'R$ 199',
-      period: '/mês',
-      description: 'Para redes e grandes estabelecimentos',
-      features: [
-        'Profissionais ilimitados',
-        'Filiais ilimitadas',
-        'API personalizada',
-        'Treinamento dedicado',
-        'Suporte 24/7',
-      ],
-    },
-  ];
+      description: getDescription(plan.name),
+      features: Array.isArray(plan.features) ? plan.features as string[] : [],
+      popular: index === 1 // Mark the second plan as popular
+    }));
+
+  function getDescription(planName: string) {
+    const descriptions: { [key: string]: string } = {
+      'Básico': 'Ideal para profissionais autônomos',
+      'Premium': 'Perfeito para pequenos salões',
+      'Enterprise': 'Para redes e grandes estabelecimentos'
+    };
+    return descriptions[planName] || 'Plano personalizado para seu negócio';
+  }
+
+  // Show loading state
+  if (plansLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (plansError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navbar />
+        <div className="text-center p-8">
+          <p className="text-red-600">Erro ao carregar planos. Tente novamente.</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">

@@ -130,6 +130,7 @@ export type Database = {
           is_active: boolean
           max_businesses: number
           max_professionals: number
+          max_stores: number
           name: string
           price: number
           subscribers_count: number
@@ -143,6 +144,7 @@ export type Database = {
           is_active?: boolean
           max_businesses: number
           max_professionals: number
+          max_stores?: number
           name: string
           price: number
           subscribers_count?: number
@@ -156,6 +158,7 @@ export type Database = {
           is_active?: boolean
           max_businesses?: number
           max_professionals?: number
+          max_stores?: number
           name?: string
           price?: number
           subscribers_count?: number
