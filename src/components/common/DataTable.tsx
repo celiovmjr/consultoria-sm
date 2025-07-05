@@ -28,81 +28,84 @@ const DataTable = ({
   deleteConfirmMessage = "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
 }: DataTableProps) => {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((column) => (
-            <TableHead key={column.key}>{column.label}</TableHead>
-          ))}
-          {showActions && <TableHead>Ações</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((row, index) => (
-          <TableRow key={row.id || index}>
-            {columns.map((column) => (
-              <TableCell key={column.key}>
-                {column.render ? column.render(row[column.key], row) : row[column.key]}
-              </TableCell>
-            ))}
-            {showActions && (
-              <TableCell>
-                <div className="flex space-x-2">
-                  {onEdit && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(row)}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Editar
-                    </Button>
-                  )}
-                  {onDelete && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {deleteConfirmMessage}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => onDelete(row)} 
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </div>
-              </TableCell>
-            )}
-          </TableRow>
-        ))}
-        {data.length === 0 && (
+    <div className="w-full overflow-x-auto border rounded-lg">
+      <Table className="min-w-[600px]">
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={columns.length + (showActions ? 1 : 0)} className="text-center py-8 text-gray-500">
-              Nenhum item encontrado
-            </TableCell>
+            {columns.map((column) => (
+              <TableHead key={column.key} className="whitespace-nowrap">{column.label}</TableHead>
+            ))}
+            {showActions && <TableHead className="whitespace-nowrap">Ações</TableHead>}
           </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((row, index) => (
+            <TableRow key={row.id || index}>
+              {columns.map((column) => (
+                <TableCell key={column.key} className="whitespace-nowrap">
+                  {column.render ? column.render(row[column.key], row) : row[column.key]}
+                </TableCell>
+              ))}
+              {showActions && (
+                <TableCell className="whitespace-nowrap">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {onEdit && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(row)}
+                        className="text-xs"
+                      >
+                        <Edit className="w-3 h-3 sm:mr-1" />
+                        <span className="hidden sm:inline">Editar</span>
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50 text-xs"
+                          >
+                            <Trash2 className="w-3 h-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Excluir</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {deleteConfirmMessage}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => onDelete(row)} 
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+          {data.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={columns.length + (showActions ? 1 : 0)} className="text-center py-8 text-gray-500">
+                Nenhum item encontrado
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

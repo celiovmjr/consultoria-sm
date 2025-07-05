@@ -234,20 +234,20 @@ const PlansManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       <AdminSidebar />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Planos</h1>
-              <p className="text-gray-600">Gerencie os planos de assinatura da plataforma</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gerenciamento de Planos</h1>
+              <p className="text-gray-600 text-sm md:text-base">Gerencie os planos de assinatura da plataforma</p>
             </div>
           </div>
 
           {/* Search */}
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -260,15 +260,15 @@ const PlansManagement = () => {
           </div>
 
           {/* Create Button */}
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => resetForm()}>
+                <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto" onClick={() => resetForm()}>
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Plano
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md mx-4 sm:mx-auto">
                 <DialogHeader>
                   <DialogTitle>Criar Novo Plano</DialogTitle>
                   <DialogDescription>
@@ -344,11 +344,11 @@ const PlansManagement = () => {
                       rows={4}
                     />
                   </div>
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={resetForm}>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">
                       Cancelar
                     </Button>
-                    <Button type="submit">Criar Plano</Button>
+                    <Button type="submit" className="w-full sm:w-auto">Criar Plano</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -356,63 +356,65 @@ const PlansManagement = () => {
           </div>
 
           {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {filteredPlans.map(plan => (
               <Card key={plan.id} className="border-0 shadow-lg">
-                <CardHeader>
+                <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <CreditCard className="w-5 h-5 mr-2 text-blue-600" />
+                    <CardTitle className="flex items-center text-lg">
+                      <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
                       {plan.name}
                     </CardTitle>
-                    <Badge variant={plan.is_active ? "default" : "secondary"}>
+                    <Badge variant={plan.is_active ? "default" : "secondary"} className="text-xs">
                       {plan.is_active ? 'Ativo' : 'Inativo'}
                     </Badge>
                   </div>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     {plan.subscribers_count} assinantes ativos
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-blue-600">R$ {plan.price}</p>
-                      <p className="text-sm text-gray-600">por mês</p>
+                      <p className="text-2xl md:text-3xl font-bold text-blue-600">R$ {plan.price}</p>
+                      <p className="text-xs md:text-sm text-gray-600">por mês</p>
                     </div>
                     
                     {/* Plan Limits */}
                     <div className="grid grid-cols-3 gap-2 text-center py-3 bg-gray-50 rounded-lg">
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Users className="w-4 h-4 text-blue-600" />
+                          <Users className="w-3 h-3 md:w-4 md:h-4 text-blue-600" />
                         </div>
-                        <p className="text-sm font-medium">{plan.max_professionals === -1 ? '∞' : plan.max_professionals}</p>
+                        <p className="text-xs md:text-sm font-medium">{plan.max_professionals === -1 ? '∞' : plan.max_professionals}</p>
                         <p className="text-xs text-gray-500">Prof.</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Store className="w-4 h-4 text-green-600" />
+                          <Store className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
                         </div>
-                        <p className="text-sm font-medium">{plan.max_stores === -1 ? '∞' : plan.max_stores}</p>
+                        <p className="text-xs md:text-sm font-medium">{plan.max_stores === -1 ? '∞' : plan.max_stores}</p>
                         <p className="text-xs text-gray-500">Lojas</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Percent className="w-4 h-4 text-orange-600" />
+                          <Percent className="w-3 h-3 md:w-4 md:h-4 text-orange-600" />
                         </div>
-                        <p className="text-sm font-medium">{plan.commission_percentage || 0}%</p>
+                        <p className="text-xs md:text-sm font-medium">{plan.commission_percentage || 0}%</p>
                         <p className="text-xs text-gray-500">Comissão</p>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Recursos inclusos:</h4>
-                      {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, index: number) => (
-                        <div key={index} className="flex items-center text-sm text-gray-600">
-                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                          {feature}
-                        </div>
-                      ))}
+                      <h4 className="font-medium text-xs md:text-sm">Recursos inclusos:</h4>
+                      <div className="max-h-24 overflow-y-auto">
+                        {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, index: number) => (
+                          <div key={index} className="flex items-center text-xs md:text-sm text-gray-600 mb-1">
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
+                            <span className="line-clamp-1">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="pt-4 border-t space-y-2">
@@ -420,38 +422,38 @@ const PlansManagement = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEditPlan(plan)}
-                        className="w-full"
+                        className="w-full text-xs md:text-sm"
                       >
-                        <Edit className="w-4 h-4 mr-2" />
+                        <Edit className="w-3 h-3 md:w-4 md:h-4 mr-2" />
                         Editar Plano
                       </Button>
                       
-                      <div className="flex space-x-2">
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleToggleStatus(plan.id, plan.is_active)}
-                          className="flex-1"
+                          className="flex-1 text-xs md:text-sm"
                         >
                           {plan.is_active ? 'Desativar' : 'Ativar'}
                         </Button>
                         
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="text-red-600">
-                              <Trash2 className="w-4 h-4" />
+                            <Button variant="outline" size="sm" className="text-red-600 px-2">
+                              <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="mx-4">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
                               <AlertDialogDescription>
                                 Tem certeza que deseja excluir o plano "{plan.name}"? Esta ação não pode ser desfeita.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeletePlan(plan.id)} className="bg-red-600 hover:bg-red-700">
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                              <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeletePlan(plan.id)} className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
                                 Excluir
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -467,7 +469,7 @@ const PlansManagement = () => {
 
           {/* Edit Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md mx-4 sm:mx-auto">
               <DialogHeader>
                 <DialogTitle>Editar Plano</DialogTitle>
                 <DialogDescription>
@@ -538,11 +540,11 @@ const PlansManagement = () => {
                       rows={4}
                     />
                   </div>
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={resetForm}>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">
                       Cancelar
                     </Button>
-                    <Button type="submit">Salvar Alterações</Button>
+                    <Button type="submit" className="w-full sm:w-auto">Salvar Alterações</Button>
                   </DialogFooter>
                 </form>
               )}

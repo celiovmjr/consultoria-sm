@@ -69,29 +69,29 @@ const BusinessDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       <BusinessSidebar />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Visão geral do seu negócio</p>
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 text-sm md:text-base">Visão geral do seu negócio</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             {stats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <Card key={stat.title} className="border-0 shadow-lg">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                        <p className="text-sm text-gray-500">{stat.change}</p>
+                        <p className="text-xs md:text-sm font-medium text-gray-600">{stat.title}</p>
+                        <p className="text-xl md:text-2xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-xs text-gray-500">{stat.change}</p>
                       </div>
-                      <Icon className={`w-8 h-8 ${stat.color}`} />
+                      <Icon className={`w-6 h-6 md:w-8 md:h-8 ${stat.color}`} />
                     </div>
                   </CardContent>
                 </Card>
@@ -99,32 +99,32 @@ const BusinessDashboard = () => {
             })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                <CardTitle className="flex items-center text-lg">
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
                   Agendamentos de Hoje
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   {todayAppointments.length} agendamentos para hoje
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {todayAppointments.map((appointment, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                          <Clock className="w-5 h-5 text-blue-600" />
+                    <div key={index} className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3 md:space-x-4 min-w-0 flex-1">
+                        <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex-shrink-0">
+                          <Clock className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                         </div>
-                        <div>
-                          <div className="font-medium">{appointment.time}</div>
-                          <div className="text-sm text-gray-600">{appointment.client}</div>
-                          <div className="text-sm text-gray-500">{appointment.service} - {appointment.professional}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-sm md:text-base">{appointment.time}</div>
+                          <div className="text-xs md:text-sm text-gray-600 truncate">{appointment.client}</div>
+                          <div className="text-xs text-gray-500 truncate">{appointment.service} - {appointment.professional}</div>
                         </div>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                      <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ml-2 flex-shrink-0 ${getStatusColor(appointment.status)}`}>
                         {getStatusText(appointment.status)}
                       </div>
                     </div>
@@ -135,29 +135,29 @@ const BusinessDashboard = () => {
 
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                <CardTitle className="flex items-center text-lg">
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 mr-2 text-green-600" />
                   Resumo Semanal
                 </CardTitle>
-                <CardDescription>Desempenho dos últimos 7 dias</CardDescription>
+                <CardDescription className="text-sm">Desempenho dos últimos 7 dias</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Agendamentos Realizados</span>
-                    <span className="text-green-600 font-semibold">156</span>
+                    <span className="text-xs md:text-sm font-medium">Agendamentos Realizados</span>
+                    <span className="text-green-600 font-semibold text-sm md:text-base">156</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Receita Gerada</span>
-                    <span className="text-green-600 font-semibold">R$ 8.750</span>
+                    <span className="text-xs md:text-sm font-medium">Receita Gerada</span>
+                    <span className="text-green-600 font-semibold text-sm md:text-base">R$ 8.750</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Novos Clientes</span>
-                    <span className="text-blue-600 font-semibold">12</span>
+                    <span className="text-xs md:text-sm font-medium">Novos Clientes</span>
+                    <span className="text-blue-600 font-semibold text-sm md:text-base">12</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Taxa de Comparecimento</span>
-                    <span className="text-purple-600 font-semibold">92%</span>
+                    <span className="text-xs md:text-sm font-medium">Taxa de Comparecimento</span>
+                    <span className="text-purple-600 font-semibold text-sm md:text-base">92%</span>
                   </div>
                 </div>
               </CardContent>
