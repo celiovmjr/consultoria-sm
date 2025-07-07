@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Calendar, User, Clock, BarChart3, Menu, X } from 'lucide-react';
@@ -31,22 +30,22 @@ const ProfessionalSidebar = () => {
     {
       title: 'Minha Agenda',
       icon: Calendar,
-      href: '/professional/agenda',
+      href: '/profissional/dashboard',
     },
     {
       title: 'Histórico',
       icon: BarChart3,
-      href: '/professional/historico',
+      href: '/profissional/historico',
     },
     {
       title: 'Indisponibilidades',
       icon: Clock,
-      href: '/professional/indisponibilidades',
+      href: '/profissional/indisponibilidade',
     },
     {
       title: 'Perfil',
       icon: User,
-      href: '/professional/perfil',
+      href: '/profissional/perfil',
     },
   ];
 
