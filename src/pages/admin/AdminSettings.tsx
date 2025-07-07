@@ -249,7 +249,7 @@ const AdminSettings = () => {
       
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
+          <div className="mb-8 pt-16 md:pt-0">
             <h1 className="text-3xl font-bold text-gray-900">Configurações do Sistema</h1>
             <p className="text-gray-600">Gerencie as configurações gerais da plataforma</p>
           </div>

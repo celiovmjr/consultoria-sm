@@ -292,7 +292,7 @@ const BusinessManagement = () => {
       
       <main className="flex-1 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6 lg:mb-8">
+          <div className="mb-6 lg:mb-8 pt-16 lg:pt-0">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Gerenciamento de Negócios</h1>
             <p className="text-muted-foreground text-sm lg:text-base">Administre todos os negócios da plataforma</p>
           </div>

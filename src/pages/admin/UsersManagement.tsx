@@ -205,7 +205,7 @@ const UsersManagement = () => {
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 pt-16 md:pt-0">
             <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Usuários</h1>
             <p className="text-muted-foreground">Administre todos os usuários da plataforma</p>
           </div>
