@@ -8,231 +8,111 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Mail, Bell, Shield, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useSystemSettings, PlatformSettings, EmailSettings, NotificationSettings } from '@/hooks/useSystemSettings';
 
 const AdminSettings = () => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  
-  const [platformSettings, setPlatformSettings] = useState({
+  const {
+    platformSettings,
+    emailSettings,
+    notificationSettings,
+    isLoading,
+    isSaving,
+    error,
+    updatePlatformSettings,
+    updateEmailSettings,
+    updateNotificationSettings,
+    generateBackup,
+    resetSystemSettings,
+    clearCache,
+  } = useSystemSettings();
+
+  // Local state for form inputs
+  const [localPlatformSettings, setLocalPlatformSettings] = useState<PlatformSettings>({
     name: 'Agenda.AI',
     description: 'Plataforma completa para gestão de agendamentos',
     supportEmail: 'suporte@agenda.ai',
     maintenanceMode: false,
     allowRegistrations: true,
-    requireEmailVerification: true
+    requireEmailVerification: true,
   });
 
-  const [emailSettings, setEmailSettings] = useState({
+  const [localEmailSettings, setLocalEmailSettings] = useState<EmailSettings>({
     smtpHost: 'smtp.gmail.com',
     smtpPort: '587',
     smtpUsername: 'sistema@agenda.ai',
     smtpPassword: '',
     fromName: 'Agenda.AI',
-    fromEmail: 'noreply@agenda.ai'
+    fromEmail: 'noreply@agenda.ai',
   });
 
-  const [notifications, setNotifications] = useState({
+  const [localNotifications, setLocalNotifications] = useState<NotificationSettings>({
     newBusinessSignup: true,
     paymentAlerts: true,
     systemUpdates: true,
     maintenanceAlerts: true,
-    securityAlerts: true
+    securityAlerts: true,
   });
 
-  // Load settings on component mount
+  // Sync local state with loaded data
   useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    setIsLoading(true);
-    try {
-      // In a real implementation, you would load settings from a settings table
-      // For now, we'll use localStorage as a simple storage mechanism
-      const savedPlatformSettings = localStorage.getItem('platformSettings');
-      const savedEmailSettings = localStorage.getItem('emailSettings');
-      const savedNotifications = localStorage.getItem('notifications');
-
-      if (savedPlatformSettings) {
-        setPlatformSettings(JSON.parse(savedPlatformSettings));
-      }
-      if (savedEmailSettings) {
-        setEmailSettings(JSON.parse(savedEmailSettings));
-      }
-      if (savedNotifications) {
-        setNotifications(JSON.parse(savedNotifications));
-      }
-
-      console.log('Settings loaded successfully');
-    } catch (error) {
-      console.error('Error loading settings:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar configurações.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+    if (platformSettings) {
+      setLocalPlatformSettings(platformSettings);
     }
-  };
+  }, [platformSettings]);
 
-  const saveSettings = async (settingsType: string, settings: any) => {
-    setIsSaving(true);
-    try {
-      // In a real implementation, you would save to a settings table in Supabase
-      // For now, we'll use localStorage
-      localStorage.setItem(settingsType, JSON.stringify(settings));
-      
-      console.log(`${settingsType} saved:`, settings);
-      
-      toast({
-        title: "Configurações salvas",
-        description: "As configurações foram atualizadas com sucesso.",
-      });
-    } catch (error) {
-      console.error(`Error saving ${settingsType}:`, error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar configurações. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
+  useEffect(() => {
+    if (emailSettings) {
+      setLocalEmailSettings(emailSettings);
     }
-  };
+  }, [emailSettings]);
+
+  useEffect(() => {
+    if (notificationSettings) {
+      setLocalNotifications(notificationSettings);
+    }
+  }, [notificationSettings]);
 
   const handlePlatformSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveSettings('platformSettings', platformSettings);
+    updatePlatformSettings(localPlatformSettings);
   };
 
   const handleEmailSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveSettings('emailSettings', emailSettings);
+    updateEmailSettings(localEmailSettings);
   };
 
   const handleNotificationsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveSettings('notifications', notifications);
+    updateNotificationSettings(localNotifications);
   };
 
   const handleSystemReset = async () => {
     if (window.confirm('Tem certeza que deseja resetar as configurações do sistema? Esta ação não pode ser desfeita.')) {
-      try {
-        localStorage.removeItem('platformSettings');
-        localStorage.removeItem('emailSettings');
-        localStorage.removeItem('notifications');
-        
-        // Reset to default values
-        setPlatformSettings({
-          name: 'Agenda.AI',
-          description: 'Plataforma completa para gestão de agendamentos',
-          supportEmail: 'suporte@agenda.ai',
-          maintenanceMode: false,
-          allowRegistrations: true,
-          requireEmailVerification: true
-        });
-        
-        setEmailSettings({
-          smtpHost: 'smtp.gmail.com',
-          smtpPort: '587',
-          smtpUsername: 'sistema@agenda.ai',
-          smtpPassword: '',
-          fromName: 'Agenda.AI',
-          fromEmail: 'noreply@agenda.ai'
-        });
-        
-        setNotifications({
-          newBusinessSignup: true,
-          paymentAlerts: true,
-          systemUpdates: true,
-          maintenanceAlerts: true,
-          securityAlerts: true
-        });
-
-        toast({
-          title: "Sistema resetado",
-          description: "As configurações foram restauradas para os valores padrão.",
-        });
-      } catch (error) {
-        console.error('Error resetting system:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao resetar configurações.",
-          variant: "destructive"
-        });
-      }
+      await resetSystemSettings();
     }
   };
 
-  const handleClearCache = async () => {
-    try {
-      // Clear browser cache
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-      
-      // Clear localStorage cache items
-      const cacheKeys = Object.keys(localStorage).filter(key => key.includes('cache'));
-      cacheKeys.forEach(key => localStorage.removeItem(key));
-      
-      toast({
-        title: "Cache limpo",
-        description: "O cache da aplicação foi limpo com sucesso.",
-      });
-    } catch (error) {
-      console.error('Error clearing cache:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao limpar cache.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleGenerateBackup = async () => {
-    try {
-      const backupData = {
-        platformSettings,
-        emailSettings,
-        notifications,
-        timestamp: new Date().toISOString(),
-        version: '1.0'
-      };
-
-      const dataStr = JSON.stringify(backupData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `backup-configuracoes-${Date.now()}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-
-      toast({
-        title: "Backup gerado",
-        description: "O backup das configurações foi gerado com sucesso.",
-      });
-    } catch (error) {
-      console.error('Error generating backup:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao gerar backup.",
-        variant: "destructive"
-      });
-    }
-  };
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+        <AdminSidebar />
+        <main className="flex-1 p-4 lg:p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center">
+              <p className="text-destructive">Erro ao carregar configurações: {error.message}</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex flex-col lg:flex-row">
         <AdminSidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 lg:p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin" />
@@ -244,111 +124,117 @@ const AdminSettings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       <AdminSidebar />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 lg:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-8 pt-16 md:pt-0">
-            <h1 className="text-3xl font-bold text-gray-900">Configurações do Sistema</h1>
-            <p className="text-gray-600">Gerencie as configurações gerais da plataforma</p>
+          <div className="mb-6 lg:mb-8 pt-16 lg:pt-0">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Configurações do Sistema</h1>
+            <p className="text-muted-foreground text-sm lg:text-base">Gerencie as configurações gerais da plataforma</p>
           </div>
 
           <Tabs defaultValue="platform" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="platform" className="flex items-center">
-                <Settings className="w-4 h-4 mr-2" />
-                Plataforma
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
+              <TabsTrigger value="platform" className="flex items-center text-xs lg:text-sm">
+                <Settings className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                <span className="hidden sm:inline">Plataforma</span>
+                <span className="sm:hidden">Config</span>
               </TabsTrigger>
-              <TabsTrigger value="email" className="flex items-center">
-                <Mail className="w-4 h-4 mr-2" />
+              <TabsTrigger value="email" className="flex items-center text-xs lg:text-sm">
+                <Mail className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                 Email
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center">
-                <Bell className="w-4 h-4 mr-2" />
-                Notificações
+              <TabsTrigger value="notifications" className="flex items-center text-xs lg:text-sm">
+                <Bell className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                <span className="hidden sm:inline">Notificações</span>
+                <span className="sm:hidden">Notif</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center">
-                <Shield className="w-4 h-4 mr-2" />
-                Segurança
+              <TabsTrigger value="security" className="flex items-center text-xs lg:text-sm">
+                <Shield className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                <span className="hidden sm:inline">Segurança</span>
+                <span className="sm:hidden">Seg</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="platform">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
+              <Card className="border-border shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg lg:text-xl">
+                    <Settings className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
                     Configurações da Plataforma
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm lg:text-base">
                     Configure as informações básicas da plataforma
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handlePlatformSettingsSubmit} className="space-y-4">
+                  <form onSubmit={handlePlatformSettingsSubmit} className="space-y-4 lg:space-y-6">
                     <div>
-                      <Label htmlFor="platformName">Nome da Plataforma</Label>
+                      <Label htmlFor="platformName" className="text-sm lg:text-base">Nome da Plataforma</Label>
                       <Input
                         id="platformName"
-                        value={platformSettings.name}
-                        onChange={(e) => setPlatformSettings({...platformSettings, name: e.target.value})}
+                        value={localPlatformSettings.name}
+                        onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, name: e.target.value})}
                         required
+                        className="mt-1"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="platformDescription">Descrição</Label>
+                      <Label htmlFor="platformDescription" className="text-sm lg:text-base">Descrição</Label>
                       <Textarea
                         id="platformDescription"
-                        value={platformSettings.description}
-                        onChange={(e) => setPlatformSettings({...platformSettings, description: e.target.value})}
+                        value={localPlatformSettings.description}
+                        onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, description: e.target.value})}
                         rows={3}
+                        className="mt-1"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="supportEmail">Email de Suporte</Label>
+                      <Label htmlFor="supportEmail" className="text-sm lg:text-base">Email de Suporte</Label>
                       <Input
                         id="supportEmail"
                         type="email"
-                        value={platformSettings.supportEmail}
-                        onChange={(e) => setPlatformSettings({...platformSettings, supportEmail: e.target.value})}
+                        value={localPlatformSettings.supportEmail}
+                        onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, supportEmail: e.target.value})}
                         required
+                        className="mt-1"
                       />
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Modo de Manutenção</Label>
-                          <p className="text-sm text-gray-600">Bloquear acesso temporariamente</p>
+                    <div className="space-y-4 lg:space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Modo de Manutenção</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Bloquear acesso temporariamente</p>
                         </div>
                         <Switch
-                          checked={platformSettings.maintenanceMode}
-                          onCheckedChange={(checked) => setPlatformSettings({...platformSettings, maintenanceMode: checked})}
+                          checked={localPlatformSettings.maintenanceMode}
+                          onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, maintenanceMode: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Permitir Novos Cadastros</Label>
-                          <p className="text-sm text-gray-600">Habilitar registro de novos usuários</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Permitir Novos Cadastros</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Habilitar registro de novos usuários</p>
                         </div>
                         <Switch
-                          checked={platformSettings.allowRegistrations}
-                          onCheckedChange={(checked) => setPlatformSettings({...platformSettings, allowRegistrations: checked})}
+                          checked={localPlatformSettings.allowRegistrations}
+                          onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, allowRegistrations: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Verificação de Email</Label>
-                          <p className="text-sm text-gray-600">Exigir verificação de email no cadastro</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Verificação de Email</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Exigir verificação de email no cadastro</p>
                         </div>
                         <Switch
-                          checked={platformSettings.requireEmailVerification}
-                          onCheckedChange={(checked) => setPlatformSettings({...platformSettings, requireEmailVerification: checked})}
+                          checked={localPlatformSettings.requireEmailVerification}
+                          onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, requireEmailVerification: checked})}
                         />
                       </div>
                     </div>
@@ -363,80 +249,86 @@ const AdminSettings = () => {
             </TabsContent>
 
             <TabsContent value="email">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Mail className="w-5 h-5 mr-2 text-green-600" />
+              <Card className="border-border shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg lg:text-xl">
+                    <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-green-600" />
                     Configurações de Email
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm lg:text-base">
                     Configure o servidor SMTP para envio de emails
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleEmailSettingsSubmit} className="space-y-4">
+                  <form onSubmit={handleEmailSettingsSubmit} className="space-y-4 lg:space-y-6">
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                       <div>
-                        <Label htmlFor="smtpHost">Servidor SMTP</Label>
+                        <Label htmlFor="smtpHost" className="text-sm lg:text-base">Servidor SMTP</Label>
                         <Input
                           id="smtpHost"
-                          value={emailSettings.smtpHost}
-                          onChange={(e) => setEmailSettings({...emailSettings, smtpHost: e.target.value})}
+                          value={localEmailSettings.smtpHost}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, smtpHost: e.target.value})}
                           required
+                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="smtpPort">Porta</Label>
+                        <Label htmlFor="smtpPort" className="text-sm lg:text-base">Porta</Label>
                         <Input
                           id="smtpPort"
-                          value={emailSettings.smtpPort}
-                          onChange={(e) => setEmailSettings({...emailSettings, smtpPort: e.target.value})}
+                          value={localEmailSettings.smtpPort}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, smtpPort: e.target.value})}
                           required
+                          className="mt-1"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                       <div>
-                        <Label htmlFor="smtpUsername">Usuário</Label>
+                        <Label htmlFor="smtpUsername" className="text-sm lg:text-base">Usuário</Label>
                         <Input
                           id="smtpUsername"
-                          value={emailSettings.smtpUsername}
-                          onChange={(e) => setEmailSettings({...emailSettings, smtpUsername: e.target.value})}
+                          value={localEmailSettings.smtpUsername}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, smtpUsername: e.target.value})}
                           required
+                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="smtpPassword">Senha</Label>
+                        <Label htmlFor="smtpPassword" className="text-sm lg:text-base">Senha</Label>
                         <Input
                           id="smtpPassword"
                           type="password"
-                          value={emailSettings.smtpPassword}
-                          onChange={(e) => setEmailSettings({...emailSettings, smtpPassword: e.target.value})}
+                          value={localEmailSettings.smtpPassword}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, smtpPassword: e.target.value})}
                           placeholder="Nova senha SMTP"
+                          className="mt-1"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                       <div>
-                        <Label htmlFor="fromName">Nome do Remetente</Label>
+                        <Label htmlFor="fromName" className="text-sm lg:text-base">Nome do Remetente</Label>
                         <Input
                           id="fromName"
-                          value={emailSettings.fromName}
-                          onChange={(e) => setEmailSettings({...emailSettings, fromName: e.target.value})}
+                          value={localEmailSettings.fromName}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, fromName: e.target.value})}
                           required
+                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="fromEmail">Email do Remetente</Label>
+                        <Label htmlFor="fromEmail" className="text-sm lg:text-base">Email do Remetente</Label>
                         <Input
                           id="fromEmail"
                           type="email"
-                          value={emailSettings.fromEmail}
-                          onChange={(e) => setEmailSettings({...emailSettings, fromEmail: e.target.value})}
+                          value={localEmailSettings.fromEmail}
+                          onChange={(e) => setLocalEmailSettings({...localEmailSettings, fromEmail: e.target.value})}
                           required
+                          className="mt-1"
                         />
                       </div>
                     </div>
@@ -451,72 +343,72 @@ const AdminSettings = () => {
             </TabsContent>
 
             <TabsContent value="notifications">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="w-5 h-5 mr-2 text-purple-600" />
+              <Card className="border-border shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg lg:text-xl">
+                    <Bell className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-purple-600" />
                     Configurações de Notificações
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm lg:text-base">
                     Configure quando você deseja receber notificações
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleNotificationsSubmit} className="space-y-6">
+                  <form onSubmit={handleNotificationsSubmit} className="space-y-4 lg:space-y-6">
                     
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Novos Negócios</Label>
-                          <p className="text-sm text-gray-600">Notificar quando um novo negócio se cadastrar</p>
+                    <div className="space-y-4 lg:space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Novos Negócios</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Notificar quando um novo negócio se cadastrar</p>
                         </div>
                         <Switch
-                          checked={notifications.newBusinessSignup}
-                          onCheckedChange={(checked) => setNotifications({...notifications, newBusinessSignup: checked})}
+                          checked={localNotifications.newBusinessSignup}
+                          onCheckedChange={(checked) => setLocalNotifications({...localNotifications, newBusinessSignup: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Alertas de Pagamento</Label>
-                          <p className="text-sm text-gray-600">Notificar sobre problemas de pagamento</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Alertas de Pagamento</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Notificar sobre problemas de pagamento</p>
                         </div>
                         <Switch
-                          checked={notifications.paymentAlerts}
-                          onCheckedChange={(checked) => setNotifications({...notifications, paymentAlerts: checked})}
+                          checked={localNotifications.paymentAlerts}
+                          onCheckedChange={(checked) => setLocalNotifications({...localNotifications, paymentAlerts: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Atualizações do Sistema</Label>
-                          <p className="text-sm text-gray-600">Notificar sobre atualizações importantes</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Atualizações do Sistema</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Notificar sobre atualizações importantes</p>
                         </div>
                         <Switch
-                          checked={notifications.systemUpdates}
-                          onCheckedChange={(checked) => setNotifications({...notifications, systemUpdates: checked})}
+                          checked={localNotifications.systemUpdates}
+                          onCheckedChange={(checked) => setLocalNotifications({...localNotifications, systemUpdates: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Alertas de Manutenção</Label>
-                          <p className="text-sm text-gray-600">Notificar sobre manutenções programadas</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Alertas de Manutenção</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Notificar sobre manutenções programadas</p>
                         </div>
                         <Switch
-                          checked={notifications.maintenanceAlerts}
-                          onCheckedChange={(checked) => setNotifications({...notifications, maintenanceAlerts: checked})}
+                          checked={localNotifications.maintenanceAlerts}
+                          onCheckedChange={(checked) => setLocalNotifications({...localNotifications, maintenanceAlerts: checked})}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Label className="font-medium">Alertas de Segurança</Label>
-                          <p className="text-sm text-gray-600">Notificar sobre problemas de segurança</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                        <div className="flex-1">
+                          <Label className="font-medium text-sm lg:text-base">Alertas de Segurança</Label>
+                          <p className="text-xs lg:text-sm text-muted-foreground">Notificar sobre problemas de segurança</p>
                         </div>
                         <Switch
-                          checked={notifications.securityAlerts}
-                          onCheckedChange={(checked) => setNotifications({...notifications, securityAlerts: checked})}
+                          checked={localNotifications.securityAlerts}
+                          onCheckedChange={(checked) => setLocalNotifications({...localNotifications, securityAlerts: checked})}
                         />
                       </div>
                     </div>
@@ -531,43 +423,43 @@ const AdminSettings = () => {
             </TabsContent>
 
             <TabsContent value="security">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Shield className="w-5 h-5 mr-2 text-red-600" />
+              <Card className="border-border shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center text-lg lg:text-xl">
+                    <Shield className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-red-600" />
                     Configurações de Segurança
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm lg:text-base">
                     Gerencie as configurações de segurança da plataforma
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <h4 className="font-medium text-yellow-800 mb-2">Ações Administrativas</h4>
-                      <div className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start" onClick={handleGenerateBackup}>
+                    <div className="p-4 lg:p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                      <h4 className="font-medium text-yellow-800 dark:text-yellow-300 mb-3 text-sm lg:text-base">Ações Administrativas</h4>
+                      <div className="space-y-2 lg:space-y-3">
+                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base" onClick={generateBackup}>
                           Gerar Backup do Sistema
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={handleClearCache}>
+                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base" onClick={clearCache}>
                           Limpar Cache da Aplicação
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base">
                           Revisar Logs de Segurança
                         </Button>
                       </div>
                     </div>
 
-                    <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                      <h4 className="font-medium text-red-800 mb-2">Zona de Perigo</h4>
-                      <p className="text-sm text-red-700 mb-4">
+                    <div className="p-4 lg:p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <h4 className="font-medium text-red-800 dark:text-red-300 mb-2 text-sm lg:text-base">Zona de Perigo</h4>
+                      <p className="text-xs lg:text-sm text-red-700 dark:text-red-400 mb-4">
                         Estas ações são irreversíveis e podem afetar o funcionamento da plataforma.
                       </p>
-                      <div className="space-y-2">
-                        <Button variant="destructive" className="w-full justify-start" onClick={handleSystemReset}>
+                      <div className="space-y-2 lg:space-y-3">
+                        <Button variant="destructive" className="w-full justify-start text-sm lg:text-base" onClick={handleSystemReset}>
                           Resetar Configurações do Sistema
                         </Button>
-                        <Button variant="destructive" className="w-full justify-start">
+                        <Button variant="destructive" className="w-full justify-start text-sm lg:text-base">
                           Limpar Todos os Dados de Teste
                         </Button>
                       </div>
