@@ -6,6 +6,7 @@ import { useBusinesses } from '@/hooks/useBusinesses';
 import { useUsers } from '@/hooks/useUsers';
 import { useAppointments } from '@/hooks/useAppointments';
 import { usePlans } from '@/hooks/usePlans';
+import { useBusinessesByPlan } from '@/hooks/useBusinessesByPlan';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -14,8 +15,9 @@ const AdminDashboard = () => {
   const { data: users = [], isLoading: usersLoading } = useUsers();
   const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments();
   const { data: plans = [], isLoading: plansLoading } = usePlans();
+  const { data: businessesByPlan = {}, isLoading: businessesByPlanLoading } = useBusinessesByPlan();
 
-  const isLoading = businessesLoading || usersLoading || appointmentsLoading || plansLoading;
+  const isLoading = businessesLoading || usersLoading || appointmentsLoading || plansLoading || businessesByPlanLoading;
 
   // Calculate metrics
   const totalBusinesses = businesses.length;
@@ -23,16 +25,21 @@ const AdminDashboard = () => {
   const totalUsers = users.length;
   const totalAppointments = appointments.length;
 
-  // Get most popular plan
-  const mostPopularPlan = plans.reduce((prev, current) => 
-    (prev.subscribers_count > current.subscribers_count) ? prev : current, 
-    plans[0] || { name: 'Premium', subscribers_count: 0 }
+  // Get most popular plan based on actual subscriber count
+  const plansWithRealCounts = plans.map(plan => ({
+    ...plan,
+    real_subscribers_count: businessesByPlan[plan.name] || 0
+  }));
+
+  const mostPopularPlan = plansWithRealCounts.reduce((prev, current) => 
+    (prev.real_subscribers_count > current.real_subscribers_count) ? prev : current, 
+    plansWithRealCounts[0] || { name: 'Premium', real_subscribers_count: 0 }
   );
 
   // Calculate percentage for most popular plan
-  const totalSubscribers = plans.reduce((sum, plan) => sum + plan.subscribers_count, 0);
-  const popularPlanPercentage = totalSubscribers > 0 
-    ? Math.round((mostPopularPlan.subscribers_count / totalSubscribers) * 100)
+  const totalRealSubscribers = Object.values(businessesByPlan).reduce((sum, count) => sum + count, 0);
+  const popularPlanPercentage = totalRealSubscribers > 0 
+    ? Math.round((mostPopularPlan.real_subscribers_count / totalRealSubscribers) * 100)
     : 0;
 
   // Get recent businesses (last 5)
@@ -144,9 +151,12 @@ const AdminDashboard = () => {
                               <p className="text-xs md:text-sm text-muted-foreground truncate">{business.owner}</p>
                               <p className="text-xs text-muted-foreground">{formatDate(business.created_at)}</p>
                             </div>
-                            <Badge variant={business.status === 'active' ? 'default' : 'secondary'} className="ml-2 text-xs">
-                              {business.status === 'active' ? 'Ativo' : 'Inativo'}
-                            </Badge>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge variant={business.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                                {business.status === 'active' ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{business.plan}</span>
+                            </div>
                           </div>
                         ))
                       ) : (

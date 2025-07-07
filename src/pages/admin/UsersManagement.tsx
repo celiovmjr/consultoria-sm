@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, Search, Plus, Edit, Trash2, Mail, Phone, Building, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
@@ -289,7 +288,7 @@ const UsersManagement = () => {
                       Novo Usuário
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-background border-border">
+                  <DialogContent className="sm:max-w-[500px] bg-background border-border">
                     <DialogHeader>
                       <DialogTitle className="text-foreground">
                         {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
@@ -377,14 +376,14 @@ const UsersManagement = () => {
                         </Select>
                       </div>
                       
-                      <div className="flex space-x-2 pt-4">
-                        <Button type="submit" className="flex-1">
-                          {editingUser ? 'Atualizar' : 'Criar'} Usuário
-                        </Button>
+                      <DialogFooter className="flex space-x-2 pt-4">
                         <Button type="button" variant="outline" onClick={resetForm}>
                           Cancelar
                         </Button>
-                      </div>
+                        <Button type="submit">
+                          {editingUser ? 'Atualizar' : 'Criar'} Usuário
+                        </Button>
+                      </DialogFooter>
                     </form>
                   </DialogContent>
                 </Dialog>
