@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Building, Search, Plus, Edit, Trash2, Mail, Phone, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building, Search, Plus, Mail, Phone, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
+import DataTable from '@/components/common/DataTable';
 import { useToast } from '@/hooks/use-toast';
 import { useBusinesses } from '@/hooks/useBusinesses';
 import { supabase } from '@/integrations/supabase/client';
@@ -200,11 +200,67 @@ const BusinessManagement = () => {
     }
   };
 
+  const columns = [
+    {
+      key: 'business_info',
+      label: 'Negócio',
+      render: (value: any, row: any) => (
+        <div className="min-w-[200px]">
+          <div className="font-medium text-foreground">{row.name}</div>
+          <div className="text-sm text-muted-foreground flex items-center mt-1">
+            <Mail className="w-3 h-3 mr-1 flex-shrink-0" />
+            <span className="truncate">{row.email}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'owner_info',
+      label: 'Proprietário',
+      render: (value: any, row: any) => (
+        <div className="min-w-[150px]">
+          <div className="font-medium text-foreground">{row.owner}</div>
+          <div className="text-sm text-muted-foreground flex items-center mt-1">
+            <Phone className="w-3 h-3 mr-1 flex-shrink-0" />
+            <span className="truncate">{row.phone}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'description',
+      label: 'Descrição',
+      render: (value: any, row: any) => (
+        <div className="max-w-[200px] truncate text-foreground" title={row.description}>
+          {row.description || '-'}
+        </div>
+      )
+    },
+    {
+      key: 'plan',
+      label: 'Plano',
+      render: (value: any, row: any) => (
+        <Badge variant="outline" className="border-border text-foreground whitespace-nowrap">
+          {row.plan}
+        </Badge>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value: any, row: any) => (
+        <Badge className={getStatusColor(row.status)}>
+          {row.status === 'active' ? 'Ativo' : row.status === 'inactive' ? 'Inativo' : 'Pendente'}
+        </Badge>
+      )
+    }
+  ];
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen bg-background flex flex-col lg:flex-row">
         <AdminSidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin" />
@@ -217,9 +273,9 @@ const BusinessManagement = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen bg-background flex flex-col lg:flex-row">
         <AdminSidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center">
               <p className="text-red-600">Erro ao carregar negócios: {error.message}</p>
@@ -231,36 +287,39 @@ const BusinessManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       <AdminSidebar />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Negócios</h1>
-            <p className="text-muted-foreground">Administre todos os negócios da plataforma</p>
+          <div className="mb-6 lg:mb-8">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Gerenciamento de Negócios</h1>
+            <p className="text-muted-foreground text-sm lg:text-base">Administre todos os negócios da plataforma</p>
           </div>
 
           <Card className="border-border shadow-lg">
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardHeader className="pb-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <CardTitle className="flex items-center text-foreground">
+                  <CardTitle className="flex items-center text-foreground text-lg lg:text-xl">
                     <Building className="w-5 h-5 mr-2 text-blue-600" />
                     Lista de Negócios
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-muted-foreground text-sm">
                     {businesses.length} negócios cadastrados
                   </CardDescription>
                 </div>
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600" onClick={() => resetForm()}>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 w-full lg:w-auto" 
+                      onClick={() => resetForm()}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Negócio
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-background border-border">
+                  <DialogContent className="bg-background border-border mx-4 max-w-md lg:max-w-lg">
                     <DialogHeader>
                       <DialogTitle className="text-foreground">Novo Negócio</DialogTitle>
                       <DialogDescription className="text-muted-foreground">
@@ -303,18 +362,25 @@ const BusinessManagement = () => {
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                         className="bg-background border-border text-foreground"
                       />
-                      <Input
-                        placeholder="Plano"
-                        value={formData.plan}
-                        onChange={(e) => setFormData({...formData, plan: e.target.value})}
-                        required
-                        className="bg-background border-border text-foreground"
-                      />
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={resetForm}>
+                      <Select 
+                        value={formData.plan} 
+                        onValueChange={(value) => setFormData({...formData, plan: value})}
+                      >
+                        <SelectTrigger className="bg-background border-border text-foreground">
+                          <SelectValue placeholder="Selecione um plano" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Gratuito</SelectItem>
+                          <SelectItem value="basic">Básico</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="enterprise">Enterprise</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <DialogFooter className="flex-col lg:flex-row gap-2">
+                        <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto">
                           Cancelar
                         </Button>
-                        <Button type="submit">Criar Negócio</Button>
+                        <Button type="submit" className="w-full lg:w-auto">Criar Negócio</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -332,106 +398,19 @@ const BusinessManagement = () => {
                 />
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead className="text-muted-foreground">Negócio</TableHead>
-                    <TableHead className="text-muted-foreground">Proprietário</TableHead>
-                    <TableHead className="text-muted-foreground">Descrição</TableHead>
-                    <TableHead className="text-muted-foreground">Plano</TableHead>
-                    <TableHead className="text-muted-foreground">Status</TableHead>
-                    <TableHead className="text-muted-foreground">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBusinesses.map((business) => (
-                    <TableRow key={business.id} className="border-border">
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-foreground">{business.name}</div>
-                          <div className="text-sm text-muted-foreground flex items-center">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {business.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-foreground">{business.owner}</div>
-                          <div className="text-sm text-muted-foreground flex items-center">
-                            <Phone className="w-3 h-3 mr-1" />
-                            {business.phone}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">{business.description}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="border-border text-foreground">{business.plan}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(business.status)}>
-                          {business.status === 'active' ? 'Ativo' : business.status === 'inactive' ? 'Inativo' : 'Pendente'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" onClick={() => handleEdit(business)}>
-                            <Edit className="w-4 h-4 mr-1" />
-                            Editar
-                          </Button>
-                          {business.status === 'active' ? (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleStatusChange(business.id, 'inactive')}
-                              className="text-yellow-600"
-                            >
-                              Desativar
-                            </Button>
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleStatusChange(business.id, 'active')}
-                              className="text-green-600"
-                            >
-                              Ativar
-                            </Button>
-                          )}
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="outline" className="text-red-600">
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                Excluir
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-background border-border">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-foreground">Confirmar exclusão</AlertDialogTitle>
-                                <AlertDialogDescription className="text-muted-foreground">
-                                  Tem certeza que deseja excluir o negócio "{business.name}"? Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(business.id)} className="bg-red-600 hover:bg-red-700">
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <DataTable
+                columns={columns}
+                data={filteredBusinesses}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                deleteConfirmMessage="Tem certeza que deseja excluir este negócio? Esta ação não pode ser desfeita."
+              />
             </CardContent>
           </Card>
 
           {/* Edit Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="bg-background border-border">
+            <DialogContent className="bg-background border-border mx-4 max-w-md lg:max-w-lg">
               <DialogHeader>
                 <DialogTitle className="text-foreground">Editar Negócio</DialogTitle>
                 <DialogDescription className="text-muted-foreground">
@@ -474,18 +453,38 @@ const BusinessManagement = () => {
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="bg-background border-border text-foreground"
                 />
-                <Input
-                  placeholder="Plano"
-                  value={formData.plan}
-                  onChange={(e) => setFormData({...formData, plan: e.target.value})}
-                  required
-                  className="bg-background border-border text-foreground"
-                />
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={resetForm}>
+                <Select 
+                  value={formData.plan} 
+                  onValueChange={(value) => setFormData({...formData, plan: value})}
+                >
+                  <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectValue placeholder="Selecione um plano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Gratuito</SelectItem>
+                    <SelectItem value="basic">Básico</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select 
+                  value={formData.status} 
+                  onValueChange={(value) => setFormData({...formData, status: value as 'active' | 'inactive' | 'pending'})}
+                >
+                  <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                  </SelectContent>
+                </Select>
+                <DialogFooter className="flex-col lg:flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto">
                     Cancelar
                   </Button>
-                  <Button type="submit">Salvar Alterações</Button>
+                  <Button type="submit" className="w-full lg:w-auto">Salvar Alterações</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
