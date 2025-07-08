@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, Search, Plus, Edit, Trash2, Mail, Phone, Building, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
@@ -24,6 +25,7 @@ const UsersManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -100,13 +102,15 @@ const UsersManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (userId: string) => {
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+    
     try {
-      console.log('Deleting user:', userId);
+      console.log('Deleting user:', userToDelete);
       const { error } = await supabase
         .from('users')
         .delete()
-        .eq('id', userId);
+        .eq('id', userToDelete);
 
       if (error) throw error;
 
@@ -115,6 +119,7 @@ const UsersManagement = () => {
         title: "Usuário excluído",
         description: "O usuário foi removido com sucesso.",
       });
+      setUserToDelete(null);
     } catch (error) {
       console.error('Error deleting user:', error);
       toast({
@@ -122,6 +127,7 @@ const UsersManagement = () => {
         description: "Erro ao excluir usuário. Tente novamente.",
         variant: "destructive"
       });
+      setUserToDelete(null);
     }
   };
 
@@ -458,10 +464,34 @@ const UsersManagement = () => {
                             <Edit className="w-4 h-4 mr-1" />
                             Editar
                           </Button>
-                          <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDelete(user.id)}>
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Excluir
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o usuário "{user.name}"? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => {
+                                    setUserToDelete(user.id);
+                                    handleDelete();
+                                  }}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>
