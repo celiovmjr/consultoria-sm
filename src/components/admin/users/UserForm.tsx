@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 interface UserFormProps {
   businesses: any[];
   editingUser: any;
-  setEditingUser: (user: any) => void;
+  onEdit: (user: any) => void;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }
@@ -20,7 +20,7 @@ interface UserFormProps {
 export const UserForm = ({ 
   businesses, 
   editingUser, 
-  setEditingUser, 
+  onEdit, 
   isDialogOpen, 
   setIsDialogOpen 
 }: UserFormProps) => {
@@ -34,6 +34,29 @@ export const UserForm = ({
     business_id: '',
     status: 'active' as 'active' | 'inactive'
   });
+
+  // Sincronizar formData com editingUser quando mudar
+  useEffect(() => {
+    if (editingUser) {
+      setFormData({
+        name: editingUser.name,
+        email: editingUser.email,
+        phone: editingUser.phone || '',
+        role: editingUser.role,
+        business_id: editingUser.business_id || '',
+        status: editingUser.status
+      });
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        role: 'business_owner',
+        business_id: '',
+        status: 'active'
+      });
+    }
+  }, [editingUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,27 +110,19 @@ export const UserForm = ({
       business_id: '',
       status: 'active'
     });
-    setEditingUser(null);
+    onEdit(null);
     setIsDialogOpen(false);
   };
 
   const handleEdit = (user: any) => {
-    setEditingUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      phone: user.phone || '',
-      role: user.role,
-      business_id: user.business_id || '',
-      status: user.status
-    });
+    onEdit(user);
     setIsDialogOpen(true);
   };
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => resetForm()} className="bg-gradient-to-r from-blue-600 to-purple-600">
+        <Button onClick={() => onEdit(null)} className="bg-gradient-to-r from-blue-600 to-purple-600">
           <Plus className="w-4 h-4 mr-2" />
           Novo Usuário
         </Button>

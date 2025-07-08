@@ -156,7 +156,7 @@ const UsersManagement = () => {
                 <UserForm
                   businesses={businesses}
                   editingUser={editingUser}
-                  setEditingUser={setEditingUser}
+                  onEdit={setEditingUser}
                   isDialogOpen={isDialogOpen}
                   setIsDialogOpen={setIsDialogOpen}
                 />
