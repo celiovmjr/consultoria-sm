@@ -26,28 +26,39 @@ const PlansManagement = () => {
     name: '',
     price: 0,
     features: '',
-    max_professionals: 0,
-    max_businesses: 1,
-    max_stores: 1,
-    commission_percentage: 0,
-    is_active: true
+    status: 'active'
   });
+
+  // Helper function to extract features from JSONB
+  const getPlanFeature = (features: any, key: string, defaultValue: string = 'N/A') => {
+    try {
+      const featuresObj = typeof features === 'string' ? JSON.parse(features) : features;
+      const value = featuresObj?.[key];
+      if (value === -1) return '∞';
+      return value !== undefined ? value.toString() : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  };
 
   const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       console.log('Creating plan:', formData);
+      
+      // Create features object
+      const featuresObj = {
+        max_businesses: 1,
+        max_professionals: 3
+      };
+      
       const { error } = await supabase
         .from('plans')
         .insert([{
           name: formData.name,
           price: formData.price,
-          features: formData.features.split('\n').filter(f => f.trim()),
-          max_professionals: formData.max_professionals,
-          max_businesses: formData.max_businesses,
-          max_stores: formData.max_stores,
-          commission_percentage: formData.commission_percentage,
-          is_active: formData.is_active
+          features: featuresObj,
+          status: formData.status
         }]);
 
       if (error) {
@@ -76,12 +87,8 @@ const PlansManagement = () => {
     setFormData({
       name: plan.name,
       price: plan.price,
-      features: Array.isArray(plan.features) ? plan.features.join('\n') : '',
-      max_professionals: plan.max_professionals,
-      max_businesses: plan.max_businesses,
-      max_stores: plan.max_stores || 1,
-      commission_percentage: plan.commission_percentage || 0,
-      is_active: plan.is_active
+      features: JSON.stringify(plan.features, null, 2),
+      status: plan.status
     });
     setIsEditDialogOpen(true);
   };
@@ -97,12 +104,8 @@ const PlansManagement = () => {
         .update({
           name: formData.name,
           price: formData.price,
-          features: formData.features.split('\n').filter(f => f.trim()),
-          max_professionals: formData.max_professionals,
-          max_businesses: formData.max_businesses,
-          max_stores: formData.max_stores,
-          commission_percentage: formData.commission_percentage,
-          is_active: formData.is_active
+          features: JSON.parse(formData.features),
+          status: formData.status
         })
         .eq('id', selectedPlan.id);
 
@@ -155,12 +158,13 @@ const PlansManagement = () => {
     }
   };
 
-  const handleToggleStatus = async (planId: string, currentStatus: boolean) => {
+  const handleToggleStatus = async (planId: string, currentStatus: string) => {
     try {
-      console.log('Toggling plan status:', planId, !currentStatus);
+      console.log('Toggling plan status:', planId, currentStatus);
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       const { error } = await supabase
         .from('plans')
-        .update({ status: currentStatus === 'active' ? 'inactive' : 'active' })
+        .update({ status: newStatus })
         .eq('id', planId);
 
       if (error) {
@@ -188,11 +192,7 @@ const PlansManagement = () => {
       name: '',
       price: 0,
       features: '',
-      max_professionals: 0,
-      max_businesses: 1,
-      max_stores: 1,
-      commission_percentage: 0,
-      is_active: true
+      status: 'active'
     });
     setSelectedPlan(null);
     setIsCreateDialogOpen(false);
@@ -298,47 +298,11 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="maxProfessionals">Profissionais</Label>
-                      <Input
-                        id="maxProfessionals"
-                        type="number"
-                        placeholder="10"
-                        value={formData.max_professionals}
-                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="maxStores">Filiais/Lojas</Label>
-                      <Input
-                        id="maxStores"
-                        type="number"
-                        placeholder="3"
-                        value={formData.max_stores}
-                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
-                        required
-                      />
-                    </div>
-                  </div>
                   <div>
-                    <Label htmlFor="commission">Comissão (%)</Label>
-                    <Input
-                      id="commission"
-                      type="number"
-                      placeholder="3.5"
-                      step="0.01"
-                      value={formData.commission_percentage}
-                      onChange={(e) => setFormData({...formData, commission_percentage: parseFloat(e.target.value)})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="features">Recursos (um por linha)</Label>
+                    <Label htmlFor="features">Recursos (JSON)</Label>
                     <Textarea
                       id="features"
-                      placeholder="Agendamentos ilimitados&#10;Suporte por email&#10;Relatórios básicos"
+                      placeholder='{"max_businesses": 1, "max_professionals": 3}'
                       value={formData.features}
                       onChange={(e) => setFormData({...formData, features: e.target.value})}
                       rows={4}
@@ -365,12 +329,12 @@ const PlansManagement = () => {
                       <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
                       {plan.name}
                     </CardTitle>
-                    <Badge variant={plan.is_active ? "default" : "secondary"} className="text-xs">
-                      {plan.is_active ? 'Ativo' : 'Inativo'}
+                    <Badge variant={plan.status === 'active' ? "default" : "secondary"} className="text-xs">
+                      {plan.status === 'active' ? 'Ativo' : 'Inativo'}
                     </Badge>
                   </div>
                   <CardDescription className="text-sm">
-                    {plan.subscribers_count} assinantes ativos
+                    Plano {plan.name.toLowerCase()}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -386,21 +350,21 @@ const PlansManagement = () => {
                         <div className="flex items-center justify-center mb-1">
                           <Users className="w-3 h-3 md:w-4 md:h-4 text-blue-600" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{plan.max_professionals === -1 ? '∞' : plan.max_professionals}</p>
+                        <p className="text-xs md:text-sm font-medium">{getPlanFeature(plan.features, 'max_professionals', 'N/A')}</p>
                         <p className="text-xs text-gray-500">Prof.</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
                           <Store className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{plan.max_stores === -1 ? '∞' : plan.max_stores}</p>
-                        <p className="text-xs text-gray-500">Lojas</p>
+                        <p className="text-xs md:text-sm font-medium">{getPlanFeature(plan.features, 'max_businesses', 'N/A')}</p>
+                        <p className="text-xs text-gray-500">Negócios</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
                           <Percent className="w-3 h-3 md:w-4 md:h-4 text-orange-600" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{plan.commission_percentage || 0}%</p>
+                        <p className="text-xs md:text-sm font-medium">0%</p>
                         <p className="text-xs text-gray-500">Comissão</p>
                       </div>
                     </div>
@@ -432,10 +396,10 @@ const PlansManagement = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleToggleStatus(plan.id, plan.is_active)}
+                          onClick={() => handleToggleStatus(plan.id, plan.status)}
                           className="flex-1 text-xs md:text-sm"
                         >
-                          {plan.is_active ? 'Desativar' : 'Ativar'}
+                          {plan.status === 'active' ? 'Desativar' : 'Ativar'}
                         </Button>
                         
                         <AlertDialog>
@@ -498,41 +462,8 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="editMaxProfessionals">Profissionais</Label>
-                      <Input
-                        id="editMaxProfessionals"
-                        type="number"
-                        value={formData.max_professionals}
-                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value)})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="editMaxStores">Filiais/Lojas</Label>
-                      <Input
-                        id="editMaxStores"
-                        type="number"
-                        value={formData.max_stores}
-                        onChange={(e) => setFormData({...formData, max_stores: parseInt(e.target.value)})}
-                        required
-                      />
-                    </div>
-                  </div>
                   <div>
-                    <Label htmlFor="editCommission">Comissão (%)</Label>
-                    <Input
-                      id="editCommission"
-                      type="number"
-                      step="0.01"
-                      value={formData.commission_percentage}
-                      onChange={(e) => setFormData({...formData, commission_percentage: parseFloat(e.target.value)})}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="editFeatures">Recursos (um por linha)</Label>
+                    <Label htmlFor="editFeatures">Recursos (JSON)</Label>
                     <Textarea
                       id="editFeatures"
                       value={formData.features}
