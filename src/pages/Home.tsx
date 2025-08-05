@@ -88,6 +88,7 @@ const Home = () => {
     const featuresObj = typeof features === 'string' ? JSON.parse(features) : features;
     const featuresList: string[] = [];
     
+    // Add limits based on features
     if (featuresObj.max_businesses) {
       if (featuresObj.max_businesses === -1) {
         featuresList.push('Negócios ilimitados');
@@ -104,7 +105,7 @@ const Home = () => {
       }
     }
     
-    // Add default features based on plan
+    // Add standard features for all plans
     featuresList.push('Agendamentos online');
     featuresList.push('Controle de horários');
     featuresList.push('Relatórios básicos');

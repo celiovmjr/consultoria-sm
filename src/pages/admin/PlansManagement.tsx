@@ -25,7 +25,9 @@ const PlansManagement = () => {
   const [formData, setFormData] = useState({
     name: '',
     price: 0,
-    features: '',
+    max_businesses: 1,
+    max_professionals: 3,
+    benefits: '',
     status: 'active'
   });
 
@@ -48,8 +50,8 @@ const PlansManagement = () => {
       
       // Create features object
       const featuresObj = {
-        max_businesses: 1,
-        max_professionals: 3
+        max_businesses: formData.max_businesses,
+        max_professionals: formData.max_professionals
       };
       
       const { error } = await supabase
@@ -84,10 +86,13 @@ const PlansManagement = () => {
 
   const handleEditPlan = (plan: any) => {
     setSelectedPlan(plan);
+    const features = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features;
     setFormData({
       name: plan.name,
       price: plan.price,
-      features: JSON.stringify(plan.features, null, 2),
+      max_businesses: features?.max_businesses || 1,
+      max_professionals: features?.max_professionals || 3,
+      benefits: '', // Will be populated from display logic
       status: plan.status
     });
     setIsEditDialogOpen(true);
@@ -99,12 +104,17 @@ const PlansManagement = () => {
 
     try {
       console.log('Updating plan:', selectedPlan.id, formData);
+      const featuresObj = {
+        max_businesses: formData.max_businesses,
+        max_professionals: formData.max_professionals
+      };
+      
       const { error } = await supabase
         .from('plans')
         .update({
           name: formData.name,
           price: formData.price,
-          features: JSON.parse(formData.features),
+          features: featuresObj,
           status: formData.status
         })
         .eq('id', selectedPlan.id);
@@ -191,7 +201,9 @@ const PlansManagement = () => {
     setFormData({
       name: '',
       price: 0,
-      features: '',
+      max_businesses: 1,
+      max_professionals: 3,
+      benefits: '',
       status: 'active'
     });
     setSelectedPlan(null);
@@ -298,15 +310,44 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="maxBusinesses">Quantidade de Negócios</Label>
+                      <Input
+                        id="maxBusinesses"
+                        type="number"
+                        placeholder="1"
+                        min="1"
+                        value={formData.max_businesses}
+                        onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value) || 1})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="maxProfessionals">Quantidade de Profissionais</Label>
+                      <Input
+                        id="maxProfessionals"
+                        type="number"
+                        placeholder="3"
+                        min="1"
+                        value={formData.max_professionals}
+                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value) || 1})}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <Label htmlFor="features">Recursos (JSON)</Label>
+                    <Label htmlFor="benefits">Benefícios (um por linha)</Label>
                     <Textarea
-                      id="features"
-                      placeholder='{"max_businesses": 1, "max_professionals": 3}'
-                      value={formData.features}
-                      onChange={(e) => setFormData({...formData, features: e.target.value})}
-                      rows={4}
+                      id="benefits"
+                      placeholder="Agendamentos online&#10;Controle de horários&#10;Relatórios básicos&#10;Suporte por email"
+                      value={formData.benefits}
+                      onChange={(e) => setFormData({...formData, benefits: e.target.value})}
+                      rows={5}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Os limites de negócios e profissionais serão adicionados automaticamente
+                    </p>
                   </div>
                   <DialogFooter className="flex-col sm:flex-row gap-2">
                     <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">
@@ -462,14 +503,41 @@ const PlansManagement = () => {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editMaxBusinesses">Quantidade de Negócios</Label>
+                      <Input
+                        id="editMaxBusinesses"
+                        type="number"
+                        min="1"
+                        value={formData.max_businesses}
+                        onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value) || 1})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editMaxProfessionals">Quantidade de Profissionais</Label>
+                      <Input
+                        id="editMaxProfessionals"
+                        type="number"
+                        min="1"
+                        value={formData.max_professionals}
+                        onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value) || 1})}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <Label htmlFor="editFeatures">Recursos (JSON)</Label>
+                    <Label htmlFor="editBenefits">Benefícios (um por linha)</Label>
                     <Textarea
-                      id="editFeatures"
-                      value={formData.features}
-                      onChange={(e) => setFormData({...formData, features: e.target.value})}
-                      rows={4}
+                      id="editBenefits"
+                      value={formData.benefits}
+                      onChange={(e) => setFormData({...formData, benefits: e.target.value})}
+                      rows={5}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Os limites de negócios e profissionais serão adicionados automaticamente
+                    </p>
                   </div>
                   <DialogFooter className="flex-col sm:flex-row gap-2">
                     <Button type="button" variant="outline" onClick={resetForm} className="w-full sm:w-auto">
