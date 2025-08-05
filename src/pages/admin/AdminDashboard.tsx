@@ -148,7 +148,7 @@ const AdminDashboard = () => {
                           <div key={business.id} className="flex items-center justify-between p-3 md:p-4 bg-muted/30 rounded-lg">
                             <div className="min-w-0 flex-1">
                               <h4 className="font-medium text-foreground text-sm md:text-base truncate">{business.name}</h4>
-                              <p className="text-xs md:text-sm text-muted-foreground truncate">{business.owner}</p>
+                              <p className="text-xs md:text-sm text-muted-foreground truncate">Status: {business.status}</p>
                               <p className="text-xs text-muted-foreground">{formatDate(business.created_at)}</p>
                             </div>
                             <div className="flex flex-col items-end gap-1">

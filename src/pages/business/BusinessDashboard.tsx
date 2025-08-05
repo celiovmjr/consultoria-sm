@@ -78,7 +78,7 @@ const BusinessDashboard = () => {
 
   // Get today's appointments with more details
   const todayAppointmentsDetailed = todayAppointments.map(apt => ({
-    time: apt.appointment_time,
+    time: apt.appointment_date ? new Date(apt.appointment_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
     client: apt.client_name,
     service: apt.services?.name || 'Serviço',
     professional: apt.professionals?.name || 'Profissional',

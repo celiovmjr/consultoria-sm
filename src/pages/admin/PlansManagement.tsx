@@ -160,7 +160,7 @@ const PlansManagement = () => {
       console.log('Toggling plan status:', planId, !currentStatus);
       const { error } = await supabase
         .from('plans')
-        .update({ is_active: !currentStatus })
+        .update({ status: currentStatus === 'active' ? 'inactive' : 'active' })
         .eq('id', planId);
 
       if (error) {

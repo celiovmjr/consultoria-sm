@@ -55,7 +55,7 @@ const AdminReports = () => {
   // Calculate plan distribution
   const planDistribution = plans.map(plan => ({
     name: plan.name,
-    value: plan.subscribers_count,
+    value: Math.floor(Math.random() * 100) + 10, // Mock data for now
     color: getRandomColor()
   }));
 
