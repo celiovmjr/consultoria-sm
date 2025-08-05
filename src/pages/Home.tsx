@@ -64,24 +64,52 @@ const Home = () => {
   ];
 
   // Transform database plans to match UI format
-  const plans = plansData
-    .filter(plan => plan.is_active)
-    .map((plan, index) => ({
-      name: plan.name,
-      price: `R$ ${plan.price}`,
-      period: '/mês',
-      description: getDescription(plan.name),
-      features: Array.isArray(plan.features) ? plan.features as string[] : [],
-      popular: index === 1 // Mark the second plan as popular
-    }));
+  const plans = plansData.map((plan, index) => ({
+    name: plan.name,
+    price: `R$ ${plan.price.toFixed(2)}`,
+    period: '/mês',
+    description: getDescription(plan.name),
+    features: getFeaturesList(plan.features),
+    popular: index === 1 // Mark the second plan as popular
+  }));
 
   function getDescription(planName: string) {
     const descriptions: { [key: string]: string } = {
       'Básico': 'Ideal para profissionais autônomos',
-      'Premium': 'Perfeito para pequenos salões',
-      'Enterprise': 'Para redes e grandes estabelecimentos'
+      'Profissional': 'Perfeito para pequenos salões',
+      'Empresarial': 'Para redes e grandes estabelecimentos'
     };
     return descriptions[planName] || 'Plano personalizado para seu negócio';
+  }
+
+  function getFeaturesList(features: any): string[] {
+    if (!features) return [];
+    
+    const featuresObj = typeof features === 'string' ? JSON.parse(features) : features;
+    const featuresList: string[] = [];
+    
+    if (featuresObj.max_businesses) {
+      if (featuresObj.max_businesses === -1) {
+        featuresList.push('Negócios ilimitados');
+      } else {
+        featuresList.push(`Até ${featuresObj.max_businesses} negócio(s)`);
+      }
+    }
+    
+    if (featuresObj.max_professionals) {
+      if (featuresObj.max_professionals === -1) {
+        featuresList.push('Profissionais ilimitados');
+      } else {
+        featuresList.push(`Até ${featuresObj.max_professionals} profissionais`);
+      }
+    }
+    
+    // Add default features based on plan
+    featuresList.push('Agendamentos online');
+    featuresList.push('Controle de horários');
+    featuresList.push('Relatórios básicos');
+    
+    return featuresList;
   }
 
   // Show loading state
