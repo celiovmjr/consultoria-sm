@@ -317,7 +317,7 @@ const PlansManagement = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <Label htmlFor="maxBusinesses">Quantidade de Negócios</Label>
+                      <Label htmlFor="maxBusinesses">Negócios</Label>
                       <Input
                         id="maxBusinesses"
                         type="number"
@@ -329,7 +329,7 @@ const PlansManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="maxProfessionals">Quantidade de Profissionais</Label>
+                      <Label htmlFor="maxProfessionals">Profissionais</Label>
                       <Input
                         id="maxProfessionals"
                         type="number"
@@ -524,7 +524,7 @@ const PlansManagement = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <Label htmlFor="editMaxBusinesses">Quantidade de Negócios</Label>
+                      <Label htmlFor="editMaxBusinesses">Negócios</Label>
                       <Input
                         id="editMaxBusinesses"
                         type="number"
@@ -535,7 +535,7 @@ const PlansManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="editMaxProfessionals">Quantidade de Profissionais</Label>
+                      <Label htmlFor="editMaxProfessionals">Profissionais</Label>
                       <Input
                         id="editMaxProfessionals"
                         type="number"
