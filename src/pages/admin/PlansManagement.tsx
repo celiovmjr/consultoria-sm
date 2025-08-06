@@ -53,7 +53,8 @@ const PlansManagement = () => {
       const featuresObj = {
         max_businesses: formData.max_businesses,
         max_professionals: formData.max_professionals,
-        commission_percentage: formData.commission_percentage
+        commission_percentage: formData.commission_percentage,
+        benefits: formData.benefits
       };
       
       const { error } = await supabase
@@ -95,7 +96,7 @@ const PlansManagement = () => {
       max_businesses: features?.max_businesses || 1,
       max_professionals: features?.max_professionals || 3,
       commission_percentage: features?.commission_percentage || 0,
-      benefits: '', // Will be populated from display logic
+      benefits: features?.benefits || '',
       status: plan.status
     });
     setIsEditDialogOpen(true);
@@ -110,7 +111,8 @@ const PlansManagement = () => {
       const featuresObj = {
         max_businesses: formData.max_businesses,
         max_professionals: formData.max_professionals,
-        commission_percentage: formData.commission_percentage
+        commission_percentage: formData.commission_percentage,
+        benefits: formData.benefits
       };
       
       const { error } = await supabase
@@ -432,10 +434,10 @@ const PlansManagement = () => {
                     <div className="space-y-2">
                       <h4 className="font-medium text-xs md:text-sm">Recursos inclusos:</h4>
                       <div className="max-h-24 overflow-y-auto">
-                        {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, index: number) => (
+                        {getPlanFeature(plan.features, 'benefits', '').split('\n').filter(benefit => benefit.trim()).map((benefit: string, index: number) => (
                           <div key={index} className="flex items-center text-xs md:text-sm text-gray-600 mb-1">
                             <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
-                            <span className="line-clamp-1">{feature}</span>
+                            <span className="line-clamp-1">{benefit.trim()}</span>
                           </div>
                         ))}
                       </div>
