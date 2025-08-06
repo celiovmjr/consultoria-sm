@@ -115,6 +115,8 @@ const PlansManagement = () => {
         benefits: formData.benefits
       };
       
+      console.log('Features object to save:', featuresObj);
+      
       const { error } = await supabase
         .from('plans')
         .update({
