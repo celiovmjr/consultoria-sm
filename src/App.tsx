@@ -29,7 +29,18 @@ import AppointmentHistory from "./pages/professional/AppointmentHistory";
 import Unavailability from "./pages/professional/Unavailability";
 import BusinessLanding from "./pages/client/BusinessLanding";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: 'always',
+      retry: 2,
+    },
+  },
+});
 
 function App() {
   return (
