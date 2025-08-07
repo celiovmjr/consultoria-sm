@@ -95,8 +95,10 @@ const Home = () => {
     },
   ];
 
-  // Transform database plans to match UI format
-  const plans = plansData.map((plan, index) => ({
+  // Transform database plans to match UI format - only active plans
+  const plans = plansData
+    .filter(plan => plan.status === 'active')
+    .map((plan, index) => ({
     name: plan.name,
     price: `R$ ${plan.price.toFixed(2)}`,
     period: '/mês',
