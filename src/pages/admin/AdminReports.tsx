@@ -100,28 +100,28 @@ const AdminReports = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 pt-16 md:pt-0">
-            <h1 className="text-3xl font-bold text-gray-900">Relatórios Administrativos</h1>
-            <p className="text-gray-600">Análise completa de dados e métricas da plataforma</p>
+            <h1 className="text-3xl font-bold text-foreground">Relatórios Administrativos</h1>
+            <p className="text-muted-foreground">Análise completa de dados e métricas da plataforma</p>
           </div>
 
           {/* Filters */}
           <Card className="border-0 shadow-lg mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+                <BarChart3 className="w-5 h-5 mr-2 text-primary" />
                 Filtros de Relatório
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Relatório</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Tipo de Relatório</label>
                   <Select value={reportType} onValueChange={setReportType}>
                     <SelectTrigger>
                       <SelectValue />
@@ -136,7 +136,7 @@ const AdminReports = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Período</label>
                   <Select value={dateRange} onValueChange={setDateRange}>
                     <SelectTrigger>
                       <SelectValue />
@@ -163,7 +163,7 @@ const AdminReports = () => {
 
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <>
@@ -173,13 +173,13 @@ const AdminReports = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Receita Total</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
+                        <p className="text-2xl font-bold text-foreground">
                           R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
-                        <p className="text-xs text-green-600 mt-1">+12% vs período anterior</p>
+                        <p className="text-xs text-accent mt-1">+12% vs período anterior</p>
                       </div>
-                      <DollarSign className="w-8 h-8 text-green-600" />
+                      <DollarSign className="w-8 h-8 text-accent" />
                     </div>
                   </CardContent>
                 </Card>
@@ -188,11 +188,11 @@ const AdminReports = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Negócios Ativos</p>
-                        <p className="text-2xl font-bold text-gray-900">{activeBusinesses}</p>
-                        <p className="text-xs text-gray-500 mt-1">de {totalBusinesses} total</p>
+                        <p className="text-sm font-medium text-muted-foreground">Negócios Ativos</p>
+                        <p className="text-2xl font-bold text-foreground">{activeBusinesses}</p>
+                        <p className="text-xs text-muted-foreground mt-1">de {totalBusinesses} total</p>
                       </div>
-                      <Building className="w-8 h-8 text-blue-600" />
+                      <Building className="w-8 h-8 text-primary" />
                     </div>
                   </CardContent>
                 </Card>
@@ -201,11 +201,11 @@ const AdminReports = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                        <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
-                        <p className="text-xs text-green-600 mt-1">+8% vs mês anterior</p>
+                        <p className="text-sm font-medium text-muted-foreground">Total de Usuários</p>
+                        <p className="text-2xl font-bold text-foreground">{totalUsers}</p>
+                        <p className="text-xs text-accent mt-1">+8% vs mês anterior</p>
                       </div>
-                      <Users className="w-8 h-8 text-purple-600" />
+                      <Users className="w-8 h-8 text-secondary" />
                     </div>
                   </CardContent>
                 </Card>
@@ -214,11 +214,11 @@ const AdminReports = () => {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Agendamentos</p>
-                        <p className="text-2xl font-bold text-gray-900">{completedAppointments}</p>
-                        <p className="text-xs text-gray-500 mt-1">de {totalAppointments} total</p>
+                        <p className="text-sm font-medium text-muted-foreground">Agendamentos</p>
+                        <p className="text-2xl font-bold text-foreground">{completedAppointments}</p>
+                        <p className="text-xs text-muted-foreground mt-1">de {totalAppointments} total</p>
                       </div>
-                      <Calendar className="w-8 h-8 text-orange-600" />
+                      <Calendar className="w-8 h-8 text-accent" />
                     </div>
                   </CardContent>
                 </Card>
@@ -229,7 +229,7 @@ const AdminReports = () => {
                 <Card className="border-0 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center">
-                      <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                      <TrendingUp className="w-5 h-5 mr-2 text-accent" />
                       Receita Mensal
                     </CardTitle>
                     <CardDescription>
@@ -252,7 +252,7 @@ const AdminReports = () => {
                 <Card className="border-0 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center">
-                      <Building className="w-5 h-5 mr-2 text-blue-600" />
+                      <Building className="w-5 h-5 mr-2 text-primary" />
                       Crescimento de Negócios
                     </CardTitle>
                     <CardDescription>
@@ -277,7 +277,7 @@ const AdminReports = () => {
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
+                    <BarChart3 className="w-5 h-5 mr-2 text-secondary" />
                     Distribuição de Planos
                   </CardTitle>
                   <CardDescription>
@@ -308,15 +308,15 @@ const AdminReports = () => {
                     
                     <div className="space-y-4">
                       {planDistribution.map((plan, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                           <div className="flex items-center">
                             <div 
                               className="w-4 h-4 rounded-full mr-3"
                               style={{ backgroundColor: plan.color }}
                             />
-                            <span className="font-medium">{plan.name}</span>
+                            <span className="font-medium text-foreground">{plan.name}</span>
                           </div>
-                          <span className="text-gray-600">{plan.value} assinantes</span>
+                          <span className="text-muted-foreground">{plan.value} assinantes</span>
                         </div>
                       ))}
                     </div>

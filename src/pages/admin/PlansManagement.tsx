@@ -226,12 +226,12 @@ const PlansManagement = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex">
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           </div>
         </main>
@@ -241,12 +241,12 @@ const PlansManagement = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-background flex">
         <AdminSidebar />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center">
-              <p className="text-red-600">Erro ao carregar planos: {error.message}</p>
+              <p className="text-destructive">Erro ao carregar planos: {error.message}</p>
             </div>
           </div>
         </main>
@@ -255,22 +255,22 @@ const PlansManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
       <AdminSidebar />
       
       <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Gerenciamento de Planos</h1>
-              <p className="text-gray-600 text-sm md:text-base">Gerencie os planos de assinatura da plataforma</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Gerenciamento de Planos</h1>
+              <p className="text-muted-foreground text-sm md:text-base">Gerencie os planos de assinatura da plataforma</p>
             </div>
           </div>
 
           {/* Search */}
           <div className="mb-4 md:mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Buscar planos..."
                 value={searchTerm}
@@ -284,7 +284,7 @@ const PlansManagement = () => {
           <div className="mb-4 md:mb-6">
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto" onClick={() => resetForm()}>
+                <Button className="w-full sm:w-auto" onClick={() => resetForm()}>
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Plano
                 </Button>
@@ -387,8 +387,8 @@ const PlansManagement = () => {
               <Card key={plan.id} className="border-0 shadow-lg">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-lg">
-                      <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
+                    <CardTitle className="flex items-center text-lg text-foreground">
+                      <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary" />
                       {plan.name}
                     </CardTitle>
                     <Badge variant={plan.status === 'active' ? "default" : "secondary"} className="text-xs">
@@ -402,49 +402,49 @@ const PlansManagement = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-center">
-                      <p className="text-2xl md:text-3xl font-bold text-blue-600">R$ {plan.price}</p>
-                      <p className="text-xs md:text-sm text-gray-600">por mês</p>
+                      <p className="text-2xl md:text-3xl font-bold text-primary">R$ {plan.price}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">por mês</p>
                     </div>
                     
                     {/* Plan Limits */}
-                    <div className="grid grid-cols-3 gap-2 text-center py-3 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-3 gap-2 text-center py-3 bg-muted/50 rounded-lg">
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Users className="w-3 h-3 md:w-4 md:h-4 text-blue-600" />
+                          <Users className="w-3 h-3 md:w-4 md:h-4 text-primary" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{getPlanFeature(plan.features, 'max_professionals', 'N/A')}</p>
-                        <p className="text-xs text-gray-500">Prof.</p>
+                        <p className="text-xs md:text-sm font-medium text-foreground">{getPlanFeature(plan.features, 'max_professionals', 'N/A')}</p>
+                        <p className="text-xs text-muted-foreground">Prof.</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Store className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
+                          <Store className="w-3 h-3 md:w-4 md:h-4 text-accent" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{getPlanFeature(plan.features, 'max_businesses', 'N/A')}</p>
-                        <p className="text-xs text-gray-500">Negócios</p>
+                        <p className="text-xs md:text-sm font-medium text-foreground">{getPlanFeature(plan.features, 'max_businesses', 'N/A')}</p>
+                        <p className="text-xs text-muted-foreground">Negócios</p>
                       </div>
                       <div>
                         <div className="flex items-center justify-center mb-1">
-                          <Percent className="w-3 h-3 md:w-4 md:h-4 text-orange-600" />
+                          <Percent className="w-3 h-3 md:w-4 md:h-4 text-secondary" />
                         </div>
-                        <p className="text-xs md:text-sm font-medium">{getPlanFeature(plan.features, 'commission_percentage', '0')}%</p>
-                        <p className="text-xs text-gray-500">Comissão</p>
+                        <p className="text-xs md:text-sm font-medium text-foreground">{getPlanFeature(plan.features, 'commission_percentage', '0')}%</p>
+                        <p className="text-xs text-muted-foreground">Comissão</p>
                       </div>
                     </div>
                      
-                     <div className="space-y-2">
-                       <h4 className="font-medium text-xs md:text-sm">Recursos inclusos:</h4>
-                       <div className="max-h-24 overflow-y-auto">
-                         {(() => {
-                           const benefits = getPlanFeature(plan.features, 'benefits', '');
-                           console.log('Plan benefits for', plan.name, ':', benefits);
-                           return benefits.split('\n')
-                             .filter(benefit => benefit.trim())
-                             .map((benefit: string, index: number) => (
-                               <div key={index} className="flex items-center text-xs md:text-sm text-gray-600 mb-1">
-                                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
-                                 <span className="line-clamp-1">{benefit.trim()}</span>
-                               </div>
-                             ));
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-xs md:text-sm text-foreground">Recursos inclusos:</h4>
+                        <div className="max-h-24 overflow-y-auto">
+                          {(() => {
+                            const benefits = getPlanFeature(plan.features, 'benefits', '');
+                            console.log('Plan benefits for', plan.name, ':', benefits);
+                            return benefits.split('\n')
+                              .filter(benefit => benefit.trim())
+                              .map((benefit: string, index: number) => (
+                                <div key={index} className="flex items-center text-xs md:text-sm text-muted-foreground mb-1">
+                                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-accent rounded-full mr-2 flex-shrink-0"></div>
+                                  <span className="line-clamp-1">{benefit.trim()}</span>
+                                </div>
+                              ));
                          })()}
                        </div>
                     </div>
