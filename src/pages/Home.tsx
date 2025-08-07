@@ -88,7 +88,16 @@ const Home = () => {
     const featuresObj = typeof features === 'string' ? JSON.parse(features) : features;
     const featuresList: string[] = [];
     
-    // Add limits based on features
+    // If benefits are saved in the database, use them directly
+    if (featuresObj.benefits && featuresObj.benefits.trim()) {
+      const benefitsFromDB = featuresObj.benefits.split('\n')
+        .filter((benefit: string) => benefit.trim())
+        .map((benefit: string) => benefit.trim());
+      
+      return benefitsFromDB;
+    }
+    
+    // Fallback: Add limits based on features (for backwards compatibility)
     if (featuresObj.max_businesses) {
       if (featuresObj.max_businesses === -1) {
         featuresList.push('Negócios ilimitados');
@@ -105,7 +114,7 @@ const Home = () => {
       }
     }
     
-    // Add standard features for all plans
+    // Add standard features for all plans (fallback only)
     featuresList.push('Agendamentos online');
     featuresList.push('Controle de horários');
     featuresList.push('Relatórios básicos');
