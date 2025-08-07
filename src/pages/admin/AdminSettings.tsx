@@ -6,11 +6,31 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Mail, Bell, Shield, Loader2 } from 'lucide-react';
+import { Settings, Mail, Bell, Wrench, Loader2 } from 'lucide-react';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import { useSystemSettings, PlatformSettings, EmailSettings, NotificationSettings } from '@/hooks/useSystemSettings';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface AppSettingsForm {
+  app_name: string;
+  hero_title: string;
+  hero_subtitle: string;
+  features_title: string;
+  features_subtitle: string;
+  testimonials_title: string;
+  testimonials_subtitle: string;
+  pricing_title: string;
+  pricing_subtitle: string;
+  cta_title: string;
+  cta_subtitle: string;
+}
 
 const AdminSettings = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const {
     platformSettings,
     emailSettings,
@@ -25,6 +45,35 @@ const AdminSettings = () => {
     resetSystemSettings,
     clearCache,
   } = useSystemSettings();
+
+  // Fetch app settings
+  const { data: appSettings, isLoading: appSettingsLoading } = useQuery({
+    queryKey: ['app-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', [
+          'app_name', 'hero_title', 'hero_subtitle', 'features_title', 
+          'features_subtitle', 'testimonials_title', 'testimonials_subtitle', 
+          'pricing_title', 'pricing_subtitle', 'cta_title', 'cta_subtitle'
+        ]);
+      
+      if (error) throw error;
+      
+      // Transform array to object for easier access
+      const settingsObj: { [key: string]: string } = {};
+      data?.forEach(item => {
+        if (item.setting_value) {
+          settingsObj[item.setting_key] = typeof item.setting_value === 'string' 
+            ? JSON.parse(item.setting_value) 
+            : item.setting_value;
+        }
+      });
+      
+      return settingsObj;
+    }
+  });
 
   // Local state for form inputs
   const [localPlatformSettings, setLocalPlatformSettings] = useState<PlatformSettings>({
@@ -53,6 +102,20 @@ const AdminSettings = () => {
     securityAlerts: true,
   });
 
+  const [appSettingsForm, setAppSettingsForm] = useState<AppSettingsForm>({
+    app_name: '',
+    hero_title: '',
+    hero_subtitle: '',
+    features_title: '',
+    features_subtitle: '',
+    testimonials_title: '',
+    testimonials_subtitle: '',
+    pricing_title: '',
+    pricing_subtitle: '',
+    cta_title: '',
+    cta_subtitle: ''
+  });
+
   // Sync local state with loaded data
   useEffect(() => {
     if (platformSettings) {
@@ -71,6 +134,63 @@ const AdminSettings = () => {
       setLocalNotifications(notificationSettings);
     }
   }, [notificationSettings]);
+
+  // Sync app settings
+  useEffect(() => {
+    if (appSettings) {
+      setAppSettingsForm({
+        app_name: appSettings.app_name || '',
+        hero_title: appSettings.hero_title || '',
+        hero_subtitle: appSettings.hero_subtitle || '',
+        features_title: appSettings.features_title || '',
+        features_subtitle: appSettings.features_subtitle || '',
+        testimonials_title: appSettings.testimonials_title || '',
+        testimonials_subtitle: appSettings.testimonials_subtitle || '',
+        pricing_title: appSettings.pricing_title || '',
+        pricing_subtitle: appSettings.pricing_subtitle || '',
+        cta_title: appSettings.cta_title || '',
+        cta_subtitle: appSettings.cta_subtitle || ''
+      });
+    }
+  }, [appSettings]);
+
+  // App settings mutation
+  const updateAppSettingsMutation = useMutation({
+    mutationFn: async (data: AppSettingsForm) => {
+      const promises = Object.entries(data).map(([key, value]) => 
+        supabase
+          .from('system_settings')
+          .upsert({ 
+            setting_key: key, 
+            setting_value: JSON.stringify(value) 
+          })
+      );
+      
+      const results = await Promise.all(promises);
+      
+      // Check for errors
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error(errors[0].error?.message || 'Erro ao salvar configurações');
+      }
+      
+      return results;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configurações salvas",
+        description: "As configurações da aplicação foram atualizadas com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['app-settings'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message || "Não foi possível salvar as configurações.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const handlePlatformSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +211,18 @@ const AdminSettings = () => {
     if (window.confirm('Tem certeza que deseja resetar as configurações do sistema? Esta ação não pode ser desfeita.')) {
       await resetSystemSettings();
     }
+  };
+
+  const handleAppSettingsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateAppSettingsMutation.mutate(appSettingsForm);
+  };
+
+  const handleAppInputChange = (field: keyof AppSettingsForm, value: string) => {
+    setAppSettingsForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   if (error) {
@@ -135,7 +267,7 @@ const AdminSettings = () => {
           </div>
 
           <Tabs defaultValue="platform" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
+            <TabsList className="grid w-full grid-cols-3 gap-1">
               <TabsTrigger value="platform" className="flex items-center text-xs lg:text-sm">
                 <Settings className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                 <span className="hidden sm:inline">Plataforma</span>
@@ -150,10 +282,10 @@ const AdminSettings = () => {
                 <span className="hidden sm:inline">Notificações</span>
                 <span className="sm:hidden">Notif</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center text-xs lg:text-sm">
-                <Shield className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
-                <span className="hidden sm:inline">Segurança</span>
-                <span className="sm:hidden">Seg</span>
+              <TabsTrigger value="app" className="flex items-center text-xs lg:text-sm">
+                <Wrench className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                <span className="hidden sm:inline">Aplicação</span>
+                <span className="sm:hidden">App</span>
               </TabsTrigger>
             </TabsList>
 
@@ -422,49 +554,190 @@ const AdminSettings = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="security">
+            <TabsContent value="app">
               <Card className="border-border shadow-lg">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center text-lg lg:text-xl">
-                    <Shield className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-red-600" />
-                    Configurações de Segurança
+                    <Wrench className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-orange-600" />
+                    Configurações da Aplicação
                   </CardTitle>
                   <CardDescription className="text-sm lg:text-base">
-                    Gerencie as configurações de segurança da plataforma
+                    Configure os textos e conteúdos da landing page
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    <div className="p-4 lg:p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                      <h4 className="font-medium text-yellow-800 dark:text-yellow-300 mb-3 text-sm lg:text-base">Ações Administrativas</h4>
-                      <div className="space-y-2 lg:space-y-3">
-                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base" onClick={generateBackup}>
-                          Gerar Backup do Sistema
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base" onClick={clearCache}>
-                          Limpar Cache da Aplicação
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start text-sm lg:text-base">
-                          Revisar Logs de Segurança
-                        </Button>
-                      </div>
-                    </div>
+                  <form onSubmit={handleAppSettingsSubmit} className="space-y-6">
+                    {/* General Settings */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Informações Gerais</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="app_name">Nome da Aplicação</Label>
+                          <Input
+                            id="app_name"
+                            value={appSettingsForm.app_name}
+                            onChange={(e) => handleAppInputChange('app_name', e.target.value)}
+                            placeholder="AgendaPro"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                    <div className="p-4 lg:p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                      <h4 className="font-medium text-red-800 dark:text-red-300 mb-2 text-sm lg:text-base">Zona de Perigo</h4>
-                      <p className="text-xs lg:text-sm text-red-700 dark:text-red-400 mb-4">
-                        Estas ações são irreversíveis e podem afetar o funcionamento da plataforma.
-                      </p>
-                      <div className="space-y-2 lg:space-y-3">
-                        <Button variant="destructive" className="w-full justify-start text-sm lg:text-base" onClick={handleSystemReset}>
-                          Resetar Configurações do Sistema
-                        </Button>
-                        <Button variant="destructive" className="w-full justify-start text-sm lg:text-base">
-                          Limpar Todos os Dados de Teste
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                    {/* Hero Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Seção Principal (Hero)</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="hero_title">Título Principal</Label>
+                          <Input
+                            id="hero_title"
+                            value={appSettingsForm.hero_title}
+                            onChange={(e) => handleAppInputChange('hero_title', e.target.value)}
+                            placeholder="Revolucione seu Salão com Agendamentos Inteligentes"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="hero_subtitle">Subtítulo</Label>
+                          <Textarea
+                            id="hero_subtitle"
+                            value={appSettingsForm.hero_subtitle}
+                            onChange={(e) => handleAppInputChange('hero_subtitle', e.target.value)}
+                            placeholder="A plataforma completa para gestão de agendamentos..."
+                            rows={3}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Features Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Seção de Recursos</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="features_title">Título</Label>
+                          <Input
+                            id="features_title"
+                            value={appSettingsForm.features_title}
+                            onChange={(e) => handleAppInputChange('features_title', e.target.value)}
+                            placeholder="Tudo que você precisa em uma plataforma"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="features_subtitle">Subtítulo</Label>
+                          <Textarea
+                            id="features_subtitle"
+                            value={appSettingsForm.features_subtitle}
+                            onChange={(e) => handleAppInputChange('features_subtitle', e.target.value)}
+                            placeholder="Recursos pensados especialmente para o seu tipo de negócio"
+                            rows={2}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Testimonials Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Seção de Depoimentos</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="testimonials_title">Título</Label>
+                          <Input
+                            id="testimonials_title"
+                            value={appSettingsForm.testimonials_title}
+                            onChange={(e) => handleAppInputChange('testimonials_title', e.target.value)}
+                            placeholder="O que nossos clientes dizem"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="testimonials_subtitle">Subtítulo</Label>
+                          <Input
+                            id="testimonials_subtitle"
+                            value={appSettingsForm.testimonials_subtitle}
+                            onChange={(e) => handleAppInputChange('testimonials_subtitle', e.target.value)}
+                            placeholder="Histórias reais de sucesso"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pricing Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Seção de Planos</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="pricing_title">Título</Label>
+                          <Input
+                            id="pricing_title"
+                            value={appSettingsForm.pricing_title}
+                            onChange={(e) => handleAppInputChange('pricing_title', e.target.value)}
+                            placeholder="Planos que crescem com seu negócio"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="pricing_subtitle">Subtítulo</Label>
+                          <Input
+                            id="pricing_subtitle"
+                            value={appSettingsForm.pricing_subtitle}
+                            onChange={(e) => handleAppInputChange('pricing_subtitle', e.target.value)}
+                            placeholder="Escolha o plano ideal para o seu estabelecimento"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* CTA Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Seção de Chamada para Ação</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="cta_title">Título</Label>
+                          <Input
+                            id="cta_title"
+                            value={appSettingsForm.cta_title}
+                            onChange={(e) => handleAppInputChange('cta_title', e.target.value)}
+                            placeholder="Pronto para transformar seu negócio?"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cta_subtitle">Subtítulo</Label>
+                          <Textarea
+                            id="cta_subtitle"
+                            value={appSettingsForm.cta_subtitle}
+                            onChange={(e) => handleAppInputChange('cta_subtitle', e.target.value)}
+                            placeholder="Junte-se a centenas de profissionais que já revolucionaram seus salões"
+                            rows={2}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Button 
+                      type="submit" 
+                      disabled={updateAppSettingsMutation.isPending}
+                      className="w-full"
+                    >
+                      {updateAppSettingsMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        'Salvar Configurações da Aplicação'
+                      )}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
