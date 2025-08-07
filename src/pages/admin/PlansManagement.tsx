@@ -221,8 +221,7 @@ const PlansManagement = () => {
   };
 
   const filteredPlans = plans.filter(plan =>
-    plan.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    plan.status === 'active'
+    plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
