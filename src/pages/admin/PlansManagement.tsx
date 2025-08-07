@@ -37,7 +37,7 @@ const PlansManagement = () => {
     try {
       const featuresObj = typeof features === 'string' ? JSON.parse(features) : features;
       const value = featuresObj?.[key];
-      if (value === -1) return '∞';
+      if (value === -1) return 'Ilimitado';
       return value !== undefined ? value.toString() : defaultValue;
     } catch {
       return defaultValue;
