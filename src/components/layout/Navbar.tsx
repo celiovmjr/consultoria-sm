@@ -4,10 +4,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Calendar, Menu, X, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSystemSettings } from '@/hooks/useSystemSettings';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { platformSettings } = useSystemSettings();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -21,7 +23,7 @@ const Navbar = () => {
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Agenda.AI
+              {platformSettings?.name || 'Agenda.AI'}
             </span>
           </Link>
 

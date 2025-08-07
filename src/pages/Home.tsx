@@ -13,8 +13,14 @@ import { supabase } from '@/integrations/supabase/client';
 const Home = () => {
   const { data: plansData = [], isLoading: plansLoading, error: plansError } = usePlans();
   
-  // Fetch app settings directly
-  const { data: appSettings, isLoading: settingsLoading } = useQuery({
+  // Use system settings hook to get all app settings
+  const { 
+    platformSettings, 
+    isLoading: settingsLoading 
+  } = useSystemSettings();
+  
+  // Fetch additional app-specific settings
+  const { data: appSettings, isLoading: appSettingsLoading } = useQuery({
     queryKey: ['app-settings'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -157,7 +163,7 @@ const Home = () => {
   }
 
   // Show loading state
-  if (plansLoading || settingsLoading) {
+  if (plansLoading || settingsLoading || appSettingsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navbar />
@@ -191,10 +197,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="space-y-8">
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
-              {appSettings?.hero_title || appSettings?.app_name || 'Revolucione seu Salão com Agendamentos Inteligentes'}
+              {appSettings?.hero_title || platformSettings?.name || appSettings?.app_name || 'Revolucione seu Salão com Agendamentos Inteligentes'}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              {appSettings?.hero_subtitle || 'A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.'}
+              {appSettings?.hero_subtitle || platformSettings?.description || 'A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link to="/cadastro">
