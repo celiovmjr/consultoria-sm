@@ -431,17 +431,23 @@ const PlansManagement = () => {
                         <p className="text-xs text-gray-500">Comissão</p>
                       </div>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-xs md:text-sm">Recursos inclusos:</h4>
-                      <div className="max-h-24 overflow-y-auto">
-                        {getPlanFeature(plan.features, 'benefits', '').split('\n').filter(benefit => benefit.trim()).map((benefit: string, index: number) => (
-                          <div key={index} className="flex items-center text-xs md:text-sm text-gray-600 mb-1">
-                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
-                            <span className="line-clamp-1">{benefit.trim()}</span>
-                          </div>
-                        ))}
-                      </div>
+                     
+                     <div className="space-y-2">
+                       <h4 className="font-medium text-xs md:text-sm">Recursos inclusos:</h4>
+                       <div className="max-h-24 overflow-y-auto">
+                         {(() => {
+                           const benefits = getPlanFeature(plan.features, 'benefits', '');
+                           console.log('Plan benefits for', plan.name, ':', benefits);
+                           return benefits.split('\n')
+                             .filter(benefit => benefit.trim())
+                             .map((benefit: string, index: number) => (
+                               <div key={index} className="flex items-center text-xs md:text-sm text-gray-600 mb-1">
+                                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
+                                 <span className="line-clamp-1">{benefit.trim()}</span>
+                               </div>
+                             ));
+                         })()}
+                       </div>
                     </div>
 
                     <div className="pt-4 border-t space-y-2">
