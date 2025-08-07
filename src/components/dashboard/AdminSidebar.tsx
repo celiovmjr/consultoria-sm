@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, BarChart3, Building, Users, Settings, CreditCard, Menu, X, TrendingUp } from 'lucide-react';
+import { Calendar, BarChart3, Building, Users, Settings, CreditCard, Menu, X, TrendingUp, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/utils';
@@ -57,6 +57,11 @@ const AdminSidebar = () => {
       title: 'Configurações',
       icon: Settings,
       href: '/admin/configuracoes',
+    },
+    {
+      title: 'Config. App',
+      icon: Wrench,
+      href: '/admin/app-settings',
     },
   ];
 

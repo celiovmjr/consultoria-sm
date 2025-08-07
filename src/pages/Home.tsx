@@ -6,9 +6,41 @@ import { Calendar, Clock, Users, BarChart3, Smartphone, Shield, CheckCircle, Sta
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { usePlans } from '@/hooks/usePlans';
+import { useSystemSettings } from '@/hooks/useSystemSettings';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Home = () => {
   const { data: plansData = [], isLoading: plansLoading, error: plansError } = usePlans();
+  
+  // Fetch app settings directly
+  const { data: appSettings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['app-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', [
+          'app_name', 'hero_title', 'hero_subtitle', 'features_title', 
+          'features_subtitle', 'testimonials_title', 'testimonials_subtitle', 
+          'pricing_title', 'pricing_subtitle', 'cta_title', 'cta_subtitle'
+        ]);
+      
+      if (error) throw error;
+      
+      // Transform array to object for easier access
+      const settings: { [key: string]: string } = {};
+      data?.forEach(item => {
+        if (item.setting_value) {
+          settings[item.setting_key] = typeof item.setting_value === 'string' 
+            ? JSON.parse(item.setting_value) 
+            : item.setting_value;
+        }
+      });
+      
+      return settings;
+    }
+  });
   const features = [
     {
       icon: Calendar,
@@ -123,7 +155,7 @@ const Home = () => {
   }
 
   // Show loading state
-  if (plansLoading) {
+  if (plansLoading || settingsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navbar />
@@ -157,10 +189,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="space-y-8">
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent leading-tight">
-              Revolucione seu Salão com Agendamentos Inteligentes
+              {appSettings?.hero_title || appSettings?.app_name || 'Revolucione seu Salão com Agendamentos Inteligentes'}
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.
+              {appSettings?.hero_subtitle || 'A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link to="/cadastro">
@@ -183,10 +215,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Tudo que você precisa em uma plataforma
+              {appSettings?.features_title || 'Tudo que você precisa em uma plataforma'}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Recursos pensados especialmente para o seu tipo de negócio
+              {appSettings?.features_subtitle || 'Recursos pensados especialmente para o seu tipo de negócio'}
             </p>
           </div>
           
@@ -214,10 +246,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              O que nossos clientes dizem
+              {appSettings?.testimonials_title || 'O que nossos clientes dizem'}
             </h2>
             <p className="text-xl text-gray-600">
-              Histórias reais de sucesso
+              {appSettings?.testimonials_subtitle || 'Histórias reais de sucesso'}
             </p>
           </div>
           
@@ -247,10 +279,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Planos que crescem com seu negócio
+              {appSettings?.pricing_title || 'Planos que crescem com seu negócio'}
             </h2>
             <p className="text-xl text-gray-600">
-              Escolha o plano ideal para o seu estabelecimento
+              {appSettings?.pricing_subtitle || 'Escolha o plano ideal para o seu estabelecimento'}
             </p>
           </div>
           
@@ -302,10 +334,10 @@ const Home = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Pronto para transformar seu negócio?
+            {appSettings?.cta_title || 'Pronto para transformar seu negócio?'}
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Junte-se a centenas de profissionais que já revolucionaram seus salões
+            {appSettings?.cta_subtitle || 'Junte-se a centenas de profissionais que já revolucionaram seus salões'}
           </p>
           <Link to="/cadastro">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-4 h-auto">

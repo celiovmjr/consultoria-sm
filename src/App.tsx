@@ -14,6 +14,7 @@ import UsersManagement from "./pages/admin/UsersManagement";
 import PlansManagement from "./pages/admin/PlansManagement";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AppSettings from "./pages/admin/AppSettings";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import BusinessReports from "./pages/business/BusinessReports";
 import BusinessSettings from "./pages/business/BusinessSettings";
@@ -50,6 +51,7 @@ function App() {
               <Route path="/admin/planos" element={<PlansManagement />} />
               <Route path="/admin/relatorios" element={<AdminReports />} />
               <Route path="/admin/configuracoes" element={<AdminSettings />} />
+              <Route path="/admin/app-settings" element={<AppSettings />} />
               
               {/* Business Owner Routes */}
               <Route path="/negocio/dashboard" element={<BusinessDashboard />} />
