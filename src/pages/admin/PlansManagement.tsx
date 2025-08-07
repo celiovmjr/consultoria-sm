@@ -325,8 +325,7 @@ const PlansManagement = () => {
                       <Input
                         id="maxBusinesses"
                         type="number"
-                        placeholder="1"
-                        min="1"
+                        placeholder="1 ou -1 para ilimitado"
                         value={formData.max_businesses}
                         onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value) || 1})}
                         required
@@ -337,8 +336,7 @@ const PlansManagement = () => {
                       <Input
                         id="maxProfessionals"
                         type="number"
-                        placeholder="3"
-                        min="1"
+                        placeholder="3 ou -1 para ilimitado"
                         value={formData.max_professionals}
                         onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value) || 1})}
                         required
@@ -532,7 +530,7 @@ const PlansManagement = () => {
                       <Input
                         id="editMaxBusinesses"
                         type="number"
-                        min="1"
+                        placeholder="-1 para ilimitado"
                         value={formData.max_businesses}
                         onChange={(e) => setFormData({...formData, max_businesses: parseInt(e.target.value) || 1})}
                         required
@@ -543,7 +541,7 @@ const PlansManagement = () => {
                       <Input
                         id="editMaxProfessionals"
                         type="number"
-                        min="1"
+                        placeholder="-1 para ilimitado"
                         value={formData.max_professionals}
                         onChange={(e) => setFormData({...formData, max_professionals: parseInt(e.target.value) || 1})}
                         required
