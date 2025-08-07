@@ -259,28 +259,60 @@ const AdminSettings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-gradient-main flex flex-col lg:flex-row">
       <AdminSidebar />
       
-      <main className="flex-1 p-4 lg:p-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="mb-6 lg:mb-8 pt-16 lg:pt-0">
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Configurações do Sistema</h1>
-            <p className="text-muted-foreground text-sm lg:text-base">Gerencie as configurações gerais da plataforma</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Configurações do Sistema</h1>
+                <p className="text-muted-foreground text-sm lg:text-base mt-1">Gerencie as configurações gerais da plataforma</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={generateBackup}
+                  variant="outline"
+                  size="sm"
+                  className="hover-scale transition-fast"
+                >
+                  <Wrench className="w-4 h-4 mr-2" />
+                  Backup
+                </Button>
+                <Button
+                  onClick={clearCache}
+                  variant="outline"
+                  size="sm"
+                  className="hover-scale transition-fast"
+                >
+                  Limpar Cache
+                </Button>
+              </div>
+            </div>
           </div>
 
           <Tabs defaultValue="platform" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 gap-1">
-              <TabsTrigger value="platform" className="flex items-center text-xs lg:text-sm">
+            <TabsList className="grid w-full grid-cols-3 bg-card border border-border/50 shadow-sm">
+              <TabsTrigger 
+                value="platform" 
+                className="flex items-center text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-fast"
+              >
                 <Settings className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                 <span className="hidden sm:inline">Plataforma</span>
                 <span className="sm:hidden">Config</span>
               </TabsTrigger>
-              <TabsTrigger value="email" className="flex items-center text-xs lg:text-sm">
+              <TabsTrigger 
+                value="email" 
+                className="flex items-center text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-fast"
+              >
                 <Mail className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                 Email
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center text-xs lg:text-sm">
+              <TabsTrigger 
+                value="notifications" 
+                className="flex items-center text-xs lg:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-fast"
+              >
                 <Bell className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                 <span className="hidden sm:inline">Notificações</span>
                 <span className="sm:hidden">Notif</span>
@@ -304,162 +336,172 @@ const AdminSettings = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold border-b pb-2">Configurações da Aplicação</h3>
                       
-                      {/* General Settings */}
-                      <Card className="bg-gradient-secondary border-border/50">
-                        <CardHeader>
-                          <CardTitle className="text-base text-foreground">Informações Gerais</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="app_name" className="text-foreground">Nome da Aplicação</Label>
-                            <Input
-                              id="app_name"
-                              value={appSettingsForm.app_name}
-                              onChange={(e) => handleAppInputChange('app_name', e.target.value)}
-                              placeholder="AgendaPro"
-                              className="transition-fast focus:border-primary/50"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* General Settings */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Informações Gerais</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="app_name" className="text-foreground font-medium">Nome da Aplicação</Label>
+                             <Input
+                               id="app_name"
+                               value={appSettingsForm.app_name}
+                               onChange={(e) => handleAppInputChange('app_name', e.target.value)}
+                               placeholder="AgendaPro"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
 
-                      {/* Hero Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Seção Principal (Hero)</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="hero_title">Título Principal</Label>
-                            <Input
-                              id="hero_title"
-                              value={appSettingsForm.hero_title}
-                              onChange={(e) => handleAppInputChange('hero_title', e.target.value)}
-                              placeholder="Revolucione seu Salão com Agendamentos Inteligentes"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="hero_subtitle">Subtítulo</Label>
-                            <Textarea
-                              id="hero_subtitle"
-                              value={appSettingsForm.hero_subtitle}
-                              onChange={(e) => handleAppInputChange('hero_subtitle', e.target.value)}
-                              placeholder="A plataforma completa para gestão de agendamentos..."
-                              rows={3}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* Hero Section */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Seção Principal (Hero)</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="hero_title" className="text-foreground font-medium">Título Principal</Label>
+                             <Input
+                               id="hero_title"
+                               value={appSettingsForm.hero_title}
+                               onChange={(e) => handleAppInputChange('hero_title', e.target.value)}
+                               placeholder="Revolucione seu Salão com Agendamentos Inteligentes"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="hero_subtitle" className="text-foreground font-medium">Subtítulo</Label>
+                             <Textarea
+                               id="hero_subtitle"
+                               value={appSettingsForm.hero_subtitle}
+                               onChange={(e) => handleAppInputChange('hero_subtitle', e.target.value)}
+                               placeholder="A plataforma completa para gestão de agendamentos..."
+                               rows={3}
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
 
-                      {/* Features Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Seção de Recursos</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="features_title">Título</Label>
-                            <Input
-                              id="features_title"
-                              value={appSettingsForm.features_title}
-                              onChange={(e) => handleAppInputChange('features_title', e.target.value)}
-                              placeholder="Tudo que você precisa em uma plataforma"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="features_subtitle">Subtítulo</Label>
-                            <Textarea
-                              id="features_subtitle"
-                              value={appSettingsForm.features_subtitle}
-                              onChange={(e) => handleAppInputChange('features_subtitle', e.target.value)}
-                              placeholder="Recursos pensados especialmente para o seu tipo de negócio"
-                              rows={2}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* Features Section */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Seção de Recursos</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="features_title" className="text-foreground font-medium">Título</Label>
+                             <Input
+                               id="features_title"
+                               value={appSettingsForm.features_title}
+                               onChange={(e) => handleAppInputChange('features_title', e.target.value)}
+                               placeholder="Tudo que você precisa em uma plataforma"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="features_subtitle" className="text-foreground font-medium">Subtítulo</Label>
+                             <Textarea
+                               id="features_subtitle"
+                               value={appSettingsForm.features_subtitle}
+                               onChange={(e) => handleAppInputChange('features_subtitle', e.target.value)}
+                               placeholder="Recursos pensados especialmente para o seu tipo de negócio"
+                               rows={2}
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
 
-                      {/* Testimonials Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Seção de Depoimentos</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="testimonials_title">Título</Label>
-                            <Input
-                              id="testimonials_title"
-                              value={appSettingsForm.testimonials_title}
-                              onChange={(e) => handleAppInputChange('testimonials_title', e.target.value)}
-                              placeholder="O que nossos clientes dizem"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="testimonials_subtitle">Subtítulo</Label>
-                            <Input
-                              id="testimonials_subtitle"
-                              value={appSettingsForm.testimonials_subtitle}
-                              onChange={(e) => handleAppInputChange('testimonials_subtitle', e.target.value)}
-                              placeholder="Histórias reais de sucesso"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* Testimonials Section */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Seção de Depoimentos</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="testimonials_title" className="text-foreground font-medium">Título</Label>
+                             <Input
+                               id="testimonials_title"
+                               value={appSettingsForm.testimonials_title}
+                               onChange={(e) => handleAppInputChange('testimonials_title', e.target.value)}
+                               placeholder="O que nossos clientes dizem"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="testimonials_subtitle" className="text-foreground font-medium">Subtítulo</Label>
+                             <Input
+                               id="testimonials_subtitle"
+                               value={appSettingsForm.testimonials_subtitle}
+                               onChange={(e) => handleAppInputChange('testimonials_subtitle', e.target.value)}
+                               placeholder="Histórias reais de sucesso"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
 
-                      {/* Pricing Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Seção de Planos</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="pricing_title">Título</Label>
-                            <Input
-                              id="pricing_title"
-                              value={appSettingsForm.pricing_title}
-                              onChange={(e) => handleAppInputChange('pricing_title', e.target.value)}
-                              placeholder="Planos que crescem com seu negócio"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="pricing_subtitle">Subtítulo</Label>
-                            <Input
-                              id="pricing_subtitle"
-                              value={appSettingsForm.pricing_subtitle}
-                              onChange={(e) => handleAppInputChange('pricing_subtitle', e.target.value)}
-                              placeholder="Escolha o plano ideal para o seu estabelecimento"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* Pricing Section */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Seção de Planos</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="pricing_title" className="text-foreground font-medium">Título</Label>
+                             <Input
+                               id="pricing_title"
+                               value={appSettingsForm.pricing_title}
+                               onChange={(e) => handleAppInputChange('pricing_title', e.target.value)}
+                               placeholder="Planos que crescem com seu negócio"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="pricing_subtitle" className="text-foreground font-medium">Subtítulo</Label>
+                             <Input
+                               id="pricing_subtitle"
+                               value={appSettingsForm.pricing_subtitle}
+                               onChange={(e) => handleAppInputChange('pricing_subtitle', e.target.value)}
+                               placeholder="Escolha o plano ideal para o seu estabelecimento"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
 
-                      {/* CTA Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Seção de Chamada para Ação</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="cta_title">Título</Label>
-                            <Input
-                              id="cta_title"
-                              value={appSettingsForm.cta_title}
-                              onChange={(e) => handleAppInputChange('cta_title', e.target.value)}
-                              placeholder="Pronto para transformar seu negócio?"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="cta_subtitle">Subtítulo</Label>
-                            <Textarea
-                              id="cta_subtitle"
-                              value={appSettingsForm.cta_subtitle}
-                              onChange={(e) => handleAppInputChange('cta_subtitle', e.target.value)}
-                              placeholder="Junte-se a centenas de profissionais que já revolucionaram seus salões"
-                              rows={2}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                       {/* CTA Section */}
+                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
+                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
+                           <CardTitle className="text-base text-foreground">Seção de Chamada para Ação</CardTitle>
+                         </CardHeader>
+                         <CardContent className="space-y-4 pt-6">
+                           <div>
+                             <Label htmlFor="cta_title" className="text-foreground font-medium">Título</Label>
+                             <Input
+                               id="cta_title"
+                               value={appSettingsForm.cta_title}
+                               onChange={(e) => handleAppInputChange('cta_title', e.target.value)}
+                               placeholder="Pronto para transformar seu negócio?"
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="cta_subtitle" className="text-foreground font-medium">Subtítulo</Label>
+                             <Textarea
+                               id="cta_subtitle"
+                               value={appSettingsForm.cta_subtitle}
+                               onChange={(e) => handleAppInputChange('cta_subtitle', e.target.value)}
+                               placeholder="Junte-se a centenas de profissionais que já revolucionaram seus salões"
+                               rows={2}
+                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
+                             />
+                           </div>
+                         </CardContent>
+                       </Card>
                     </div>
 
                     {/* Platform Settings Section */}
@@ -563,13 +605,13 @@ const AdminSettings = () => {
             </TabsContent>
 
             <TabsContent value="email">
-              <Card className="border-border shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center text-lg lg:text-xl">
-                    <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-green-600" />
+              <Card className="bg-gradient-card border-border/50 shadow-lg hover-lift transition-fast">
+                <CardHeader className="pb-4 bg-gradient-subtle rounded-t-lg">
+                  <CardTitle className="flex items-center text-lg lg:text-xl text-foreground">
+                    <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-primary" />
                     Configurações de Email
                   </CardTitle>
-                  <CardDescription className="text-sm lg:text-base">
+                  <CardDescription className="text-sm lg:text-base text-muted-foreground">
                     Configure o servidor SMTP para envio de emails
                   </CardDescription>
                 </CardHeader>
@@ -657,13 +699,13 @@ const AdminSettings = () => {
             </TabsContent>
 
             <TabsContent value="notifications">
-              <Card className="border-border shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center text-lg lg:text-xl">
-                    <Bell className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-purple-600" />
+              <Card className="bg-gradient-card border-border/50 shadow-lg hover-lift transition-fast">
+                <CardHeader className="pb-4 bg-gradient-subtle rounded-t-lg">
+                  <CardTitle className="flex items-center text-lg lg:text-xl text-foreground">
+                    <Bell className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-primary" />
                     Configurações de Notificações
                   </CardTitle>
-                  <CardDescription className="text-sm lg:text-base">
+                  <CardDescription className="text-sm lg:text-base text-muted-foreground">
                     Configure quando você deseja receber notificações
                   </CardDescription>
                 </CardHeader>
