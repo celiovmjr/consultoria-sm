@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -122,14 +122,15 @@ export const UserForm = ({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => onEdit(null)} className="bg-gradient-to-r from-blue-600 to-purple-600">
+        <Button onClick={() => onEdit(null)} className="bg-gradient-primary text-white hover-glow transition-smooth">
           <Plus className="w-4 h-4 mr-2" />
           Novo Usuário
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-background border-border">
+      <DialogContent className="sm:max-w-[500px] bg-gradient-card border-border/50 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-foreground">
+          <DialogTitle className="text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-info" />
             {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -137,7 +138,7 @@ export const UserForm = ({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="name" className="text-foreground">Nome Completo</Label>
             <Input
@@ -145,7 +146,7 @@ export const UserForm = ({
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               required
-              className="bg-background border-border text-foreground"
+              className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
             />
           </div>
           
@@ -157,7 +158,7 @@ export const UserForm = ({
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
               required
-              className="bg-background border-border text-foreground"
+              className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
             />
           </div>
           
@@ -167,14 +168,14 @@ export const UserForm = ({
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              className="bg-background border-border text-foreground"
+              className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
             />
           </div>
           
           <div>
             <Label htmlFor="role" className="text-foreground">Tipo de Usuário</Label>
             <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value as any})}>
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border">
@@ -188,7 +189,7 @@ export const UserForm = ({
           <div>
             <Label htmlFor="business_id" className="text-foreground">Negócio</Label>
             <Select value={formData.business_id} onValueChange={(value) => setFormData({...formData, business_id: value})}>
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue placeholder="Selecione um negócio (opcional)" />
               </SelectTrigger>
               <SelectContent className="bg-background border-border">
@@ -205,7 +206,7 @@ export const UserForm = ({
           <div>
             <Label htmlFor="status" className="text-foreground">Status</Label>
             <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border">
@@ -215,11 +216,11 @@ export const UserForm = ({
             </Select>
           </div>
           
-          <DialogFooter className="flex space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={resetForm}>
+          <DialogFooter className="flex space-x-3 pt-4">
+            <Button type="button" variant="outline" onClick={resetForm} className="transition-smooth hover:bg-muted/50">
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="bg-gradient-primary hover-glow transition-smooth">
               {editingUser ? 'Atualizar' : 'Criar'} Usuário
             </Button>
           </DialogFooter>

@@ -76,33 +76,37 @@ const AdminDashboard = () => {
             <>
               {/* Key Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-                <Card>
+                <Card className="bg-gradient-card hover-lift border-border/50">
                   <CardContent className="p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs md:text-sm font-medium text-muted-foreground">Total de Negócios</p>
                         <p className="text-xl md:text-2xl font-bold text-foreground">{totalBusinesses}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{activeBusinesses} ativos</p>
+                        <p className="text-xs text-success mt-1">{activeBusinesses} ativos</p>
                       </div>
-                      <Building className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                      <div className="p-3 rounded-full bg-info/10">
+                        <Building className="w-6 h-6 md:w-8 md:h-8 text-info" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-card hover-lift border-border/50">
                   <CardContent className="p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs md:text-sm font-medium text-muted-foreground">Total de Usuários</p>
                         <p className="text-xl md:text-2xl font-bold text-foreground">{totalUsers}</p>
-                        <p className="text-xs text-green-600 mt-1">+8% vs mês anterior</p>
+                        <p className="text-xs text-success mt-1">+8% vs mês anterior</p>
                       </div>
-                      <Users className="w-6 h-6 md:w-8 md:h-8 text-purple-600" />
+                      <div className="p-3 rounded-full bg-primary/10">
+                        <Users className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-card hover-lift border-border/50">
                   <CardContent className="p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -110,20 +114,24 @@ const AdminDashboard = () => {
                         <p className="text-xl md:text-2xl font-bold text-foreground">{mostPopularPlan?.name || 'Premium'}</p>
                         <p className="text-xs text-muted-foreground mt-1">{popularPlanPercentage}% dos usuários</p>
                       </div>
-                      <CreditCard className="w-6 h-6 md:w-8 md:h-8 text-orange-600" />
+                      <div className="p-3 rounded-full bg-warning/10">
+                        <CreditCard className="w-6 h-6 md:w-8 md:h-8 text-warning" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-card hover-lift border-border/50">
                   <CardContent className="p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs md:text-sm font-medium text-muted-foreground">Novos Agendamentos</p>
                         <p className="text-xl md:text-2xl font-bold text-foreground">{totalAppointments}</p>
-                        <p className="text-xs text-green-600 mt-1">+15% vs semana anterior</p>
+                        <p className="text-xs text-success mt-1">+15% vs semana anterior</p>
                       </div>
-                      <Calendar className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
+                      <div className="p-3 rounded-full bg-success/10">
+                        <Calendar className="w-6 h-6 md:w-8 md:h-8 text-success" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -131,10 +139,10 @@ const AdminDashboard = () => {
 
               {/* Recent Business and Quick Actions */}
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-                <Card>
+                <Card className="bg-gradient-card border-border/50">
                   <CardHeader>
                     <CardTitle className="flex items-center text-foreground text-lg">
-                      <Building className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
+                      <Building className="w-4 h-4 md:w-5 md:h-5 mr-2 text-info" />
                       Negócios Recentes
                     </CardTitle>
                     <CardDescription className="text-muted-foreground text-sm">
@@ -145,7 +153,7 @@ const AdminDashboard = () => {
                     <div className="space-y-3 md:space-y-4">
                       {recentBusinesses.length > 0 ? (
                         recentBusinesses.map((business) => (
-                          <div key={business.id} className="flex items-center justify-between p-3 md:p-4 bg-muted/30 rounded-lg">
+                          <div key={business.id} className="flex items-center justify-between p-3 md:p-4 bg-muted/50 rounded-lg transition-smooth hover:bg-muted/70 border border-border/50">
                             <div className="min-w-0 flex-1">
                               <h4 className="font-medium text-foreground text-sm md:text-base truncate">{business.name}</h4>
                               <p className="text-xs md:text-sm text-muted-foreground truncate">Status: {business.status}</p>
@@ -169,10 +177,10 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-card border-border/50">
                   <CardHeader>
                     <CardTitle className="flex items-center text-foreground text-lg">
-                      <PlusCircle className="w-4 h-4 md:w-5 md:h-5 mr-2 text-green-600" />
+                      <PlusCircle className="w-4 h-4 md:w-5 md:h-5 mr-2 text-success" />
                       Ações Rápidas
                     </CardTitle>
                     <CardDescription className="text-muted-foreground text-sm">
@@ -184,9 +192,9 @@ const AdminDashboard = () => {
                       <Link to="/admin/usuarios">
                         <Button 
                           variant="outline" 
-                          className="w-full h-auto p-3 md:p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/30 border-blue-200 dark:border-blue-800"
+                          className="w-full h-auto p-3 md:p-4 bg-info/10 hover:bg-info/20 border-info/20 transition-smooth hover-glow group"
                         >
-                          <Users className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
+                          <Users className="w-4 h-4 md:w-5 md:h-5 mr-2 text-info group-hover:scale-110 transition-transform" />
                           <span className="text-foreground text-sm md:text-base">Gerenciar Usuários</span>
                         </Button>
                       </Link>
@@ -194,34 +202,32 @@ const AdminDashboard = () => {
                       <Link to="/admin/relatorios">
                         <Button 
                           variant="outline" 
-                          className="w-full h-auto p-3 md:p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-800/30 border-green-200 dark:border-green-800"
+                          className="w-full h-auto p-3 md:p-4 bg-success/10 hover:bg-success/20 border-success/20 transition-smooth hover-glow group"
                         >
-                          <File className="w-4 h-4 md:w-5 md:h-5 mr-2 text-green-600" />
+                          <File className="w-4 h-4 md:w-5 md:h-5 mr-2 text-success group-hover:scale-110 transition-transform" />
                           <span className="text-foreground text-sm md:text-base">Criar Relatório</span>
                         </Button>
                       </Link>
                       
                       <Button 
                         variant="outline" 
-                        className="w-full h-auto p-3 md:p-4 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-800/30 border-orange-200 dark:border-orange-800"
+                        className="w-full h-auto p-3 md:p-4 bg-warning/10 hover:bg-warning/20 border-warning/20 transition-smooth hover-glow group"
                         onClick={() => {
-                          // Implementar funcionalidade de notificação
                           alert('Funcionalidade de notificação em desenvolvimento');
                         }}
                       >
-                        <MessageSquare className="w-4 h-4 md:w-5 md:h-5 mr-2 text-orange-600" />
+                        <MessageSquare className="w-4 h-4 md:w-5 md:h-5 mr-2 text-warning group-hover:scale-110 transition-transform" />
                         <span className="text-foreground text-sm md:text-base">Enviar Notificação</span>
                       </Button>
                       
                       <Button 
                         variant="outline" 
-                        className="w-full h-auto p-3 md:p-4 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-800/30 border-purple-200 dark:border-purple-800"
+                        className="w-full h-auto p-3 md:p-4 bg-primary/10 hover:bg-primary/20 border-primary/20 transition-smooth hover-glow group"
                         onClick={() => {
-                          // Implementar verificação de pagamentos
                           alert('Verificação de pagamentos em desenvolvimento');
                         }}
                       >
-                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 mr-2 text-purple-600" />
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary group-hover:scale-110 transition-transform" />
                         <span className="text-foreground text-sm md:text-base">Verificar Pagamentos</span>
                       </Button>
                     </div>

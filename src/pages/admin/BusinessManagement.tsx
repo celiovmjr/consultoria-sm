@@ -296,12 +296,12 @@ const BusinessManagement = () => {
             <p className="text-muted-foreground text-sm lg:text-base">Administre todos os negócios da plataforma</p>
           </div>
 
-          <Card className="border-border shadow-lg">
+          <Card className="bg-gradient-card border-border/50 shadow-lg hover-lift">
             <CardHeader className="pb-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <CardTitle className="flex items-center text-foreground text-lg lg:text-xl">
-                    <Building className="w-5 h-5 mr-2 text-blue-600" />
+                    <Building className="w-5 h-5 mr-2 text-info" />
                     Lista de Negócios
                   </CardTitle>
                   <CardDescription className="text-muted-foreground text-sm">
@@ -311,34 +311,37 @@ const BusinessManagement = () => {
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 w-full lg:w-auto" 
+                      className="bg-gradient-primary text-white w-full lg:w-auto hover-glow transition-smooth" 
                       onClick={() => resetForm()}
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Negócio
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-background border-border mx-4 max-w-md lg:max-w-lg">
+                  <DialogContent className="bg-gradient-card border-border/50 mx-4 max-w-md lg:max-w-lg shadow-2xl">
                     <DialogHeader>
-                      <DialogTitle className="text-foreground">Novo Negócio</DialogTitle>
+                      <DialogTitle className="text-foreground flex items-center gap-2">
+                        <Building className="w-5 h-5 text-info" />
+                        Novo Negócio
+                      </DialogTitle>
                       <DialogDescription className="text-muted-foreground">
                         Cadastre um novo negócio na plataforma
                       </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreate} className="space-y-4">
+                    <form onSubmit={handleCreate} className="space-y-6">
                       <Input
                         placeholder="Nome do negócio"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         required
-                        className="bg-background border-border text-foreground"
+                        className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                       />
                       <Input
                         placeholder="Nome do proprietário"
                         value={formData.owner}
                         onChange={(e) => setFormData({...formData, owner: e.target.value})}
                         required
-                        className="bg-background border-border text-foreground"
+                        className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                       />
                       <Input
                         type="email"
@@ -346,40 +349,40 @@ const BusinessManagement = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         required
-                        className="bg-background border-border text-foreground"
+                        className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                       />
                       <Input
                         placeholder="Telefone"
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         required
-                        className="bg-background border-border text-foreground"
+                        className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                       />
                       <Input
                         placeholder="Descrição"
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="bg-background border-border text-foreground"
+                        className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                       />
                       <Select 
                         value={formData.plan} 
                         onValueChange={(value) => setFormData({...formData, plan: value})}
                       >
-                        <SelectTrigger className="bg-background border-border text-foreground">
+                        <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                           <SelectValue placeholder="Selecione um plano" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-background border-border">
                           <SelectItem value="free">Gratuito</SelectItem>
                           <SelectItem value="basic">Básico</SelectItem>
                           <SelectItem value="premium">Premium</SelectItem>
                           <SelectItem value="enterprise">Enterprise</SelectItem>
                         </SelectContent>
                       </Select>
-                      <DialogFooter className="flex-col lg:flex-row gap-2">
-                        <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto">
+                      <DialogFooter className="flex-col lg:flex-row gap-3 pt-4">
+                        <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto transition-smooth hover:bg-muted/50">
                           Cancelar
                         </Button>
-                        <Button type="submit" className="w-full lg:w-auto">Criar Negócio</Button>
+                        <Button type="submit" className="w-full lg:w-auto bg-gradient-primary hover-glow transition-smooth">Criar Negócio</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -409,27 +412,30 @@ const BusinessManagement = () => {
 
           {/* Edit Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="bg-background border-border mx-4 max-w-md lg:max-w-lg">
+            <DialogContent className="bg-gradient-card border-border/50 mx-4 max-w-md lg:max-w-lg shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="text-foreground">Editar Negócio</DialogTitle>
+                <DialogTitle className="text-foreground flex items-center gap-2">
+                  <Building className="w-5 h-5 text-warning" />
+                  Editar Negócio
+                </DialogTitle>
                 <DialogDescription className="text-muted-foreground">
                   Atualize as informações do negócio
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleUpdate} className="space-y-4">
+              <form onSubmit={handleUpdate} className="space-y-6">
                 <Input
                   placeholder="Nome do negócio"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                 />
                 <Input
                   placeholder="Nome do proprietário"
                   value={formData.owner}
                   onChange={(e) => setFormData({...formData, owner: e.target.value})}
                   required
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                 />
                 <Input
                   type="email"
@@ -437,29 +443,29 @@ const BusinessManagement = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                 />
                 <Input
                   placeholder="Telefone"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   required
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                 />
                 <Input
                   placeholder="Descrição"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
                 />
                 <Select 
                   value={formData.plan} 
                   onValueChange={(value) => setFormData({...formData, plan: value})}
                 >
-                  <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                     <SelectValue placeholder="Selecione um plano" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background border-border">
                     <SelectItem value="free">Gratuito</SelectItem>
                     <SelectItem value="basic">Básico</SelectItem>
                     <SelectItem value="premium">Premium</SelectItem>
@@ -470,20 +476,20 @@ const BusinessManagement = () => {
                   value={formData.status} 
                   onValueChange={(value) => setFormData({...formData, status: value as 'active' | 'inactive' | 'pending'})}
                 >
-                  <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background border-border">
                     <SelectItem value="active">Ativo</SelectItem>
                     <SelectItem value="inactive">Inativo</SelectItem>
                     <SelectItem value="pending">Pendente</SelectItem>
                   </SelectContent>
                 </Select>
-                <DialogFooter className="flex-col lg:flex-row gap-2">
-                  <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto">
+                <DialogFooter className="flex-col lg:flex-row gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={resetForm} className="w-full lg:w-auto transition-smooth hover:bg-muted/50">
                     Cancelar
                   </Button>
-                  <Button type="submit" className="w-full lg:w-auto">Salvar Alterações</Button>
+                  <Button type="submit" className="w-full lg:w-auto bg-gradient-primary hover-glow transition-smooth">Salvar Alterações</Button>
                 </DialogFooter>
               </form>
             </DialogContent>

@@ -141,12 +141,12 @@ const UsersManagement = () => {
           />
 
           {/* Main Content */}
-          <Card className="border-border bg-card">
+          <Card className="bg-gradient-card border-border/50 shadow-lg hover-lift">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <CardTitle className="flex items-center text-foreground">
-                    <Users className="w-5 h-5 mr-2 text-blue-600" />
+                    <Users className="w-5 h-5 mr-2 text-info" />
                     Lista de Usuários
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">

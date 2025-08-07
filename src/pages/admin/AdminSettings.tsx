@@ -288,10 +288,10 @@ const AdminSettings = () => {
             </TabsList>
 
             <TabsContent value="platform">
-              <Card className="border-border shadow-lg">
+              <Card className="bg-gradient-card border-border/50 shadow-lg hover-lift">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center text-lg lg:text-xl">
-                    <Settings className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
+                    <Settings className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-primary" />
                     Configurações da Plataforma
                   </CardTitle>
                   <CardDescription className="text-sm lg:text-base">
@@ -305,18 +305,19 @@ const AdminSettings = () => {
                       <h3 className="text-lg font-semibold border-b pb-2">Configurações da Aplicação</h3>
                       
                       {/* General Settings */}
-                      <Card>
+                      <Card className="bg-gradient-secondary border-border/50">
                         <CardHeader>
-                          <CardTitle className="text-base">Informações Gerais</CardTitle>
+                          <CardTitle className="text-base text-foreground">Informações Gerais</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
-                            <Label htmlFor="app_name">Nome da Aplicação</Label>
+                            <Label htmlFor="app_name" className="text-foreground">Nome da Aplicação</Label>
                             <Input
                               id="app_name"
                               value={appSettingsForm.app_name}
                               onChange={(e) => handleAppInputChange('app_name', e.target.value)}
                               placeholder="AgendaPro"
+                              className="transition-fast focus:border-primary/50"
                             />
                           </div>
                         </CardContent>
