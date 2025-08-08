@@ -9,8 +9,10 @@ import { usePlans } from '@/hooks/usePlans';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Home = () => {
+  const { user, signOut } = useAuth();
   const { data: plansData = [], isLoading: plansLoading, error: plansError } = usePlans();
   
   // Use system settings hook to get all app settings
@@ -203,16 +205,32 @@ const Home = () => {
               {appSettings?.hero_subtitle || platformSettings?.description || 'A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/cadastro">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto">
-                  Começar Gratuitamente
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto border-2">
-                  Ver Demonstração
-                </Button>
-              </Link>
+              {user ? (
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <span className="text-gray-600">Olá, {user.email}</span>
+                  <Button 
+                    onClick={() => signOut()}
+                    variant="outline" 
+                    size="lg" 
+                    className="text-lg px-8 py-4 h-auto border-2"
+                  >
+                    Sair
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/cadastro">
+                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto">
+                      Começar Gratuitamente
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto border-2">
+                      Ver Demonstração
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

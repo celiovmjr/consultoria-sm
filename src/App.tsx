@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
@@ -46,46 +48,124 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <Routes>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter>
+              <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/cadastro" element={<Register />} />
               
               {/* Admin Routes */}
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/negocios" element={<BusinessManagement />} />
-              <Route path="/admin/usuarios" element={<UsersManagement />} />
-              <Route path="/admin/planos" element={<PlansManagement />} />
-              <Route path="/admin/relatorios" element={<AdminReports />} />
-              <Route path="/admin/configuracoes" element={<AdminSettings />} />
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/negocios" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <BusinessManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/usuarios" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <UsersManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/planos" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <PlansManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/relatorios" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <AdminReports />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/configuracoes" element={
+                <ProtectedRoute allowedRoles={['saas_admin']}>
+                  <AdminSettings />
+                </ProtectedRoute>
+              } />
               
               {/* Business Owner Routes */}
-              <Route path="/negocio/dashboard" element={<BusinessDashboard />} />
-              <Route path="/negocio/agendamentos" element={<AppointmentsManagement />} />
-              <Route path="/negocio/profissionais" element={<ProfessionalsManagement />} />
-              <Route path="/negocio/servicos" element={<ServicesManagement />} />
-              <Route path="/negocio/lojas" element={<StoresManagement />} />
-              <Route path="/negocio/categorias" element={<CategoriesManagement />} />
-              <Route path="/negocio/landing" element={<LandingCustomization />} />
-              <Route path="/negocio/relatorios" element={<BusinessReports />} />
-              <Route path="/negocio/configuracoes" element={<BusinessSettings />} />
+              <Route path="/negocio/dashboard" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <BusinessDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/agendamentos" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <AppointmentsManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/profissionais" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <ProfessionalsManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/servicos" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <ServicesManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/lojas" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <StoresManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/categorias" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <CategoriesManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/landing" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <LandingCustomization />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/relatorios" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <BusinessReports />
+                </ProtectedRoute>
+              } />
+              <Route path="/negocio/configuracoes" element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <BusinessSettings />
+                </ProtectedRoute>
+              } />
               
               {/* Professional Routes */}
-              <Route path="/profissional/dashboard" element={<ProfessionalDashboard />} />
-              <Route path="/profissional/perfil" element={<ProfessionalProfile />} />
-              <Route path="/profissional/historico" element={<AppointmentHistory />} />
-              <Route path="/profissional/indisponibilidade" element={<Unavailability />} />
+              <Route path="/profissional/dashboard" element={
+                <ProtectedRoute allowedRoles={['professional']}>
+                  <ProfessionalDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/profissional/perfil" element={
+                <ProtectedRoute allowedRoles={['professional']}>
+                  <ProfessionalProfile />
+                </ProtectedRoute>
+              } />
+              <Route path="/profissional/historico" element={
+                <ProtectedRoute allowedRoles={['professional']}>
+                  <AppointmentHistory />
+                </ProtectedRoute>
+              } />
+              <Route path="/profissional/indisponibilidade" element={
+                <ProtectedRoute allowedRoles={['professional']}>
+                  <Unavailability />
+                </ProtectedRoute>
+              } />
               
               {/* Client Routes */}
               <Route path="/cliente/:businessSlug" element={<BusinessLanding />} />
               
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
