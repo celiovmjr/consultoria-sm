@@ -19,7 +19,7 @@ import { useCategories } from '@/hooks/useCategories';
 const ServicesManagement = () => {
   const { services, loading, createService, updateService, deleteService } = useServices();
   const { stores } = useStores();
-  const { categories } = useCategories();
+  const { categories, loading: categoriesLoading } = useCategories();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -232,15 +232,25 @@ const ServicesManagement = () => {
                   </div>
                   
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                    <MultiSelectCategories
-                      categories={categories}
-                      selectedCategoryIds={selectedCategoryIds}
-                      onSelectionChange={setSelectedCategoryIds}
-                      placeholder="Selecione as categorias"
-                    />
+                  <div>
+                    {!categoriesLoading && categories && categories.length > 0 ? (
+                      <MultiSelectCategories
+                        categories={categories}
+                        selectedCategoryIds={selectedCategoryIds}
+                        onSelectionChange={setSelectedCategoryIds}
+                        placeholder="Selecione as categorias"
+                      />
+                    ) : (
+                      <div>
+                        <Label>Categorias</Label>
+                        <div className="p-3 border rounded-md bg-muted/30 text-muted-foreground text-sm">
+                          {categoriesLoading ? 'Carregando categorias...' : 'Nenhuma categoria disponível. Crie categorias primeiro.'}
+                        </div>
+                      </div>
+                    )}
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="duration">Duração (minutos)</Label>
                       <Input

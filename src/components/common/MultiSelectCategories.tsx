@@ -29,11 +29,32 @@ const MultiSelectCategories = ({
 }: MultiSelectCategoriesProps) => {
   const [open, setOpen] = useState(false);
 
-  // Ensure arrays are always defined
-  const safeCategories = categories || [];
-  const safeSelectedIds = selectedCategoryIds || [];
+  // Ensure arrays are always defined and valid
+  const safeCategories = React.useMemo(() => 
+    Array.isArray(categories) ? categories : [], 
+    [categories]
+  );
+  const safeSelectedIds = React.useMemo(() => 
+    Array.isArray(selectedCategoryIds) ? selectedCategoryIds : [], 
+    [selectedCategoryIds]
+  );
   
-  const selectedCategories = safeCategories.filter(cat => safeSelectedIds.includes(cat.id));
+  const selectedCategories = React.useMemo(() => 
+    safeCategories.filter(cat => cat && cat.id && safeSelectedIds.includes(cat.id)),
+    [safeCategories, safeSelectedIds]
+  );
+
+  // Don't render if no categories available
+  if (!safeCategories || safeCategories.length === 0) {
+    return (
+      <div className="space-y-2">
+        <Label>Categorias</Label>
+        <div className="p-3 border rounded-md bg-muted/30 text-muted-foreground text-sm">
+          Nenhuma categoria disponível
+        </div>
+      </div>
+    );
+  }
 
   const handleSelect = (categoryId: string) => {
     if (safeSelectedIds.includes(categoryId)) {
