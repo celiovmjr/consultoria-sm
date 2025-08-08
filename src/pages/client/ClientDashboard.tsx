@@ -7,109 +7,129 @@ const ClientDashboard = () => {
   const { profile } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Bem-vindo, {profile?.name}!
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">
+            Bem-vindo, !
           </h1>
-          <p className="text-gray-600">
+          <p className="text-slate-600 text-lg">
             Gerencie seus agendamentos e encontre os melhores serviços.
           </p>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Agendar Serviço
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-slate-900">
+                  Agendar Serviço
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Button className="w-full">
+            <CardContent className="pt-0">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 Novo Agendamento
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Meus Agendamentos
-              </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-slate-600" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-slate-900">
+                  Meus Agendamentos
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
+            <CardContent className="pt-0">
+              <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50">
                 Ver Histórico
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Meu Perfil
-              </CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <User className="h-5 w-5 text-slate-600" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-slate-900">
+                  Meu Perfil
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
+            <CardContent className="pt-0">
+              <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50">
                 Editar Perfil
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Configurações
-              </CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-slate-600" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-slate-900">
+                  Configurações
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
+            <CardContent className="pt-0">
+              <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50">
                 Ajustes
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Appointments */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximos Agendamentos</CardTitle>
-              <CardDescription>
+        {/* Main Content Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card className="bg-white border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-semibold text-slate-900">Próximos Agendamentos</CardTitle>
+              <CardDescription className="text-slate-600">
                 Seus próximos compromissos agendados
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>Nenhum agendamento próximo</p>
-                <Button className="mt-4">
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500 mb-6">Nenhum agendamento próximo</p>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6">
                   Fazer Agendamento
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Serviços Favoritos</CardTitle>
-              <CardDescription>
+          <Card className="bg-white border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-semibold text-slate-900">Serviços Favoritos</CardTitle>
+              <CardDescription className="text-slate-600">
                 Serviços que você mais utiliza
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>Nenhum serviço favorito ainda</p>
-                <Button variant="outline" className="mt-4">
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-8 w-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500 mb-6">Nenhum serviço favorito ainda</p>
+                <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 px-6">
                   Explorar Serviços
                 </Button>
               </div>
