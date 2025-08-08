@@ -10,6 +10,7 @@ import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import DataTable from '@/components/common/DataTable';
 import { useToast } from '@/hooks/use-toast';
 import { useBusinesses } from '@/hooks/useBusinesses';
+import { usePlans } from '@/hooks/usePlans';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -17,6 +18,7 @@ const BusinessManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: businesses = [], isLoading, error } = useBusinesses();
+  const { data: plans = [], isLoading: isLoadingPlans } = usePlans();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -368,14 +370,17 @@ const BusinessManagement = () => {
                         value={formData.plan} 
                         onValueChange={(value) => setFormData({...formData, plan: value})}
                       >
-                        <SelectTrigger className="bg-background border-border text-foreground transition-fast">
-                          <SelectValue placeholder="Selecione um plano" />
+                        <SelectTrigger className="bg-background border-border text-foreground transition-fast" disabled={isLoadingPlans}>
+                          <SelectValue placeholder={isLoadingPlans ? "Carregando planos..." : "Selecione um plano"} />
                         </SelectTrigger>
-                        <SelectContent className="bg-background border-border">
-                          <SelectItem value="free">Gratuito</SelectItem>
-                          <SelectItem value="basic">Básico</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="enterprise">Enterprise</SelectItem>
+                        <SelectContent className="bg-popover border-border z-[60]">
+                          {plans && plans.length > 0 ? (
+                            plans.map((p: any) => (
+                              <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="__no-plan__" disabled>Nenhum plano disponível</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <DialogFooter className="flex-col lg:flex-row gap-3 pt-4">
@@ -462,14 +467,17 @@ const BusinessManagement = () => {
                   value={formData.plan} 
                   onValueChange={(value) => setFormData({...formData, plan: value})}
                 >
-                  <SelectTrigger className="bg-background border-border text-foreground transition-fast">
-                    <SelectValue placeholder="Selecione um plano" />
+                  <SelectTrigger className="bg-background border-border text-foreground transition-fast" disabled={isLoadingPlans}>
+                    <SelectValue placeholder={isLoadingPlans ? "Carregando planos..." : "Selecione um plano"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border-border">
-                    <SelectItem value="free">Gratuito</SelectItem>
-                    <SelectItem value="basic">Básico</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  <SelectContent className="bg-popover border-border z-[60]">
+                    {plans && plans.length > 0 ? (
+                      plans.map((p: any) => (
+                        <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="__no-plan__" disabled>Nenhum plano disponível</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
                 <Select 
@@ -479,7 +487,7 @@ const BusinessManagement = () => {
                   <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border-border">
+                  <SelectContent className="bg-popover border-border z-[60]">
                     <SelectItem value="active">Ativo</SelectItem>
                     <SelectItem value="inactive">Inativo</SelectItem>
                     <SelectItem value="pending">Pendente</SelectItem>
