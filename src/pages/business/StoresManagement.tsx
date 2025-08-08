@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, Store as StoreIcon, MapPin, Phone, User } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
+import WorkingHours from '@/components/common/WorkingHours';
 import { useStores, Store } from '@/hooks/useStores';
 
 const StoresManagement = () => {
@@ -23,7 +24,7 @@ const StoresManagement = () => {
     phone: '',
     email: '',
     manager: '',
-    working_hours: '',
+    working_hours: [],
     is_active: true
   });
 
@@ -99,7 +100,7 @@ const StoresManagement = () => {
       phone: store.phone || '',
       email: store.email || '',
       manager: store.manager || '',
-      working_hours: store.working_hours || '',
+      working_hours: store.working_hours || [],
       is_active: store.is_active
     });
     setIsDialogOpen(true);
@@ -117,7 +118,7 @@ const StoresManagement = () => {
       phone: '',
       email: '',
       manager: '',
-      working_hours: '',
+      working_hours: [],
       is_active: true
     });
     setEditingStore(null);
@@ -227,16 +228,13 @@ const StoresManagement = () => {
                     </div>
                   </div>
                   
-                   <div>
-                     <Label htmlFor="working_hours">Horário de Funcionamento</Label>
-                     <Input
-                       id="working_hours"
-                       value={formData.working_hours}
-                       onChange={(e) => setFormData({...formData, working_hours: e.target.value})}
-                       placeholder="Ex: Seg-Sex: 9h às 18h | Sáb: 9h às 17h"
-                       required
-                     />
-                   </div>
+                  <div>
+                    <Label>Horário de Funcionamento</Label>
+                    <WorkingHours
+                      value={formData.working_hours}
+                      onChange={(schedule) => setFormData({...formData, working_hours: schedule})}
+                    />
+                  </div>
                    
                    <div className="flex items-center space-x-2">
                      <Switch
