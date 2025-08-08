@@ -197,6 +197,42 @@ export type Database = {
           },
         ]
       }
+      service_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          service_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          service_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_categories_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           business_id: string | null

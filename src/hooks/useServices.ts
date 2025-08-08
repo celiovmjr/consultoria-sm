@@ -18,10 +18,13 @@ export interface Service {
   stores?: {
     name: string;
   };
-  categories?: {
-    name: string;
-    color: string;
-  };
+  service_categories?: Array<{
+    categories: {
+      id: string;
+      name: string;
+      color: string;
+    };
+  }>;
 }
 
 export const useServices = () => {
@@ -37,7 +40,7 @@ export const useServices = () => {
         .select(`
           *,
           stores(name),
-          categories(name, color)
+          service_categories(categories(id, name, color))
         `)
         .order('created_at', { ascending: false });
 
@@ -54,25 +57,50 @@ export const useServices = () => {
     }
   };
 
-  const createService = async (serviceData: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
+  const createService = async (serviceData: Omit<Service, 'id' | 'created_at' | 'updated_at'>, categoryIds: string[] = []) => {
     try {
-      const { data, error } = await supabase
+      const { category_id, service_categories, ...cleanServiceData } = serviceData;
+      
+      const { data: service, error: serviceError } = await supabase
         .from('services')
-        .insert([serviceData])
+        .insert([cleanServiceData])
+        .select()
+        .single();
+
+      if (serviceError) throw serviceError;
+
+      // Insert service categories
+      if (categoryIds.length > 0) {
+        const serviceCategoriesData = categoryIds.map(categoryId => ({
+          service_id: service.id,
+          category_id: categoryId
+        }));
+
+        const { error: categoriesError } = await supabase
+          .from('service_categories')
+          .insert(serviceCategoriesData);
+
+        if (categoriesError) throw categoriesError;
+      }
+
+      // Fetch the complete service with categories
+      const { data: completeService, error: fetchError } = await supabase
+        .from('services')
         .select(`
           *,
           stores(name),
-          categories(name, color)
+          service_categories(categories(id, name, color))
         `)
+        .eq('id', service.id)
         .single();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       
-      setServices(prev => [data, ...prev]);
+      setServices(prev => [completeService, ...prev]);
       toast({
         title: "Serviço criado com sucesso!",
       });
-      return data;
+      return completeService;
     } catch (error: any) {
       toast({
         title: "Erro ao criar serviço",
@@ -83,28 +111,64 @@ export const useServices = () => {
     }
   };
 
-  const updateService = async (id: string, serviceData: Partial<Service>) => {
+  const updateService = async (id: string, serviceData: Partial<Service>, categoryIds?: string[]) => {
     try {
-      const { data, error } = await supabase
+      const { category_id, service_categories, ...cleanServiceData } = serviceData;
+      
+      const { data: service, error: serviceError } = await supabase
         .from('services')
-        .update(serviceData)
+        .update(cleanServiceData)
         .eq('id', id)
+        .select()
+        .single();
+
+      if (serviceError) throw serviceError;
+
+      // Update service categories if provided
+      if (categoryIds !== undefined) {
+        // Delete existing categories
+        const { error: deleteError } = await supabase
+          .from('service_categories')
+          .delete()
+          .eq('service_id', id);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new categories
+        if (categoryIds.length > 0) {
+          const serviceCategoriesData = categoryIds.map(categoryId => ({
+            service_id: id,
+            category_id: categoryId
+          }));
+
+          const { error: insertError } = await supabase
+            .from('service_categories')
+            .insert(serviceCategoriesData);
+
+          if (insertError) throw insertError;
+        }
+      }
+
+      // Fetch the complete service with categories
+      const { data: completeService, error: fetchError } = await supabase
+        .from('services')
         .select(`
           *,
           stores(name),
-          categories(name, color)
+          service_categories(categories(id, name, color))
         `)
+        .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       
       setServices(prev => prev.map(service => 
-        service.id === id ? data : service
+        service.id === id ? completeService : service
       ));
       toast({
         title: "Serviço atualizado com sucesso!",
       });
-      return data;
+      return completeService;
     } catch (error: any) {
       toast({
         title: "Erro ao atualizar serviço",

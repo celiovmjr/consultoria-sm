@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Plus, Scissors, Clock, DollarSign, Store as StoreIcon } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
+import MultiSelectCategories from '@/components/common/MultiSelectCategories';
 import { useServices, Service } from '@/hooks/useServices';
 import { useStores } from '@/hooks/useStores';
 import { useCategories } from '@/hooks/useCategories';
@@ -22,13 +23,12 @@ const ServicesManagement = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     duration: 60,
     price: 0,
-    category: '',
-    category_id: '',
     store_id: '',
     is_active: true
   });
@@ -55,17 +55,24 @@ const ServicesManagement = () => {
       ),
     },
     {
-      key: 'categories',
-      label: 'Categoria',
-      render: (value: any) => value ? (
-        <div className="flex items-center space-x-2">
-          <div 
-            className="w-3 h-3 rounded-full" 
-            style={{ backgroundColor: value.color }}
-          />
-          <span>{value.name}</span>
-        </div>
-      ) : '-',
+      key: 'service_categories',
+      label: 'Categorias',
+      render: (value: any) => {
+        if (!value || value.length === 0) return '-';
+        return (
+          <div className="flex flex-wrap gap-1">
+            {value.map((item: any, index: number) => (
+              <div key={index} className="flex items-center space-x-1 text-xs bg-muted px-2 py-1 rounded-full">
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: item.categories.color }}
+                />
+                <span>{item.categories.name}</span>
+              </div>
+            ))}
+          </div>
+        );
+      },
     },
     {
       key: 'duration',
@@ -105,9 +112,9 @@ const ServicesManagement = () => {
     
     try {
       if (editingService) {
-        await updateService(editingService.id, formData);
+        await updateService(editingService.id, formData, selectedCategoryIds);
       } else {
-        await createService(formData);
+        await createService(formData, selectedCategoryIds);
       }
       resetForm();
     } catch (error) {
@@ -122,11 +129,14 @@ const ServicesManagement = () => {
       description: service.description || '',
       duration: service.duration || 60,
       price: service.price,
-      category: service.category || '',
-      category_id: service.category_id || '',
       store_id: service.store_id || '',
       is_active: service.is_active
     });
+    
+    // Set selected categories
+    const categoryIds = service.service_categories?.map(item => item.categories.id) || [];
+    setSelectedCategoryIds(categoryIds);
+    
     setIsDialogOpen(true);
   };
 
@@ -140,11 +150,10 @@ const ServicesManagement = () => {
       description: '',
       duration: 60,
       price: 0,
-      category: '',
-      category_id: '',
       store_id: '',
       is_active: true
     });
+    setSelectedCategoryIds([]);
     setEditingService(null);
     setIsDialogOpen(false);
   };
@@ -222,22 +231,16 @@ const ServicesManagement = () => {
                     />
                   </div>
                   
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="category">Categoria</Label>
-                      <Select value={formData.category_id} onValueChange={(value) => setFormData({...formData, category_id: value})}>
-                        <SelectTrigger className="bg-popover">
-                          <SelectValue placeholder="Selecione a categoria" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <MultiSelectCategories
+                      categories={categories}
+                      selectedCategoryIds={selectedCategoryIds}
+                      onSelectionChange={setSelectedCategoryIds}
+                      placeholder="Selecione as categorias"
+                    />
+                  </div>
                     <div>
                       <Label htmlFor="duration">Duração (minutos)</Label>
                       <Input
