@@ -178,7 +178,7 @@ export const UserForm = ({
               <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-background border-border">
+              <SelectContent className="bg-popover border-border z-[60]">
                 <SelectItem value="business_owner">Proprietário</SelectItem>
                 <SelectItem value="professional">Profissional</SelectItem>
                 <SelectItem value="admin">Administrador</SelectItem>
@@ -214,7 +214,7 @@ export const UserForm = ({
               <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-background border-border">
+              <SelectContent className="bg-popover border-border z-[60]">
                 <SelectItem value="active">Ativo</SelectItem>
                 <SelectItem value="inactive">Inativo</SelectItem>
               </SelectContent>
