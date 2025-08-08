@@ -19,15 +19,31 @@ const Register = () => {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const { signUp, user } = useAuth();
+  const { signUp, user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/login');
+    if (user && profile) {
+      // Redirect based on user role
+      switch (profile.role) {
+        case 'saas_admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'business_owner':
+          navigate('/negocio/dashboard');
+          break;
+        case 'professional':
+          navigate('/profissional/dashboard');
+          break;
+        case 'client':
+          navigate('/cliente/dashboard');
+          break;
+        default:
+          navigate('/');
+      }
     }
-  }, [user, navigate]);
+  }, [user, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
