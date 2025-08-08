@@ -11,11 +11,16 @@ export interface Service {
   price: number;
   duration?: number;
   category?: string;
+  category_id?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   stores?: {
     name: string;
+  };
+  categories?: {
+    name: string;
+    color: string;
   };
 }
 
@@ -31,7 +36,8 @@ export const useServices = () => {
         .from('services')
         .select(`
           *,
-          stores(name)
+          stores(name),
+          categories(name, color)
         `)
         .order('created_at', { ascending: false });
 
@@ -55,7 +61,8 @@ export const useServices = () => {
         .insert([serviceData])
         .select(`
           *,
-          stores(name)
+          stores(name),
+          categories(name, color)
         `)
         .single();
 
@@ -84,7 +91,8 @@ export const useServices = () => {
         .eq('id', id)
         .select(`
           *,
-          stores(name)
+          stores(name),
+          categories(name, color)
         `)
         .single();
 

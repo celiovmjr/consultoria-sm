@@ -1,119 +1,58 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Tag } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, Tag, Edit, Trash2 } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
-import DataTable from '@/components/common/DataTable';
-
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-  servicesCount: number;
-  color: string;
-  storeId?: string; // Adicionando campo para loja/filial
-}
+import { useCategories, Category } from '@/hooks/useCategories';
 
 const CategoriesManagement = () => {
-  const { toast } = useToast();
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Cabelos', description: 'Serviços relacionados a cabelos', servicesCount: 8, color: '#3b82f6', storeId: '1' },
-    { id: 2, name: 'Unhas', description: 'Manicure e pedicure', servicesCount: 5, color: '#ef4444', storeId: '1' },
-    { id: 3, name: 'Estética', description: 'Tratamentos estéticos', servicesCount: 12, color: '#10b981', storeId: '1' },
-    { id: 4, name: 'Massagem', description: 'Massagens terapêuticas', servicesCount: 3, color: '#f59e0b', storeId: '1' },
-  ]);
-
+  const { categories, loading, createCategory, updateCategory, deleteCategory } = useCategories();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     color: '#3b82f6',
-    storeId: '1'
+    business_id: null,
+    is_active: true
   });
 
-  const columns = [
-    {
-      key: 'name',
-      label: 'Nome',
-      render: (value: string, row: Category) => (
-        <div className="flex items-center space-x-2">
-          <div 
-            className="w-4 h-4 rounded-full" 
-            style={{ backgroundColor: row.color }}
-          />
-          <span className="font-medium">{value}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'description',
-      label: 'Descrição',
-    },
-    {
-      key: 'servicesCount',
-      label: 'Serviços',
-      render: (value: number) => (
-        <Badge variant="secondary">
-          {value} serviços
-        </Badge>
-      ),
-    },
-  ];
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingCategory) {
-      setCategories(categories.map(cat => 
-        cat.id === editingCategory.id 
-          ? { ...cat, ...formData }
-          : cat
-      ));
-      toast({
-        title: "Categoria atualizada",
-        description: "A categoria foi atualizada com sucesso.",
-      });
-    } else {
-      const newCategory: Category = {
-        id: Math.max(...categories.map(c => c.id)) + 1,
-        ...formData,
-        servicesCount: 0
-      };
-      setCategories([...categories, newCategory]);
-      toast({
-        title: "Categoria criada",
-        description: "A nova categoria foi criada com sucesso.",
-      });
+    try {
+      if (editingCategory) {
+        await updateCategory(editingCategory.id, formData);
+      } else {
+        await createCategory(formData);
+      }
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    
-    resetForm();
   };
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
-      description: category.description,
+      description: category.description || '',
       color: category.color,
-      storeId: category.storeId || '1'
+      business_id: category.business_id,
+      is_active: category.is_active
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (category: Category) => {
-    setCategories(categories.filter(cat => cat.id !== category.id));
-    toast({
-      title: "Categoria excluída",
-      description: "A categoria foi excluída com sucesso.",
-    });
+  const handleDelete = async (category: Category) => {
+    if (window.confirm(`Tem certeza que deseja excluir a categoria "${category.name}"?`)) {
+      await deleteCategory(category.id);
+    }
   };
 
   const resetForm = () => {
@@ -121,22 +60,23 @@ const CategoriesManagement = () => {
       name: '',
       description: '',
       color: '#3b82f6',
-      storeId: '1'
+      business_id: null,
+      is_active: true
     });
     setEditingCategory(null);
     setIsDialogOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <BusinessSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Categorias</h1>
-              <p className="text-gray-600">Gerencie as categorias dos seus serviços</p>
+              <h1 className="text-3xl font-bold text-foreground">Categorias</h1>
+              <p className="text-muted-foreground">Gerencie as categorias dos seus serviços</p>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -146,7 +86,7 @@ const CategoriesManagement = () => {
                   Nova Categoria
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>
                     {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
@@ -166,7 +106,7 @@ const CategoriesManagement = () => {
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      placeholder="Ex: Cabelos, Unhas, Estética..."
+                      placeholder="Ex: Cabelos"
                       required
                     />
                   </div>
@@ -177,7 +117,7 @@ const CategoriesManagement = () => {
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      placeholder="Descreva os tipos de serviços desta categoria"
+                      placeholder="Descreva o tipo de serviços desta categoria"
                       rows={3}
                     />
                   </div>
@@ -190,13 +130,12 @@ const CategoriesManagement = () => {
                         type="color"
                         value={formData.color}
                         onChange={(e) => setFormData({...formData, color: e.target.value})}
-                        className="w-16 h-10"
+                        className="w-20 h-10"
                       />
                       <Input
                         value={formData.color}
                         onChange={(e) => setFormData({...formData, color: e.target.value})}
                         placeholder="#3b82f6"
-                        className="flex-1"
                       />
                     </div>
                   </div>
@@ -225,13 +164,60 @@ const CategoriesManagement = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable 
-                columns={columns} 
-                data={categories}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                deleteConfirmMessage="Tem certeza que deseja excluir esta categoria? Esta ação removerá a categoria de todos os serviços associados e não pode ser desfeita."
-              />
+              {loading ? (
+                <div className="flex justify-center p-8">
+                  <div className="text-muted-foreground">Carregando categorias...</div>
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="text-center p-8">
+                  <Tag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Nenhuma categoria encontrada</h3>
+                  <p className="text-muted-foreground">Crie sua primeira categoria para organizar seus serviços</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {categories.map((category) => (
+                    <div key={category.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <div>
+                          <h3 className="font-medium">{category.name}</h3>
+                          <p className="text-sm text-muted-foreground">{category.description}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-muted-foreground">
+                          {category.services_count} serviços
+                        </span>
+                        
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(category)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Excluir
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

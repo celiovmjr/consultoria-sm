@@ -13,14 +13,12 @@ import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
 import { useServices, Service } from '@/hooks/useServices';
 import { useStores } from '@/hooks/useStores';
+import { useCategories } from '@/hooks/useCategories';
 
 const ServicesManagement = () => {
   const { services, loading, createService, updateService, deleteService } = useServices();
   const { stores } = useStores();
-  
-  const categories = [
-    'Cabelos', 'Unhas', 'Estética', 'Massagem'
-  ];
+  const { categories } = useCategories();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -30,6 +28,7 @@ const ServicesManagement = () => {
     duration: 60,
     price: 0,
     category: '',
+    category_id: '',
     store_id: '',
     is_active: true
   });
@@ -56,8 +55,17 @@ const ServicesManagement = () => {
       ),
     },
     {
-      key: 'category',
+      key: 'categories',
       label: 'Categoria',
+      render: (value: any) => value ? (
+        <div className="flex items-center space-x-2">
+          <div 
+            className="w-3 h-3 rounded-full" 
+            style={{ backgroundColor: value.color }}
+          />
+          <span>{value.name}</span>
+        </div>
+      ) : '-',
     },
     {
       key: 'duration',
@@ -115,6 +123,7 @@ const ServicesManagement = () => {
       duration: service.duration || 60,
       price: service.price,
       category: service.category || '',
+      category_id: service.category_id || '',
       store_id: service.store_id || '',
       is_active: service.is_active
     });
@@ -132,6 +141,7 @@ const ServicesManagement = () => {
       duration: 60,
       price: 0,
       category: '',
+      category_id: '',
       store_id: '',
       is_active: true
     });
@@ -215,14 +225,14 @@ const ServicesManagement = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="category">Categoria</Label>
-                      <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                      <Select value={formData.category_id} onValueChange={(value) => setFormData({...formData, category_id: value})}>
                         <SelectTrigger className="bg-popover">
                           <SelectValue placeholder="Selecione a categoria" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

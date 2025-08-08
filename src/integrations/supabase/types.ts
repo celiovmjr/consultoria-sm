@@ -102,6 +102,39 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          business_id: string | null
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           created_at: string
@@ -168,6 +201,7 @@ export type Database = {
         Row: {
           business_id: string | null
           category: string | null
+          category_id: string | null
           created_at: string
           description: string | null
           duration: number | null
@@ -181,6 +215,7 @@ export type Database = {
         Insert: {
           business_id?: string | null
           category?: string | null
+          category_id?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -194,6 +229,7 @@ export type Database = {
         Update: {
           business_id?: string | null
           category?: string | null
+          category_id?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -210,6 +246,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
