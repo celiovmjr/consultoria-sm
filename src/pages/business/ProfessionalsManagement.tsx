@@ -10,86 +10,59 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Users, X, Store } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
-import { mockProfessionals, mockServices, Professional } from '@/lib/mockData';
+import { useProfessionals, Professional } from '@/hooks/useProfessionals';
+import { useServices } from '@/hooks/useServices';
+import { useStores } from '@/hooks/useStores';
 import { useToast } from '@/hooks/use-toast';
 
 const ProfessionalsManagement = () => {
   const { toast } = useToast();
-  const [professionals, setProfessionals] = useState<Professional[]>(mockProfessionals);
-  const [services] = useState(mockServices);
+  const { professionals, loading, createProfessional, updateProfessional, deleteProfessional } = useProfessionals();
+  const { services } = useServices();
+  const { stores } = useStores();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
-  
-  // Mock data for stores
-  const stores = [
-    { id: '1', name: 'Filial Centro' },
-    { id: '2', name: 'Filial Shopping' }
-  ];
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    commission: '',
-    services: [] as string[],
+    commission: 60,
+    password: '',
     status: 'active' as 'active' | 'inactive',
-    storeId: ''
+    store_id: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const selectedStore = stores.find(store => store.id === formData.storeId);
-    
-    if (editingProfessional) {
-      // Update existing professional
-      setProfessionals(professionals.map(professional => 
-        professional.id === editingProfessional.id 
-          ? { 
-              ...professional, 
-              ...formData, 
-              commission: parseInt(formData.commission),
-              services: formData.services,
-              storeName: selectedStore?.name || ''
-            }
-          : professional
-      ));
-      toast({
-        title: "Profissional atualizado",
-        description: "As informações do profissional foram atualizadas com sucesso.",
-      });
-    } else {
-      // Create new professional
-      const newProfessional: Professional = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        businessId: '1',
-        services: formData.services,
-        workingHours: {
-          monday: { start: '09:00', end: '18:00', active: true },
-          tuesday: { start: '09:00', end: '18:00', active: true },
-          wednesday: { start: '09:00', end: '18:00', active: true },
-          thursday: { start: '09:00', end: '18:00', active: true },
-          friday: { start: '09:00', end: '18:00', active: true },
-          saturday: { start: '09:00', end: '17:00', active: true },
-          sunday: { start: '09:00', end: '15:00', active: false }
-        },
-        commission: parseInt(formData.commission),
-        status: formData.status,
-        createdAt: new Date().toISOString().split('T')[0],
-        storeId: formData.storeId,
-        storeName: selectedStore?.name || ''
-      };
-      setProfessionals([...professionals, newProfessional]);
-      toast({
-        title: "Profissional criado",
-        description: "O novo profissional foi adicionado com sucesso.",
-      });
+    try {
+      if (editingProfessional) {
+        await updateProfessional(
+          editingProfessional.id, 
+          {
+            ...formData,
+            store_id: formData.store_id || undefined
+          }, 
+          selectedServiceIds,
+          formData.password || undefined
+        );
+      } else {
+        await createProfessional(
+          {
+            ...formData,
+            store_id: formData.store_id || undefined,
+            is_active: formData.status === 'active'
+          }, 
+          selectedServiceIds,
+          formData.password
+        );
+      }
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    
-    resetForm();
   };
 
   const resetForm = () => {
@@ -97,11 +70,12 @@ const ProfessionalsManagement = () => {
       name: '',
       email: '',
       phone: '',
-      commission: '',
-      services: [],
+      commission: 60,
+      password: '',
       status: 'active',
-      storeId: ''
+      store_id: ''
     });
+    setSelectedServiceIds([]);
     setEditingProfessional(null);
     setIsDialogOpen(false);
   };
@@ -111,34 +85,31 @@ const ProfessionalsManagement = () => {
     setFormData({
       name: professional.name,
       email: professional.email,
-      phone: professional.phone,
-      commission: professional.commission.toString(),
-      services: professional.services,
+      phone: professional.phone || '',
+      commission: professional.commission,
+      password: '', // Don't prefill password
       status: professional.status,
-      storeId: professional.storeId || '1'
+      store_id: professional.store_id || ''
     });
+    
+    // Set selected services (simplified for now)
+    setSelectedServiceIds(professional.services || []);
+    
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (professionalId: string) => {
-    setProfessionals(professionals.filter(professional => professional.id !== professionalId));
-    toast({
-      title: "Profissional excluído",
-      description: "O profissional foi removido com sucesso.",
-    });
+  const handleDelete = async (professional: Professional) => {
+    await deleteProfessional(professional.id);
   };
 
   const handleServiceAdd = (serviceId: string) => {
-    if (!formData.services.includes(serviceId)) {
-      setFormData({ ...formData, services: [...formData.services, serviceId] });
+    if (!selectedServiceIds.includes(serviceId)) {
+      setSelectedServiceIds([...selectedServiceIds, serviceId]);
     }
   };
 
   const handleServiceRemove = (serviceId: string) => {
-    setFormData({ 
-      ...formData, 
-      services: formData.services.filter(id => id !== serviceId) 
-    });
+    setSelectedServiceIds(selectedServiceIds.filter(id => id !== serviceId));
   };
 
   const getServiceName = (serviceId: string) => {
@@ -146,7 +117,7 @@ const ProfessionalsManagement = () => {
     return service ? service.name : 'Serviço não encontrado';
   };
 
-  const availableServices = services.filter(service => !formData.services.includes(service.id));
+  const availableServices = services.filter(service => !selectedServiceIds.includes(service.id));
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -167,7 +138,7 @@ const ProfessionalsManagement = () => {
                   Novo Profissional
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingProfessional ? 'Editar Profissional' : 'Novo Profissional'}
@@ -178,13 +149,15 @@ const ProfessionalsManagement = () => {
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="storeId">Loja/Filial</Label>
-                    <Select value={formData.storeId} onValueChange={(value) => setFormData({ ...formData, storeId: value })}>
+                    <Label htmlFor="store_id">Loja/Filial</Label>
+                    <Select value={formData.store_id} onValueChange={(value) => setFormData({ ...formData, store_id: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a loja" />
                       </SelectTrigger>
                       <SelectContent>
-                        {stores.map((store) => (
+                        {stores
+                          .filter(store => store.is_active)
+                          .map((store) => (
                           <SelectItem key={store.id} value={store.id}>
                             {store.name}
                           </SelectItem>
@@ -236,7 +209,7 @@ const ProfessionalsManagement = () => {
                         id="commission"
                         type="number"
                         value={formData.commission}
-                        onChange={(e) => setFormData({ ...formData, commission: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, commission: parseInt(e.target.value) || 0 })}
                         placeholder="60"
                         min="0"
                         max="100"
@@ -257,17 +230,29 @@ const ProfessionalsManagement = () => {
                     </div>
                   </div>
                   
+                  <div>
+                    <Label htmlFor="password">Senha {editingProfessional ? '(deixe em branco para manter a atual)' : ''}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Digite a senha"
+                      required={!editingProfessional}
+                    />
+                  </div>
+                  
                   
                   
                   <div>
                     <Label>Serviços que pode realizar</Label>
                     <div className="space-y-3 mt-2">
                       {/* Selected Services */}
-                      {formData.services.length > 0 && (
+                      {selectedServiceIds.length > 0 && (
                         <div>
                           <Label className="text-sm font-medium text-muted-foreground">Serviços Selecionados:</Label>
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {formData.services.map((serviceId) => {
+                            {selectedServiceIds.map((serviceId) => {
                               const service = services.find(s => s.id === serviceId);
                               return service ? (
                                 <Badge key={serviceId} variant="default" className="flex items-center gap-1">
@@ -310,7 +295,7 @@ const ProfessionalsManagement = () => {
                         </div>
                       )}
                       
-                      {availableServices.length === 0 && formData.services.length > 0 && (
+                      {availableServices.length === 0 && selectedServiceIds.length > 0 && (
                         <p className="text-sm text-muted-foreground">Todos os serviços disponíveis foram selecionados.</p>
                       )}
                     </div>
@@ -340,7 +325,12 @@ const ProfessionalsManagement = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
+              {loading ? (
+                <div className="flex justify-center p-8">
+                  <div className="text-muted-foreground">Carregando profissionais...</div>
+                </div>
+              ) : (
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
@@ -360,22 +350,24 @@ const ProfessionalsManagement = () => {
                       <TableCell>
                         <div className="flex items-center space-x-1">
                           <Store className="w-3 h-3 text-muted-foreground" />
-                          <span className="text-sm">{professional.storeName || 'Não definida'}</span>
+                          <span className="text-sm">
+                            {stores.find(s => s.id === professional.store_id)?.name || 'Não definida'}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>{professional.email}</TableCell>
-                      <TableCell>{professional.phone}</TableCell>
+                      <TableCell>{professional.phone || '-'}</TableCell>
                       <TableCell>{professional.commission}%</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {professional.services.slice(0, 2).map((serviceId) => (
+                          {(professional.services || []).slice(0, 2).map((serviceId) => (
                             <Badge key={serviceId} variant="secondary" className="text-xs">
                               {getServiceName(serviceId)}
                             </Badge>
                           ))}
-                          {professional.services.length > 2 && (
+                          {(professional.services?.length || 0) > 2 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{professional.services.length - 2}
+                              +{(professional.services?.length || 0) - 2}
                             </Badge>
                           )}
                         </div>
@@ -414,12 +406,12 @@ const ProfessionalsManagement = () => {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => handleDelete(professional.id)}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  Excluir
-                                </AlertDialogAction>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(professional)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Excluir
+                            </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -429,6 +421,7 @@ const ProfessionalsManagement = () => {
                   ))}
                 </TableBody>
               </Table>
+              )}
             </CardContent>
           </Card>
         </div>
