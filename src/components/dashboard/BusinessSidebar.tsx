@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X, TrendingUp, Store, Globe } from 'lucide-react';
+import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X, TrendingUp, Store, Globe, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/utils';
@@ -43,14 +43,14 @@ const BusinessSidebar = () => {
       href: '/negocio/lojas',
     },
     {
+      title: 'Categorias',
+      icon: Tag,
+      href: '/negocio/categorias',
+    },
+    {
       title: 'Serviços',
       icon: Scissors,
       href: '/negocio/servicos',
-    },
-    {
-      title: 'Categorias',
-      icon: TrendingUp,
-      href: '/negocio/categorias',
     },
     {
       title: 'Profissionais',
