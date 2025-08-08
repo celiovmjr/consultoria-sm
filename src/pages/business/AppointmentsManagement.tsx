@@ -10,6 +10,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Calendar, Search, Filter, Clock, User, CheckCircle, X, XCircle } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import { useToast } from '@/hooks/use-toast';
+import { useAppointments } from '@/hooks/useAppointments';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Appointment {
   id: string;
@@ -27,60 +30,27 @@ interface Appointment {
 
 const AppointmentsManagement = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    {
-      id: '1',
-      date: '2024-12-27',
-      time: '09:00',
-      client: 'Ana Silva',
-      service: 'Corte Feminino',
-      professional: 'Maria Costa',
-      duration: 60,
-      price: 45.00,
-      status: 'confirmed',
-      clientPhone: '(11) 99999-9999',
-      notes: 'Cliente prefere corte mais curto'
-    },
-    {
-      id: '2',
-      date: '2024-12-27',
-      time: '10:30',
-      client: 'João Santos',
-      service: 'Barba',
-      professional: 'Carlos Lima',
-      duration: 30,
-      price: 25.00,
-      status: 'completed',
-      clientPhone: '(11) 88888-8888'
-    },
-    {
-      id: '3',
-      date: '2024-12-27',
-      time: '14:00',
-      client: 'Patricia Oliveira',
-      service: 'Escova',
-      professional: 'Ana Costa',
-      duration: 45,
-      price: 35.00,
-      status: 'confirmed',
-      clientPhone: '(11) 77777-7777'
-    },
-    {
-      id: '4',
-      date: '2024-12-27',
-      time: '16:00',
-      client: 'Carlos Mendes',
-      service: 'Corte Masculino',
-      professional: 'João Silva',
-      duration: 30,
-      price: 30.00,
-      status: 'no-show',
-      clientPhone: '(11) 66666-6666'
-    }
-  ]);
+  const { data: rawAppointments = [], isLoading } = useAppointments();
+
+  // Map DB rows to UI-friendly structure
+  const appointments: Appointment[] = (rawAppointments || []).map((a: any) => {
+    const d = a.appointment_date ? new Date(a.appointment_date) : null;
+    return {
+      id: a.id,
+      date: d ? d.toISOString().split('T')[0] : '',
+      time: d ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+      client: a.client_name || a.client_email || '—',
+      service: a.services?.name || '—',
+      professional: a.professionals?.name || '—',
+      duration: 0,
+      price: Number(a.services?.price ?? 0),
+      status: (a.status || 'scheduled') as any,
+    };
+  });
 
   const filteredAppointments = appointments.filter(appointment => {
     const matchesSearch = appointment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,16 +60,27 @@ const AppointmentsManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusChange = (appointmentId: string, newStatus: 'confirmed' | 'completed' | 'cancelled' | 'no-show') => {
-    setAppointments(appointments.map(appointment =>
-      appointment.id === appointmentId ? { ...appointment, status: newStatus } : appointment
-    ));
-    toast({
-      title: "Status atualizado",
-      description: `Agendamento marcado como ${getStatusText(newStatus)}.`,
-    });
-  };
+  const handleStatusChange = async (
+    appointmentId: string,
+    newStatus: 'confirmed' | 'completed' | 'cancelled' | 'no-show'
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ status: newStatus })
+        .eq('id', appointmentId);
 
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast({
+        title: 'Status atualizado',
+        description: `Agendamento marcado como ${getStatusText(newStatus)}.`,
+      });
+    } catch (e) {
+      toast({ title: 'Erro', description: 'Não foi possível atualizar o status.', variant: 'destructive' });
+    }
+  };
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -229,7 +210,7 @@ const AppointmentsManagement = () => {
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Filtrar por status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border-border z-[60]">
                     <SelectItem value="all">Todos os Status</SelectItem>
                     <SelectItem value="confirmed">Confirmado</SelectItem>
                     <SelectItem value="completed">Concluído</SelectItem>

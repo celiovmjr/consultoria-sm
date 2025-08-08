@@ -5,34 +5,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, Users, Calendar, Download } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
+import { useAppointments } from '@/hooks/useAppointments';
 
 const BusinessReports = () => {
-  const monthlyRevenue = [
-    { month: 'Jan', revenue: 8500 },
-    { month: 'Fev', revenue: 9200 },
-    { month: 'Mar', revenue: 8800 },
-    { month: 'Abr', revenue: 10500 },
-    { month: 'Mai', revenue: 11200 },
-    { month: 'Jun', revenue: 12450 },
-  ];
+  const { data: appointments = [], isLoading } = useAppointments();
 
-  const serviceDistribution = [
-    { name: 'Corte Feminino', value: 35, color: '#8884d8' },
-    { name: 'Corte Masculino', value: 25, color: '#82ca9d' },
-    { name: 'Coloração', value: 20, color: '#ffc658' },
-    { name: 'Escova', value: 15, color: '#ff7300' },
-    { name: 'Outros', value: 5, color: '#0088fe' },
-  ];
+  const monthsPT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const now = new Date();
 
-  const dailyAppointments = [
-    { day: 'Seg', appointments: 18 },
-    { day: 'Ter', appointments: 22 },
-    { day: 'Qua', appointments: 20 },
-    { day: 'Qui', appointments: 25 },
-    { day: 'Sex', appointments: 30 },
-    { day: 'Sáb', appointments: 35 },
-    { day: 'Dom', appointments: 12 },
-  ];
+  // Monthly revenue for last 6 months from completed appointments
+  const monthlyRevenue = Array.from({ length: 6 }).map((_, i) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    const keyMonth = date.getMonth();
+    const keyYear = date.getFullYear();
+    const revenue = appointments.reduce((sum: number, apt: any) => {
+      if (!apt.appointment_date) return sum;
+      const d = new Date(apt.appointment_date);
+      const isSameMonth = d.getMonth() === keyMonth && d.getFullYear() === keyYear;
+      return isSameMonth && apt.status === 'completed'
+        ? sum + Number(apt.services?.price ?? 0)
+        : sum;
+    }, 0);
+    return { month: monthsPT[keyMonth], revenue };
+  });
+
+  // Service distribution
+  const serviceCount: Record<string, number> = {};
+  appointments.forEach((apt: any) => {
+    const name = apt.services?.name || 'Outros';
+    serviceCount[name] = (serviceCount[name] || 0) + 1;
+  });
+  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe', '#34d399'];
+  const serviceDistribution = Object.entries(serviceCount).map(([name, value], idx) => ({ name, value, color: colors[idx % colors.length] }));
+
+  // Appointments by weekday
+  const weekdays = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const weekdayCounts = new Array(7).fill(0);
+  appointments.forEach((apt: any) => {
+    if (!apt.appointment_date) return;
+    const d = new Date(apt.appointment_date);
+    weekdayCounts[d.getDay()] += 1;
+  });
+  const dailyAppointments = weekdays.map((day, i) => ({ day, appointments: weekdayCounts[i] }));
+
+  // KPIs
+  const totalRevenue = appointments.filter((a:any)=>a.status==='completed').reduce((s:number,a:any)=> s + Number(a.services?.price ?? 0), 0);
+  const totalAppointments = appointments.length;
+  const uniqueClients = new Set(appointments.map((a:any)=> a.client_email || a.client_name)).size;
+  const ticketAverage = totalAppointments ? totalRevenue / totalAppointments : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
