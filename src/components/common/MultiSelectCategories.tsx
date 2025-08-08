@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, X, Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -24,34 +21,13 @@ const MultiSelectCategories = ({
   categories = [], 
   selectedCategoryIds = [], 
   onSelectionChange,
-  placeholder = "Selecione categorias..."
+  placeholder = "Selecione as categorias..."
 }: MultiSelectCategoriesProps) => {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-
-  // Ensure arrays are always defined and valid
-  const safeCategories = React.useMemo(() => 
-    Array.isArray(categories) ? categories : [], 
-    [categories]
-  );
-  const safeSelectedIds = React.useMemo(() => 
-    Array.isArray(selectedCategoryIds) ? selectedCategoryIds : [], 
-    [selectedCategoryIds]
-  );
   
-  const selectedCategories = React.useMemo(() => 
-    safeCategories.filter(cat => cat && cat.id && safeSelectedIds.includes(cat.id)),
-    [safeCategories, safeSelectedIds]
-  );
-
-  // Filter categories based on search
-  const filteredCategories = React.useMemo(() => 
-    safeCategories.filter(cat => 
-      cat && cat.name && cat.name.toLowerCase().includes(search.toLowerCase())
-    ),
-    [safeCategories, search]
-  );
-
+  // Ensure arrays are always defined and valid
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const safeSelectedIds = Array.isArray(selectedCategoryIds) ? selectedCategoryIds : [];
+  
   // Don't render if no categories available
   if (!safeCategories || safeCategories.length === 0) {
     return (
@@ -64,112 +40,89 @@ const MultiSelectCategories = ({
     );
   }
 
-  const handleSelect = (categoryId: string) => {
-    if (safeSelectedIds.includes(categoryId)) {
-      onSelectionChange(safeSelectedIds.filter(id => id !== categoryId));
-    } else {
+  const handleCategoryAdd = (categoryId: string) => {
+    if (!safeSelectedIds.includes(categoryId)) {
       onSelectionChange([...safeSelectedIds, categoryId]);
     }
   };
 
-  const removeCategory = (categoryId: string) => {
+  const handleCategoryRemove = (categoryId: string) => {
     onSelectionChange(safeSelectedIds.filter(id => id !== categoryId));
   };
 
-  return (
-    <div className="space-y-2">
-      <Label>Categorias</Label>
-      
-      {/* Selected categories display */}
-      {selectedCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/30">
-          {selectedCategories.map((category) => (
-            <Badge 
-              key={category.id} 
-              variant="secondary" 
-              className="flex items-center gap-1 pr-1"
-              style={{ backgroundColor: `${category.color}15`, borderColor: category.color }}
-            >
-              <div 
-                className="w-2 h-2 rounded-full" 
-                style={{ backgroundColor: category.color }}
-              />
-              {category.name}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => removeCategory(category.id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-        </div>
-      )}
+  const getCategoryName = (categoryId: string) => {
+    const category = safeCategories.find(c => c.id === categoryId);
+    return category ? category.name : 'Categoria não encontrada';
+  };
 
-      {/* Category selector */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {selectedCategories.length > 0 
-              ? `${selectedCategories.length} categoria(s) selecionada(s)`
-              : placeholder
-            }
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0">
-          <div className="p-3">
-            {/* Search input */}
-            <div className="flex items-center border rounded-md px-3 py-1 mb-2">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <Input
-                placeholder="Buscar categoria..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-            </div>
-            
-            {/* Categories list */}
-            <div className="max-h-[200px] overflow-y-auto">
-              {filteredCategories.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  Nenhuma categoria encontrada.
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {filteredCategories.map((category) => (
-                    <div
-                      key={category.id}
-                      className="flex items-center gap-2 p-2 hover:bg-accent rounded-sm cursor-pointer"
-                      onClick={() => handleSelect(category.id)}
+  const getCategoryColor = (categoryId: string) => {
+    const category = safeCategories.find(c => c.id === categoryId);
+    return category ? category.color : '#3b82f6';
+  };
+
+  const availableCategories = safeCategories.filter(category => !safeSelectedIds.includes(category.id));
+
+  return (
+    <div>
+      <Label>Categorias</Label>
+      <div className="space-y-3 mt-2">
+        {/* Selected Categories */}
+        {safeSelectedIds.length > 0 && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Serviços Selecionados:</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {safeSelectedIds.map((categoryId) => {
+                const category = safeCategories.find(c => c.id === categoryId);
+                return category ? (
+                  <Badge key={categoryId} variant="default" className="flex items-center gap-1" style={{ backgroundColor: `${category.color}20`, borderColor: category.color, color: category.color }}>
+                    <div 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: category.color }}
+                    />
+                    {category.name}
+                    <button
+                      type="button"
+                      onClick={() => handleCategoryRemove(categoryId)}
+                      className="ml-1 hover:bg-white/20 rounded-full p-0.5"
                     >
-                      <Check
-                        className={cn(
-                          "h-4 w-4",
-                          safeSelectedIds.includes(category.id) ? "opacity-100" : "opacity-0"
-                        )}
-                      />
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* Category Selector */}
+        {availableCategories.length > 0 && (
+          <div>
+            <Label className="text-sm font-medium text-muted-foreground">Adicionar Categoria:</Label>
+            <Select onValueChange={handleCategoryAdd}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border border-border shadow-lg max-h-48 overflow-y-auto z-50">
+                {availableCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id} className="hover:bg-accent">
+                    <div className="flex items-center gap-2 w-full">
                       <div 
                         className="w-3 h-3 rounded-full" 
                         style={{ backgroundColor: category.color }}
                       />
-                      <span className="text-sm">{category.name}</span>
+                      <span>{category.name}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </PopoverContent>
-      </Popover>
+        )}
+        
+        {availableCategories.length === 0 && safeSelectedIds.length > 0 && (
+          <p className="text-sm text-muted-foreground">Todas as categorias disponíveis foram selecionadas.</p>
+        )}
+      </div>
     </div>
   );
 };
