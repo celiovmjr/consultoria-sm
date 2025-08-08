@@ -199,6 +199,59 @@ export type Database = {
           },
         ]
       }
+      stores: {
+        Row: {
+          address: string
+          business_id: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          manager: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address: string
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          manager?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          manager?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stores_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           created_at: string

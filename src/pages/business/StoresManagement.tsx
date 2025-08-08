@@ -1,58 +1,19 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Store, MapPin, Phone, Mail } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Store as StoreIcon, MapPin, Phone, User } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
-
-interface Store {
-  id: string;
-  name: string;
-  description: string;
-  address: string;
-  phone: string;
-  email: string;
-  manager: string;
-  workingHours: string;
-  isActive: boolean;
-  createdAt: string;
-}
+import { useStores, Store } from '@/hooks/useStores';
 
 const StoresManagement = () => {
-  const { toast } = useToast();
-  const [stores, setStores] = useState<Store[]>([
-    {
-      id: '1',
-      name: 'Filial Centro',
-      description: 'Nossa loja principal no centro da cidade',
-      address: 'Rua das Flores, 123 - Centro',
-      phone: '(11) 99999-9999',
-      email: 'centro@bellavista.com',
-      manager: 'Maria Silva',
-      workingHours: 'Seg-Sex: 9h às 18h | Sáb: 9h às 17h',
-      isActive: true,
-      createdAt: '2024-12-01'
-    },
-    {
-      id: '2',
-      name: 'Filial Shopping',
-      description: 'Unidade localizada no Shopping Center',
-      address: 'Av. Shopping, 456 - Centro Comercial',
-      phone: '(11) 88888-8888',
-      email: 'shopping@bellavista.com',
-      manager: 'Ana Costa',
-      workingHours: 'Seg-Dom: 10h às 22h',
-      isActive: true,
-      createdAt: '2024-11-15'
-    }
-  ]);
-
+  const { stores, loading, createStore, updateStore, deleteStore } = useStores();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStore, setEditingStore] = useState<Store | null>(null);
   const [formData, setFormData] = useState({
@@ -62,8 +23,8 @@ const StoresManagement = () => {
     phone: '',
     email: '',
     manager: '',
-    workingHours: '',
-    isActive: true
+    working_hours: '',
+    is_active: true
   });
 
   const columns = [
@@ -72,7 +33,7 @@ const StoresManagement = () => {
       label: 'Nome da Loja',
       render: (value: string, row: Store) => (
         <div className="flex items-center space-x-2">
-          <Store className="w-4 h-4 text-blue-600" />
+          <StoreIcon className="w-4 h-4 text-blue-600" />
           <span className="font-medium">{value}</span>
         </div>
       ),
@@ -102,7 +63,7 @@ const StoresManagement = () => {
       ),
     },
     {
-      key: 'isActive',
+      key: 'is_active',
       label: 'Status',
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -114,56 +75,38 @@ const StoresManagement = () => {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingStore) {
-      setStores(stores.map(store => 
-        store.id === editingStore.id 
-          ? { ...store, ...formData }
-          : store
-      ));
-      toast({
-        title: "Loja atualizada",
-        description: "A loja foi atualizada com sucesso.",
-      });
-    } else {
-      const newStore: Store = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setStores([...stores, newStore]);
-      toast({
-        title: "Loja criada",
-        description: "A nova loja foi criada com sucesso.",
-      });
+    try {
+      if (editingStore) {
+        await updateStore(editingStore.id, formData);
+      } else {
+        await createStore(formData);
+      }
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    
-    resetForm();
   };
 
   const handleEdit = (store: Store) => {
     setEditingStore(store);
     setFormData({
       name: store.name,
-      description: store.description,
+      description: store.description || '',
       address: store.address,
-      phone: store.phone,
-      email: store.email,
-      manager: store.manager,
-      workingHours: store.workingHours,
-      isActive: store.isActive
+      phone: store.phone || '',
+      email: store.email || '',
+      manager: store.manager || '',
+      working_hours: store.working_hours || '',
+      is_active: store.is_active
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (store: Store) => {
-    setStores(stores.filter(s => s.id !== store.id));
-    toast({
-      title: "Loja excluída",
-      description: "A loja foi excluída com sucesso.",
-    });
+  const handleDelete = async (store: Store) => {
+    await deleteStore(store.id);
   };
 
   const resetForm = () => {
@@ -174,8 +117,8 @@ const StoresManagement = () => {
       phone: '',
       email: '',
       manager: '',
-      workingHours: '',
-      isActive: true
+      working_hours: '',
+      is_active: true
     });
     setEditingStore(null);
     setIsDialogOpen(false);
@@ -284,16 +227,25 @@ const StoresManagement = () => {
                     </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="workingHours">Horário de Funcionamento</Label>
-                    <Input
-                      id="workingHours"
-                      value={formData.workingHours}
-                      onChange={(e) => setFormData({...formData, workingHours: e.target.value})}
-                      placeholder="Ex: Seg-Sex: 9h às 18h | Sáb: 9h às 17h"
-                      required
-                    />
-                  </div>
+                   <div>
+                     <Label htmlFor="working_hours">Horário de Funcionamento</Label>
+                     <Input
+                       id="working_hours"
+                       value={formData.working_hours}
+                       onChange={(e) => setFormData({...formData, working_hours: e.target.value})}
+                       placeholder="Ex: Seg-Sex: 9h às 18h | Sáb: 9h às 17h"
+                       required
+                     />
+                   </div>
+                   
+                   <div className="flex items-center space-x-2">
+                     <Switch
+                       id="is_active"
+                       checked={formData.is_active}
+                       onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+                     />
+                     <Label htmlFor="is_active">Loja Ativa</Label>
+                   </div>
                   
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={resetForm}>
@@ -311,7 +263,7 @@ const StoresManagement = () => {
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Store className="w-5 h-5 mr-2 text-blue-600" />
+                <StoreIcon className="w-5 h-5 mr-2 text-blue-600" />
                 Lista de Lojas
               </CardTitle>
               <CardDescription>
@@ -319,13 +271,20 @@ const StoresManagement = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable 
-                columns={columns} 
-                data={stores}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                deleteConfirmMessage="Tem certeza que deseja excluir esta loja? Esta ação removerá todos os serviços e profissionais associados e não pode ser desfeita."
-              />
+              {loading ? (
+                <div className="flex justify-center p-8">
+                  <div className="text-muted-foreground">Carregando lojas...</div>
+                </div>
+              ) : (
+                <DataTable 
+                  columns={columns} 
+                  data={stores}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  showActions={true}
+                  deleteConfirmMessage="Tem certeza que deseja excluir esta loja?"
+                />
+              )}
             </CardContent>
           </Card>
         </div>
