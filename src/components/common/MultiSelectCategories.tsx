@@ -15,32 +15,36 @@ interface Category {
 }
 
 interface MultiSelectCategoriesProps {
-  categories: Category[];
-  selectedCategoryIds: string[];
+  categories?: Category[];
+  selectedCategoryIds?: string[];
   onSelectionChange: (categoryIds: string[]) => void;
   placeholder?: string;
 }
 
 const MultiSelectCategories = ({ 
-  categories, 
-  selectedCategoryIds, 
+  categories = [], 
+  selectedCategoryIds = [], 
   onSelectionChange,
   placeholder = "Selecione categorias..."
 }: MultiSelectCategoriesProps) => {
   const [open, setOpen] = useState(false);
 
-  const selectedCategories = categories.filter(cat => selectedCategoryIds.includes(cat.id));
+  // Ensure arrays are always defined
+  const safeCategories = categories || [];
+  const safeSelectedIds = selectedCategoryIds || [];
+  
+  const selectedCategories = safeCategories.filter(cat => safeSelectedIds.includes(cat.id));
 
   const handleSelect = (categoryId: string) => {
-    if (selectedCategoryIds.includes(categoryId)) {
-      onSelectionChange(selectedCategoryIds.filter(id => id !== categoryId));
+    if (safeSelectedIds.includes(categoryId)) {
+      onSelectionChange(safeSelectedIds.filter(id => id !== categoryId));
     } else {
-      onSelectionChange([...selectedCategoryIds, categoryId]);
+      onSelectionChange([...safeSelectedIds, categoryId]);
     }
   };
 
   const removeCategory = (categoryId: string) => {
-    onSelectionChange(selectedCategoryIds.filter(id => id !== categoryId));
+    onSelectionChange(safeSelectedIds.filter(id => id !== categoryId));
   };
 
   return (
@@ -91,12 +95,12 @@ const MultiSelectCategories = ({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-[400px] p-0">
           <Command>
             <CommandInput placeholder="Buscar categoria..." />
             <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
             <CommandGroup>
-              {categories.map((category) => (
+              {safeCategories.map((category) => (
                 <CommandItem
                   key={category.id}
                   value={category.name}
@@ -106,7 +110,7 @@ const MultiSelectCategories = ({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedCategoryIds.includes(category.id) ? "opacity-100" : "opacity-0"
+                      safeSelectedIds.includes(category.id) ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div 
