@@ -30,6 +30,7 @@ import ProfessionalProfile from "./pages/professional/ProfessionalProfile";
 import AppointmentHistory from "./pages/professional/AppointmentHistory";
 import Unavailability from "./pages/professional/Unavailability";
 import BusinessLanding from "./pages/client/BusinessLanding";
+import ClientDashboard from "./pages/client/ClientDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -159,6 +160,11 @@ function App() {
               } />
               
               {/* Client Routes */}
+              <Route path="/cliente/dashboard" element={
+                <ProtectedRoute allowedRoles={['client']}>
+                  <ClientDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/cliente/:businessSlug" element={<BusinessLanding />} />
               
               <Route path="*" element={<NotFound />} />
