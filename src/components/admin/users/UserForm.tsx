@@ -188,12 +188,17 @@ export const UserForm = ({
           
           <div>
             <Label htmlFor="business_id" className="text-foreground">Negócio</Label>
-            <Select value={formData.business_id} onValueChange={(value) => setFormData({...formData, business_id: value})}>
+            <Select
+              value={formData.business_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, business_id: value === '__none__' ? '' : value })
+              }
+            >
               <SelectTrigger className="bg-background border-border text-foreground transition-fast">
                 <SelectValue placeholder="Selecione um negócio (opcional)" />
               </SelectTrigger>
-              <SelectContent className="bg-background border-border">
-                <SelectItem value="">Nenhum negócio</SelectItem>
+              <SelectContent className="bg-popover border-border z-[60]">
+                <SelectItem value="__none__">Nenhum negócio</SelectItem>
                 {businesses.map((business) => (
                   <SelectItem key={business.id} value={business.id}>
                     {business.name}
