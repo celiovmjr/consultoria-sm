@@ -1,80 +1,37 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Scissors, Clock, DollarSign, Store } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, Scissors, Clock, DollarSign, Store as StoreIcon } from 'lucide-react';
 import BusinessSidebar from '@/components/dashboard/BusinessSidebar';
 import DataTable from '@/components/common/DataTable';
-
-interface Service {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  category: string;
-  storeId: string;
-  storeName: string;
-  isActive: boolean;
-  createdAt: string;
-}
+import { useServices, Service } from '@/hooks/useServices';
+import { useStores } from '@/hooks/useStores';
 
 const ServicesManagement = () => {
-  const { toast } = useToast();
-  
-  // Mock data for stores
-  const stores = [
-    { id: '1', name: 'Filial Centro' },
-    { id: '2', name: 'Filial Shopping' }
-  ];
+  const { services, loading, createService, updateService, deleteService } = useServices();
+  const { stores } = useStores();
   
   const categories = [
     'Cabelos', 'Unhas', 'Estética', 'Massagem'
   ];
-
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: '1',
-      name: 'Corte Feminino',
-      description: 'Corte moderno personalizado',
-      duration: 60,
-      price: 80.00,
-      category: 'Cabelos',
-      storeId: '1',
-      storeName: 'Filial Centro',
-      isActive: true,
-      createdAt: '2024-12-01'
-    },
-    {
-      id: '2',
-      name: 'Manicure Completa',
-      description: 'Cuidado completo das unhas',
-      duration: 45,
-      price: 35.00,
-      category: 'Unhas',
-      storeId: '2',
-      storeName: 'Filial Shopping',
-      isActive: true,
-      createdAt: '2024-11-28'
-    }
-  ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    duration: '',
-    price: '',
+    duration: 60,
+    price: 0,
     category: '',
-    storeId: '',
-    isActive: true
+    store_id: '',
+    is_active: true
   });
 
   const columns = [
@@ -89,12 +46,12 @@ const ServicesManagement = () => {
       ),
     },
     {
-      key: 'storeName',
+      key: 'stores',
       label: 'Loja/Filial',
-      render: (value: string) => (
+      render: (value: any) => (
         <div className="flex items-center space-x-1">
-          <Store className="w-3 h-3 text-muted-foreground" />
-          <span className="text-sm">{value}</span>
+          <StoreIcon className="w-3 h-3 text-muted-foreground" />
+          <span className="text-sm">{value?.name || 'N/A'}</span>
         </div>
       ),
     },
@@ -123,7 +80,7 @@ const ServicesManagement = () => {
       ),
     },
     {
-      key: 'isActive',
+      key: 'is_active',
       label: 'Status',
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -135,77 +92,48 @@ const ServicesManagement = () => {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const selectedStore = stores.find(store => store.id === formData.storeId);
-    
-    if (editingService) {
-      setServices(services.map(service => 
-        service.id === editingService.id 
-          ? { 
-              ...service, 
-              ...formData,
-              duration: parseInt(formData.duration),
-              price: parseFloat(formData.price),
-              storeName: selectedStore?.name || ''
-            }
-          : service
-      ));
-      toast({
-        title: "Serviço atualizado",
-        description: "O serviço foi atualizado com sucesso.",
-      });
-    } else {
-      const newService: Service = {
-        id: Date.now().toString(),
-        ...formData,
-        duration: parseInt(formData.duration),
-        price: parseFloat(formData.price),
-        storeName: selectedStore?.name || '',
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setServices([...services, newService]);
-      toast({
-        title: "Serviço criado",
-        description: "O novo serviço foi criado com sucesso.",
-      });
+    try {
+      if (editingService) {
+        await updateService(editingService.id, formData);
+      } else {
+        await createService(formData);
+      }
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    
-    resetForm();
   };
 
   const handleEdit = (service: Service) => {
     setEditingService(service);
     setFormData({
       name: service.name,
-      description: service.description,
-      duration: service.duration.toString(),
-      price: service.price.toString(),
-      category: service.category,
-      storeId: service.storeId,
-      isActive: service.isActive
+      description: service.description || '',
+      duration: service.duration || 60,
+      price: service.price,
+      category: service.category || '',
+      store_id: service.store_id || '',
+      is_active: service.is_active
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (service: Service) => {
-    setServices(services.filter(s => s.id !== service.id));
-    toast({
-      title: "Serviço excluído",
-      description: "O serviço foi excluído com sucesso.",
-    });
+  const handleDelete = async (service: Service) => {
+    await deleteService(service.id);
   };
 
   const resetForm = () => {
     setFormData({
       name: '',
       description: '',
-      duration: '',
-      price: '',
+      duration: 60,
+      price: 0,
       category: '',
-      storeId: '',
-      isActive: true
+      store_id: '',
+      is_active: true
     });
     setEditingService(null);
     setIsDialogOpen(false);
@@ -245,12 +173,12 @@ const ServicesManagement = () => {
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="storeId">Loja/Filial</Label>
-                    <Select value={formData.storeId} onValueChange={(value) => setFormData({...formData, storeId: value})}>
-                      <SelectTrigger>
+                    <Label htmlFor="store_id">Loja/Filial</Label>
+                    <Select value={formData.store_id} onValueChange={(value) => setFormData({...formData, store_id: value})}>
+                      <SelectTrigger className="bg-popover">
                         <SelectValue placeholder="Selecione a loja" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-popover z-50">
                         {stores.map((store) => (
                           <SelectItem key={store.id} value={store.id}>
                             {store.name}
@@ -286,10 +214,10 @@ const ServicesManagement = () => {
                     <div>
                       <Label htmlFor="category">Categoria</Label>
                       <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-popover">
                           <SelectValue placeholder="Selecione a categoria" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-popover z-50">
                           {categories.map((category) => (
                             <SelectItem key={category} value={category}>
                               {category}
@@ -304,7 +232,7 @@ const ServicesManagement = () => {
                         id="duration"
                         type="number"
                         value={formData.duration}
-                        onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                        onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value) || 60})}
                         placeholder="60"
                         min="15"
                         max="480"
@@ -320,11 +248,20 @@ const ServicesManagement = () => {
                       type="number"
                       step="0.01"
                       value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
                       placeholder="80.00"
                       min="0"
                       required
                     />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="is_active"
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+                    />
+                    <Label htmlFor="is_active">Serviço Ativo</Label>
                   </div>
                   
                   <DialogFooter>
@@ -351,13 +288,20 @@ const ServicesManagement = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable 
-                columns={columns} 
-                data={services}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                deleteConfirmMessage="Tem certeza que deseja excluir este serviço? Esta ação removerá todos os agendamentos futuros associados e não pode ser desfeita."
-              />
+              {loading ? (
+                <div className="flex justify-center p-8">
+                  <div className="text-muted-foreground">Carregando serviços...</div>
+                </div>
+              ) : (
+                <DataTable 
+                  columns={columns} 
+                  data={services}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  showActions={true}
+                  deleteConfirmMessage="Tem certeza que deseja excluir este serviço?"
+                />
+              )}
             </CardContent>
           </Card>
         </div>

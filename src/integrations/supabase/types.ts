@@ -167,26 +167,41 @@ export type Database = {
       services: {
         Row: {
           business_id: string | null
+          category: string | null
           created_at: string
+          description: string | null
+          duration: number | null
           id: string
+          is_active: boolean
           name: string
           price: number
+          store_id: string | null
           updated_at: string
         }
         Insert: {
           business_id?: string | null
+          category?: string | null
           created_at?: string
+          description?: string | null
+          duration?: number | null
           id?: string
+          is_active?: boolean
           name: string
           price?: number
+          store_id?: string | null
           updated_at?: string
         }
         Update: {
           business_id?: string | null
+          category?: string | null
           created_at?: string
+          description?: string | null
+          duration?: number | null
           id?: string
+          is_active?: boolean
           name?: string
           price?: number
+          store_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -195,6 +210,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
