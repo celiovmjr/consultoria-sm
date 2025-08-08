@@ -7,7 +7,7 @@ import { useServices } from '@/hooks/useServices';
 
 const BusinessDashboard = () => {
   const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments();
-  const { data: professionals = [], isLoading: professionalsLoading } = useProfessionals();
+  const { professionals: professionalsData = [], loading: professionalsLoading } = useProfessionals();
   const { services, loading: servicesLoading } = useServices();
 
   const isLoading = appointmentsLoading || professionalsLoading || servicesLoading;

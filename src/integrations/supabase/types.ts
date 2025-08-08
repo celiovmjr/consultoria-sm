@@ -168,23 +168,44 @@ export type Database = {
       professionals: {
         Row: {
           business_id: string | null
+          commission: number | null
           created_at: string
+          email: string | null
           id: string
+          is_active: boolean | null
           name: string
+          password_hash: string | null
+          phone: string | null
+          status: string | null
+          store_id: string | null
           updated_at: string
         }
         Insert: {
           business_id?: string | null
+          commission?: number | null
           created_at?: string
+          email?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
+          password_hash?: string | null
+          phone?: string | null
+          status?: string | null
+          store_id?: string | null
           updated_at?: string
         }
         Update: {
           business_id?: string | null
+          commission?: number | null
           created_at?: string
+          email?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
+          password_hash?: string | null
+          phone?: string | null
+          status?: string | null
+          store_id?: string | null
           updated_at?: string
         }
         Relationships: [

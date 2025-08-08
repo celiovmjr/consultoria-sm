@@ -19,7 +19,7 @@ const UsersManagement = () => {
   const queryClient = useQueryClient();
   const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
   const { data: businesses = [], isLoading: businessesLoading } = useBusinesses();
-  const { data: professionals = [], isLoading: professionalsLoading } = useProfessionals();
+  const { professionals: professionalsData = [], loading: professionalsLoading } = useProfessionals();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -32,7 +32,7 @@ const UsersManagement = () => {
   // Calculate totals
   const totalUsers = users.length;
   const businessOwners = users.filter(u => u.role === 'business_owner').length;
-  const totalProfessionals = professionals.length;
+  const totalProfessionals = professionalsData.length;
   const clients = totalUsers - businessOwners; // Simplified calculation
 
   const handleDelete = async (userId: string) => {

@@ -36,7 +36,7 @@ export const useProfessionals = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProfessionals(data || []);
+      setProfessionals((data || []) as Professional[]);
     } catch (error: any) {
       console.error('Error fetching professionals:', error);
       toast({
