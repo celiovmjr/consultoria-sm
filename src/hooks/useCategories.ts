@@ -32,14 +32,13 @@ export const useCategories = () => {
 
       if (categoriesError) throw categoriesError;
 
-      // Get services count for each category
+      // Get services count for each category using the junction table
       const categoriesWithCount = await Promise.all(
         (categoriesData || []).map(async (category) => {
           const { count } = await supabase
-            .from('services')
+            .from('service_categories')
             .select('*', { count: 'exact', head: true })
-            .eq('category_id', category.id)
-            .eq('is_active', true);
+            .eq('category_id', category.id);
 
           return {
             ...category,
@@ -120,9 +119,9 @@ export const useCategories = () => {
 
   const deleteCategory = async (id: string) => {
     try {
-      // Check if category has services
+      // Check if category has services using the junction table
       const { count } = await supabase
-        .from('services')
+        .from('service_categories')
         .select('*', { count: 'exact', head: true })
         .eq('category_id', id);
 
