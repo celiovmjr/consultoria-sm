@@ -179,7 +179,9 @@ const ServicesManagement = () => {
                         <SelectValue placeholder="Selecione a loja" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover z-50">
-                        {stores.map((store) => (
+                        {stores
+                          .filter(store => store.is_active) // Apenas lojas ativas
+                          .map((store) => (
                           <SelectItem key={store.id} value={store.id}>
                             {store.name}
                           </SelectItem>
