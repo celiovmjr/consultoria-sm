@@ -27,6 +27,8 @@ const DataTable = ({
   showActions = true,
   deleteConfirmMessage = "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
 }: DataTableProps) => {
+  // Ensure data is always an array to prevent undefined errors
+  const safeData = data || [];
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
       <Table className="min-w-[600px]">
@@ -39,7 +41,7 @@ const DataTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row, index) => (
+          {safeData.map((row, index) => (
             <TableRow key={row.id || index}>
               {columns.map((column) => (
                 <TableCell key={column.key} className="whitespace-nowrap">
@@ -96,7 +98,7 @@ const DataTable = ({
               )}
             </TableRow>
           ))}
-          {data.length === 0 && (
+          {safeData.length === 0 && (
             <TableRow>
               <TableCell colSpan={columns.length + (showActions ? 1 : 0)} className="text-center py-8 text-gray-500">
                 Nenhum item encontrado
