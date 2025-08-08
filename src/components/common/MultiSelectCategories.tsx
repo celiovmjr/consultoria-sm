@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronsUpDown, X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Category {
@@ -28,6 +27,7 @@ const MultiSelectCategories = ({
   placeholder = "Selecione categorias..."
 }: MultiSelectCategoriesProps) => {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   // Ensure arrays are always defined and valid
   const safeCategories = React.useMemo(() => 
@@ -42,6 +42,14 @@ const MultiSelectCategories = ({
   const selectedCategories = React.useMemo(() => 
     safeCategories.filter(cat => cat && cat.id && safeSelectedIds.includes(cat.id)),
     [safeCategories, safeSelectedIds]
+  );
+
+  // Filter categories based on search
+  const filteredCategories = React.useMemo(() => 
+    safeCategories.filter(cat => 
+      cat && cat.name && cat.name.toLowerCase().includes(search.toLowerCase())
+    ),
+    [safeCategories, search]
   );
 
   // Don't render if no categories available
@@ -117,32 +125,49 @@ const MultiSelectCategories = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command>
-            <CommandInput placeholder="Buscar categoria..." />
-            <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
-            <CommandGroup>
-              {safeCategories.map((category) => (
-                <CommandItem
-                  key={category.id}
-                  value={category.name}
-                  onSelect={() => handleSelect(category.id)}
-                  className="flex items-center gap-2"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      safeSelectedIds.includes(category.id) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: category.color }}
-                  />
-                  {category.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+          <div className="p-3">
+            {/* Search input */}
+            <div className="flex items-center border rounded-md px-3 py-1 mb-2">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <Input
+                placeholder="Buscar categoria..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+            
+            {/* Categories list */}
+            <div className="max-h-[200px] overflow-y-auto">
+              {filteredCategories.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Nenhuma categoria encontrada.
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {filteredCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      className="flex items-center gap-2 p-2 hover:bg-accent rounded-sm cursor-pointer"
+                      onClick={() => handleSelect(category.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "h-4 w-4",
+                          safeSelectedIds.includes(category.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <span className="text-sm">{category.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
