@@ -61,14 +61,23 @@ const AdminSettings = () => {
       
       if (error) throw error;
       
+      // Normalize value coming from jsonb that may be stored as raw string or JSON string
+      const normalize = (val: any) => {
+        if (val === null || val === undefined) return '';
+        if (typeof val === 'string') {
+          const s = val.trim();
+          if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+            try { return JSON.parse(s); } catch { return s.slice(1, -1); }
+          }
+          return s;
+        }
+        return val as string;
+      };
+      
       // Transform array to object for easier access
       const settingsObj: { [key: string]: string } = {};
-      data?.forEach(item => {
-        if (item.setting_value) {
-          settingsObj[item.setting_key] = typeof item.setting_value === 'string' 
-            ? JSON.parse(item.setting_value) 
-            : item.setting_value;
-        }
+      data?.forEach((item) => {
+        settingsObj[item.setting_key] = normalize(item.setting_value);
       });
       
       return settingsObj;
@@ -243,7 +252,7 @@ const AdminSettings = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || appSettingsLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col lg:flex-row">
         <AdminSidebar />
