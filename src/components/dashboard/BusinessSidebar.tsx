@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X, TrendingUp, Store, Globe, Tag } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Calendar, BarChart3, Building, Users, Scissors, Clock, Settings, Menu, X, TrendingUp, Store, Globe, Tag, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const BusinessSidebar = () => {
@@ -10,6 +12,28 @@ const BusinessSidebar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, profile } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) throw error;
+      
+      navigate('/');
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer logout. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -100,7 +124,7 @@ const BusinessSidebar = () => {
           variant="ghost"
           size="icon"
           onClick={handleMobileMenuToggle}
-          className="fixed top-4 left-4 z-50 md:hidden bg-background border border-border shadow-lg h-10 w-10"
+          className="fixed top-4 left-4 z-50 md:hidden glass-card h-11 w-11 hover-float"
         >
           <Menu className="w-5 h-5" />
         </Button>
@@ -109,29 +133,32 @@ const BusinessSidebar = () => {
         {mobileMenuOpen && (
           <>
             <div 
-              className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden" 
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="fixed top-0 left-0 w-72 h-full bg-background border-r border-border z-50 md:hidden">
-              <div className="p-4 border-b border-border flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-                    <Building className="w-5 h-5 text-white" />
+            <div className="fixed top-0 left-0 w-80 h-full glass-card border-r border-border/20 z-50 md:hidden shadow-apple-xl">
+              <div className="p-6 border-b border-border/20 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-blue-600 rounded-xl flex items-center justify-center shadow-apple">
+                    <Building className="w-6 h-6 text-white" />
                   </div>
-                  <span className="font-semibold text-foreground">Meu Negócio</span>
+                  <div>
+                    <span className="font-semibold text-foreground text-lg">Meu Negócio</span>
+                    <p className="text-xs text-muted-foreground">Gestão Empresarial</p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="h-8 w-8"
+                  className="h-9 w-9 hover:bg-accent/50 rounded-lg"
                 >
                   <X className="w-4 h-4" />
                 </Button>
               </div>
               
-              <nav className="flex-1 p-4">
-                <ul className="space-y-2">
+              <nav className="flex-1 p-6">
+                <ul className="space-y-1">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -140,15 +167,15 @@ const BusinessSidebar = () => {
                           to={item.href}
                           onClick={handleLinkClick}
                           className={cn(
-                            "flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors space-x-3",
+                            "flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-spring space-x-3 group",
                             isActive(item.href)
-                              ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border border-green-200 dark:border-green-800 shadow-apple"
+                              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                           )}
                         >
                           <Icon className={cn(
-                            "w-6 h-6",
-                            isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
+                            "w-5 h-5 transition-colors",
+                            isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground group-hover:text-foreground"
                           )} />
                           <span>{item.title}</span>
                         </Link>
@@ -158,8 +185,31 @@ const BusinessSidebar = () => {
                 </ul>
               </nav>
               
-              <div className="p-4 border-t border-border">
-                <ThemeToggle />
+              {/* User section */}
+              <div className="p-6 border-t border-border/20 space-y-3">
+                {profile && (
+                  <div className="flex items-center space-x-3 px-3 py-2 rounded-xl bg-accent/30">
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{profile.name}</p>
+                      <p className="text-xs text-muted-foreground">Proprietário</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <ThemeToggle />
+                  <Button
+                    onClick={handleLogout}
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 justify-start text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sair
+                  </Button>
+                </div>
               </div>
             </div>
           </>
@@ -171,26 +221,29 @@ const BusinessSidebar = () => {
   // Desktop sidebar
   return (
     <div className={cn(
-      "bg-background border-r border-border transition-all duration-300 flex flex-col h-full",
-      collapsed ? "w-16" : "w-64"
+      "glass-card border-r border-border/20 transition-smooth flex flex-col h-full shadow-apple-lg",
+      collapsed ? "w-20" : "w-72"
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      <div className="p-6 border-b border-border/20 flex items-center justify-between">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <Building className="w-5 h-5 text-white" />
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-blue-600 rounded-xl flex items-center justify-center shadow-apple">
+              <Building className="w-6 h-6 text-white" />
             </div>
-            <span className="font-semibold text-foreground">Meu Negócio</span>
+            <div>
+              <span className="font-semibold text-foreground text-lg">Meu Negócio</span>
+              <p className="text-xs text-muted-foreground">Gestão Empresarial</p>
+            </div>
           </div>
         )}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
           {!collapsed && <ThemeToggle />}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8"
+            className="h-9 w-9 hover:bg-accent/50 rounded-lg transition-spring"
           >
             {collapsed ? <Menu className="w-4 h-4" /> : <X className="w-4 h-4" />}
           </Button>
@@ -198,8 +251,8 @@ const BusinessSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+      <nav className="flex-1 p-6">
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -207,16 +260,17 @@ const BusinessSidebar = () => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-spring group",
                     collapsed ? "justify-center" : "space-x-3",
                     isActive(item.href)
-                      ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border border-green-200 dark:border-green-800 shadow-apple"
+                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                   )}
                 >
                   <Icon className={cn(
-                    collapsed ? "w-8 h-8" : "w-6 h-6",
-                    isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
+                    collapsed ? "w-6 h-6" : "w-5 h-5",
+                    "transition-colors",
+                    isActive(item.href) ? "text-green-700 dark:text-green-400" : "text-muted-foreground group-hover:text-foreground"
                   )} />
                   {!collapsed && <span>{item.title}</span>}
                 </Link>
@@ -226,12 +280,48 @@ const BusinessSidebar = () => {
         </ul>
       </nav>
 
-      {/* Footer with theme toggle when collapsed */}
-      {collapsed && (
-        <div className="p-4 border-t border-border flex justify-center">
-          <ThemeToggle />
+      {/* User section */}
+      <div className="p-6 border-t border-border/20 space-y-3">
+        {!collapsed && profile && (
+          <div className="flex items-center space-x-3 px-3 py-2 rounded-xl bg-accent/30">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
+              <User className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{profile.name}</p>
+              <p className="text-xs text-muted-foreground">Proprietário</p>
+            </div>
+          </div>
+        )}
+        
+        <div className={cn(
+          "flex items-center",
+          collapsed ? "justify-center" : "space-x-2"
+        )}>
+          {collapsed && <ThemeToggle />}
+          {!collapsed && <ThemeToggle />}
+          {!collapsed ? (
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+              className="flex-1 justify-start text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-spring"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          ) : (
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="icon"
+              className="w-9 h-9 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-spring rounded-lg"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
