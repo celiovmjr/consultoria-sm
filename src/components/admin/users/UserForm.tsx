@@ -30,6 +30,7 @@ export const UserForm = ({
     name: '',
     email: '',
     phone: '',
+    password: '',
     role: 'business_owner' as 'business_owner' | 'admin' | 'professional',
     business_id: '',
     status: 'active' as 'active' | 'inactive'
@@ -42,6 +43,7 @@ export const UserForm = ({
         name: editingUser.name,
         email: editingUser.email,
         phone: editingUser.phone || '',
+        password: '', // Não pré-preencher senha para edição
         role: editingUser.role,
         business_id: editingUser.business_id || '',
         status: editingUser.status
@@ -51,6 +53,7 @@ export const UserForm = ({
         name: '',
         email: '',
         phone: '',
+        password: '',
         role: 'business_owner',
         business_id: '',
         status: 'active'
@@ -63,39 +66,129 @@ export const UserForm = ({
     
     try {
       if (editingUser) {
+        // Atualizar usuário existente
         console.log('Updating user:', editingUser.id, formData);
+        
+        // Dados para atualizar (sem senha)
+        const updateData = {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          role: formData.role,
+          business_id: formData.business_id || null,
+          status: formData.status
+        };
+
         const { error } = await supabase
           .from('users')
-          .update(formData)
+          .update(updateData)
           .eq('id', editingUser.id);
 
         if (error) throw error;
+
+        // Atualizar também o perfil se existir
+        await supabase
+          .from('profiles')
+          .update({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            business_id: formData.business_id || null
+          })
+          .eq('id', editingUser.id);
 
         toast({
           title: "Usuário atualizado",
           description: "As informações do usuário foram atualizadas com sucesso.",
         });
       } else {
-        console.log('Creating user:', formData);
-        const { error } = await supabase
-          .from('users')
-          .insert([formData]);
+        // Criar novo usuário
+        if (!formData.password || formData.password.length < 6) {
+          toast({
+            title: "Erro",
+            description: "A senha deve ter pelo menos 6 caracteres.",
+            variant: "destructive"
+          });
+          return;
+        }
 
-        if (error) throw error;
+        console.log('Creating user:', formData);
+        
+        // Primeiro, criar o usuário no Auth do Supabase
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              name: formData.name,
+              role: formData.role
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
+        if (!authData.user) {
+          throw new Error('Falha ao criar usuário na autenticação');
+        }
+
+        // Criar entrada na tabela users
+        const userData = {
+          id: authData.user.id,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          role: formData.role,
+          business_id: formData.business_id || null,
+          status: formData.status
+        };
+
+        const { error: userError } = await supabase
+          .from('users')
+          .insert([userData]);
+
+        if (userError) {
+          console.error('Error creating user record:', userError);
+          // Se falhar ao criar o registro na tabela users, 
+          // o perfil ainda será criado automaticamente pelo trigger
+        }
+
+        // Se for um profissional, criar entrada na tabela professionals
+        if (formData.role === 'professional' && formData.business_id) {
+          const professionalData = {
+            user_id: authData.user.id,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            business_id: formData.business_id,
+            status: 'active',
+            is_active: true
+          };
+
+          const { error: professionalError } = await supabase
+            .from('professionals')
+            .insert([professionalData]);
+
+          if (professionalError) {
+            console.error('Error creating professional record:', professionalError);
+          }
+        }
 
         toast({
           title: "Usuário criado",
-          description: "O novo usuário foi criado com sucesso.",
+          description: "O novo usuário foi criado com sucesso e pode fazer login na plataforma.",
         });
       }
       
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['professionals'] });
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving user:', error);
       toast({
         title: "Erro",
-        description: "Erro ao salvar usuário. Tente novamente.",
+        description: error.message || "Erro ao salvar usuário. Tente novamente.",
         variant: "destructive"
       });
     }
@@ -106,6 +199,7 @@ export const UserForm = ({
       name: '',
       email: '',
       phone: '',
+      password: '',
       role: 'business_owner',
       business_id: '',
       status: 'active'
@@ -171,6 +265,21 @@ export const UserForm = ({
               className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
             />
           </div>
+          
+          {!editingUser && (
+            <div>
+              <Label htmlFor="password" className="text-foreground">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required={!editingUser}
+                placeholder="Mínimo 6 caracteres"
+                className="bg-background border-border text-foreground transition-fast focus:border-primary/50"
+              />
+            </div>
+          )}
           
           <div>
             <Label htmlFor="role" className="text-foreground">Tipo de Usuário</Label>

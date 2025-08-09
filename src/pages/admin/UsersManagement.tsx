@@ -38,14 +38,34 @@ const UsersManagement = () => {
   const handleDelete = async (userId: string) => {
     try {
       console.log('Deleting user:', userId);
-      const { error } = await supabase
+      
+      // Primeiro, deletar registros relacionados
+      // Deletar da tabela professionals se existir
+      await supabase
+        .from('professionals')
+        .delete()
+        .eq('user_id', userId);
+
+      // Deletar da tabela users
+      const { error: userError } = await supabase
         .from('users')
         .delete()
         .eq('id', userId);
 
-      if (error) throw error;
+      if (userError) throw userError;
+
+      // Deletar da tabela profiles (cascade deve fazer isso automaticamente)
+      await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      // Note: Não deletamos do auth.users pois isso requer privilégios de admin
+      // e pode causar problemas. O ideal seria usar uma função de edge function
+      // ou marcar como inativo
 
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['professionals'] });
       toast({
         title: "Usuário excluído",
         description: "O usuário foi removido com sucesso.",
