@@ -67,7 +67,12 @@ export const UserListItem = ({
         </div>
 
         <div className="flex space-x-2">
-          <Button size="sm" variant="outline" onClick={() => onEdit(user)}>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => onEdit(user)}
+            className="transition-smooth hover:bg-muted/80"
+          >
             <Edit className="w-4 h-4 mr-1" />
             Editar
           </Button>
