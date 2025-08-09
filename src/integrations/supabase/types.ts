@@ -78,25 +78,40 @@ export type Database = {
       businesses: {
         Row: {
           created_at: string
+          description: string | null
+          email: string | null
           id: string
           name: string
+          owner: string | null
+          phone: string | null
           plan: string | null
+          slug: string | null
           status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          email?: string | null
           id?: string
           name: string
+          owner?: string | null
+          phone?: string | null
           plan?: string | null
+          slug?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          email?: string | null
           id?: string
           name?: string
+          owner?: string | null
+          phone?: string | null
           plan?: string | null
+          slug?: string | null
           status?: string
           updated_at?: string
         }
