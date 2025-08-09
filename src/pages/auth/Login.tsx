@@ -26,19 +26,19 @@ const Login = () => {
       // Redirect based on user role
       switch (profile.role) {
         case 'saas_admin':
-          navigate('/admin/dashboard');
+          navigate('/admin/dashboard', { replace: true });
           break;
         case 'business_owner':
-          navigate('/negocio/dashboard');
+          navigate('/negocio/dashboard', { replace: true });
           break;
         case 'professional':
-          navigate('/profissional/dashboard');
+          navigate('/profissional/dashboard', { replace: true });
           break;
         case 'client':
-          navigate('/cliente/dashboard');
+          navigate('/cliente/dashboard', { replace: true });
           break;
         default:
-          navigate('/');
+          navigate('/', { replace: true });
       }
     }
   }, [user, profile, navigate]);

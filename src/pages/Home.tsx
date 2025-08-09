@@ -8,11 +8,30 @@ import Footer from '@/components/layout/Footer';
 import { usePlans } from '@/hooks/usePlans';
 import { useAppName } from '@/hooks/useAppName';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { data: plansData = [], isLoading: plansLoading, error: plansError } = usePlans();
   const { data: appName = 'Agenda.AI', isLoading: appNameLoading } = useAppName();
+  const navigate = useNavigate();
+
+  const getDashboardRoute = () => {
+    if (!profile) return '/';
+    
+    switch (profile.role) {
+      case 'saas_admin':
+        return '/admin/dashboard';
+      case 'business_owner':
+        return '/negocio/dashboard';
+      case 'professional':
+        return '/profissional/dashboard';
+      case 'client':
+        return '/cliente/dashboard';
+      default:
+        return '/';
+    }
+  };
   const features = [
     {
       icon: Calendar,
@@ -172,6 +191,13 @@ const Home = () => {
               {user ? (
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
                   <span className="text-gray-600">Olá, {user.email}</span>
+                  <Button 
+                    onClick={() => navigate(getDashboardRoute())}
+                    size="lg" 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto"
+                  >
+                    Ir para Dashboard
+                  </Button>
                   <Button 
                     onClick={() => signOut()}
                     variant="outline" 
