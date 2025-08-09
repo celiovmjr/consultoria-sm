@@ -134,7 +134,7 @@ const BusinessDashboard = () => {
                 {stats.map((stat) => {
                   const Icon = stat.icon;
                   return (
-                    <Card key={stat.title} className="border-border bg-card">
+                    <Card key={stat.title} className="bg-gradient-card hover-lift border-border/50">
                       <CardContent className="p-4 md:p-6">
                         <div className="flex items-center justify-between">
                           <div>
@@ -142,7 +142,9 @@ const BusinessDashboard = () => {
                             <p className="text-xl md:text-2xl font-bold text-foreground">{stat.value}</p>
                             <p className="text-xs text-muted-foreground">{stat.change}</p>
                           </div>
-                          <Icon className={`w-6 h-6 md:w-8 md:h-8 ${stat.color}`} />
+                          <div className="p-3 rounded-full bg-primary/10">
+                            <Icon className={`w-6 h-6 md:w-8 md:h-8 ${stat.color}`} />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -151,13 +153,13 @@ const BusinessDashboard = () => {
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-                <Card className="border-border bg-card">
+                <Card className="bg-gradient-card border-border/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-lg">
+                    <CardTitle className="flex items-center text-foreground text-lg">
                       <Calendar className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-600" />
                       Agendamentos de Hoje
                     </CardTitle>
-                    <CardDescription className="text-sm">
+                    <CardDescription className="text-muted-foreground text-sm">
                       {todayAppointmentsDetailed.length} agendamentos para hoje
                     </CardDescription>
                   </CardHeader>
@@ -165,13 +167,13 @@ const BusinessDashboard = () => {
                     <div className="space-y-3 md:space-y-4">
                       {todayAppointmentsDetailed.length > 0 ? (
                         todayAppointmentsDetailed.map((appointment, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 md:p-4 bg-muted/30 rounded-lg">
+                          <div key={index} className="flex items-center justify-between p-3 md:p-4 bg-muted/50 rounded-lg transition-smooth hover:bg-muted/70 border border-border/50">
                             <div className="flex items-center space-x-3 md:space-x-4 min-w-0 flex-1">
                               <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex-shrink-0">
                                 <Clock className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <div className="font-medium text-sm md:text-base">{appointment.time}</div>
+                                <div className="font-medium text-foreground text-sm md:text-base">{appointment.time}</div>
                                 <div className="text-xs md:text-sm text-muted-foreground truncate">{appointment.client}</div>
                                 <div className="text-xs text-muted-foreground truncate">{appointment.service} - {appointment.professional}</div>
                               </div>
@@ -182,44 +184,49 @@ const BusinessDashboard = () => {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8">
-                          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">Nenhum agendamento para hoje</p>
+                        <div className="text-center py-8 md:py-12">
+                          <Calendar className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/50 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                            Nenhum agendamento para hoje
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Você está livre hoje! Aproveite o tempo livre.
+                          </p>
                         </div>
                       )}
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="border-border bg-card">
+                <Card className="bg-gradient-card border-border/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-lg">
+                    <CardTitle className="flex items-center text-foreground text-lg">
                       <TrendingUp className="w-4 h-4 md:w-5 md:h-5 mr-2 text-green-600" />
                       Resumo Semanal
                     </CardTitle>
-                    <CardDescription className="text-sm">Desempenho dos últimos 7 dias</CardDescription>
+                    <CardDescription className="text-muted-foreground text-sm">Desempenho dos últimos 7 dias</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 md:space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs md:text-sm font-medium">Agendamentos Realizados</span>
-                        <span className="text-green-600 font-semibold text-sm md:text-base">
+                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Agendamentos Realizados</span>
+                        <span className="text-success font-semibold text-sm md:text-base">
                           {appointments.filter(apt => apt.status === 'completed').length}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs md:text-sm font-medium">Receita Gerada</span>
-                        <span className="text-green-600 font-semibold text-sm md:text-base">
+                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Receita Gerada</span>
+                        <span className="text-success font-semibold text-sm md:text-base">
                           R$ {monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs md:text-sm font-medium">Novos Clientes</span>
-                        <span className="text-blue-600 font-semibold text-sm md:text-base">{activeClients}</span>
+                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Novos Clientes</span>
+                        <span className="text-info font-semibold text-sm md:text-base">{activeClients}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs md:text-sm font-medium">Taxa de Comparecimento</span>
-                        <span className="text-purple-600 font-semibold text-sm md:text-base">92%</span>
+                        <span className="text-xs md:text-sm font-medium text-muted-foreground">Taxa de Comparecimento</span>
+                        <span className="text-primary font-semibold text-sm md:text-base">92%</span>
                       </div>
                     </div>
                   </CardContent>
