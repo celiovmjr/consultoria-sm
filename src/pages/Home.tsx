@@ -188,39 +188,16 @@ const Home = () => {
               A plataforma completa para gestão de agendamentos em salões de beleza, barbearias e clínicas de estética.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {user ? (
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
-                  <span className="text-gray-600">Olá, {user.email}</span>
-                  <Button 
-                    onClick={() => navigate(getDashboardRoute())}
-                    size="lg" 
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto"
-                  >
-                    Ir para Dashboard
-                  </Button>
-                  <Button 
-                    onClick={() => signOut()}
-                    variant="outline" 
-                    size="lg" 
-                    className="text-lg px-8 py-4 h-auto border-2"
-                  >
-                    Sair
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <Link to="/cadastro">
-                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto">
-                      Começar Gratuitamente
-                    </Button>
-                  </Link>
-                  <Link to="/login">
-                    <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto border-2">
-                      Ver Demonstração
-                    </Button>
-                  </Link>
-                </>
-              )}
+              <Link to="/cadastro">
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4 h-auto">
+                  Começar Gratuitamente
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto border-2">
+                  Ver Demonstração
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
