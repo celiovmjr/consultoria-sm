@@ -197,16 +197,19 @@ const UsersManagement = () => {
               ) : (
                 <div className="space-y-4">
                   {filteredUsers.map((user) => (
-                    <UserListItem
-                      key={user.id}
-                      user={user}
-                      onEdit={setEditingUser}
-                      getStatusColor={getStatusColor}
-                      getRoleColor={getRoleColor}
-                      getRoleLabel={getRoleLabel}
-                      getBusinessName={getBusinessName}
-                      deleteComponent={<UserDeleteDialog user={user} onDelete={handleDelete} />}
-                    />
+                     <UserListItem
+                       key={user.id}
+                       user={user}
+                       onEdit={(user) => {
+                         setEditingUser(user);
+                         setIsDialogOpen(true);
+                       }}
+                       getStatusColor={getStatusColor}
+                       getRoleColor={getRoleColor}
+                       getRoleLabel={getRoleLabel}
+                       getBusinessName={getBusinessName}
+                       deleteComponent={<UserDeleteDialog user={user} onDelete={handleDelete} />}
+                     />
                   ))}
                 </div>
               )}
