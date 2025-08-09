@@ -20,8 +20,9 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any; profile?: Profile }>;
   signOut: () => Promise<{ error: any }>;
+  getProfile: (userId: string) => Promise<Profile | null>;
   isAdmin: boolean;
   isBusinessOwner: boolean;
   isProfessional: boolean;
@@ -58,12 +59,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) {
         console.error('Error fetching profile:', error);
-        return;
+        return null;
       }
 
       setProfile(data as Profile);
+      return data as Profile;
     } catch (error) {
       console.error('Error fetching profile:', error);
+      return null;
+    }
+  };
+
+  const getProfile = async (userId: string): Promise<Profile | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data as Profile;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
     }
   };
 
@@ -118,10 +141,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
+
+    if (!error && data.user) {
+      // Fetch profile immediately after successful login
+      const profile = await getProfile(data.user.id);
+      return { error, profile };
+    }
 
     return { error };
   };
@@ -149,6 +178,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUp,
     signIn,
     signOut,
+    getProfile,
     isAdmin,
     isBusinessOwner,
     isProfessional,

@@ -20,30 +20,29 @@ const Register = () => {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const { signUp, user, profile } = useAuth();
+  const { signUp, signIn, user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: appName = 'Agenda.AI' } = useAppName();
 
+  const getDashboardRoute = (userProfile: any) => {
+    switch (userProfile?.role) {
+      case 'saas_admin':
+        return '/admin/dashboard';
+      case 'business_owner':
+        return '/negocio/dashboard';
+      case 'professional':
+        return '/profissional/dashboard';
+      case 'client':
+        return '/cliente/dashboard';
+      default:
+        return '/';
+    }
+  };
+
   useEffect(() => {
     if (user && profile) {
-      // Redirect based on user role
-      switch (profile.role) {
-        case 'saas_admin':
-          navigate('/admin/dashboard');
-          break;
-        case 'business_owner':
-          navigate('/negocio/dashboard');
-          break;
-        case 'professional':
-          navigate('/profissional/dashboard');
-          break;
-        case 'client':
-          navigate('/cliente/dashboard');
-          break;
-        default:
-          navigate('/');
-      }
+      navigate(getDashboardRoute(profile), { replace: true });
     }
   }, [user, profile, navigate]);
 
@@ -87,9 +86,22 @@ const Register = () => {
       } else {
         toast({
           title: "Cadastro realizado com sucesso!",
-          description: "Verifique seu email para confirmar a conta.",
+          description: "Bem-vindo! Faça login para continuar.",
         });
-        navigate('/login');
+        
+        // Try to sign in automatically after successful signup
+        setTimeout(async () => {
+          try {
+            const { error: signInError, profile: userProfile } = await signIn(formData.email, formData.password);
+            if (!signInError && userProfile) {
+              navigate(getDashboardRoute(userProfile), { replace: true });
+            } else {
+              navigate('/login');
+            }
+          } catch {
+            navigate('/login');
+          }
+        }, 1000);
       }
     } catch (error) {
       toast({

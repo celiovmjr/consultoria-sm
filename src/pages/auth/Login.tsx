@@ -43,12 +43,27 @@ const Login = () => {
     }
   }, [user, profile, navigate]);
 
+  const getDashboardRoute = (userProfile: any) => {
+    switch (userProfile?.role) {
+      case 'saas_admin':
+        return '/admin/dashboard';
+      case 'business_owner':
+        return '/negocio/dashboard';
+      case 'professional':
+        return '/profissional/dashboard';
+      case 'client':
+        return '/cliente/dashboard';
+      default:
+        return '/';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      const { error, profile: userProfile } = await signIn(formData.email, formData.password);
       
       if (error) {
         toast({
@@ -61,7 +76,11 @@ const Login = () => {
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta!",
         });
-        // Navigation will be handled by useEffect when user/profile updates
+        
+        // Direct redirection with profile data
+        if (userProfile) {
+          navigate(getDashboardRoute(userProfile), { replace: true });
+        }
       }
     } catch (error) {
       toast({
