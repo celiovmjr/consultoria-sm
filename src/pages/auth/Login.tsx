@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAppName } from '@/hooks/useAppName';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +19,7 @@ const Login = () => {
   const { signIn, user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { data: appName = 'Agenda.AI' } = useAppName();
 
   useEffect(() => {
     if (user && profile) {
@@ -81,7 +83,7 @@ const Login = () => {
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Agenda.AI
+              {appName}
             </span>
           </Link>
         </div>

@@ -163,42 +163,36 @@ const AdminSettings = () => {
     }
   }, [appSettings]);
 
-  // App settings mutation
+  // App settings mutation - only app_name
   const updateAppSettingsMutation = useMutation({
-    mutationFn: async (data: AppSettingsForm) => {
-      const promises = Object.entries(data).map(([key, value]) => 
-        supabase
-          .from('system_settings')
-          .upsert({ 
-            setting_key: key, 
-            setting_value: JSON.stringify(value) 
-          }, {
-            onConflict: 'setting_key'
-          })
-      );
+    mutationFn: async (appName: string) => {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .upsert({ 
+          setting_key: 'app_name', 
+          setting_value: JSON.stringify(appName) 
+        }, {
+          onConflict: 'setting_key'
+        });
       
-      const results = await Promise.all(promises);
-      
-      // Check for errors
-      const errors = results.filter(result => result.error);
-      if (errors.length > 0) {
-        throw new Error(errors[0].error?.message || 'Erro ao salvar configurações');
+      if (error) {
+        throw new Error(error.message || 'Erro ao salvar nome da aplicação');
       }
       
-      return results;
+      return data;
     },
     onSuccess: () => {
       toast({
-        title: "Configurações salvas",
-        description: "As configurações da aplicação foram atualizadas com sucesso.",
+        title: "Nome da aplicação salvo",
+        description: "O nome da aplicação foi atualizado com sucesso.",
       });
+      queryClient.invalidateQueries({ queryKey: ['app-name'] });
       queryClient.invalidateQueries({ queryKey: ['app-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['plans'] });
     },
     onError: (error: any) => {
       toast({
         title: "Erro ao salvar",
-        description: error.message || "Não foi possível salvar as configurações.",
+        description: error.message || "Não foi possível salvar o nome da aplicação.",
         variant: "destructive",
       });
     }
@@ -227,7 +221,7 @@ const AdminSettings = () => {
 
   const handleAppSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateAppSettingsMutation.mutate(appSettingsForm);
+    updateAppSettingsMutation.mutate(appSettingsForm.app_name);
   };
 
   const handleAppInputChange = (field: keyof AppSettingsForm, value: string) => {
@@ -345,10 +339,13 @@ const AdminSettings = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold border-b pb-2">Configurações da Aplicação</h3>
                       
-                       {/* General Settings */}
+                       {/* Only App Name Settings */}
                        <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
                          <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Informações Gerais</CardTitle>
+                           <CardTitle className="text-base text-foreground">Nome da Aplicação</CardTitle>
+                           <CardDescription className="text-sm text-muted-foreground">
+                             Configure apenas o nome que aparece na aplicação
+                           </CardDescription>
                          </CardHeader>
                          <CardContent className="space-y-4 pt-6">
                            <div>
@@ -357,257 +354,117 @@ const AdminSettings = () => {
                                id="app_name"
                                value={appSettingsForm.app_name}
                                onChange={(e) => handleAppInputChange('app_name', e.target.value)}
-                               placeholder="AgendaPro"
+                               placeholder="Agenda.AI"
                                className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
                              />
+                             <p className="text-xs text-muted-foreground mt-1">
+                               Este nome aparecerá nas páginas de login, cadastro e landing page
+                             </p>
                            </div>
                          </CardContent>
                        </Card>
 
-                       {/* Hero Section */}
-                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
-                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Seção Principal (Hero)</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-4 pt-6">
-                           <div>
-                             <Label htmlFor="hero_title" className="text-foreground font-medium">Título Principal</Label>
-                             <Input
-                               id="hero_title"
-                               value={appSettingsForm.hero_title}
-                               onChange={(e) => handleAppInputChange('hero_title', e.target.value)}
-                               placeholder="Revolucione seu Salão com Agendamentos Inteligentes"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                           <div>
-                             <Label htmlFor="hero_subtitle" className="text-foreground font-medium">Subtítulo</Label>
-                             <Textarea
-                               id="hero_subtitle"
-                               value={appSettingsForm.hero_subtitle}
-                               onChange={(e) => handleAppInputChange('hero_subtitle', e.target.value)}
-                               placeholder="A plataforma completa para gestão de agendamentos..."
-                               rows={3}
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                         </CardContent>
-                       </Card>
+                       {/* Save App Settings Button */}
+                       <div className="flex justify-end">
+                         <Button
+                           type="button"
+                           onClick={handleAppSettingsSubmit}
+                           disabled={updateAppSettingsMutation.isPending}
+                           className="bg-primary hover:bg-primary/90 text-primary-foreground transition-fast hover-scale"
+                         >
+                           {updateAppSettingsMutation.isPending ? (
+                             <>
+                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                               Salvando...
+                             </>
+                           ) : (
+                             'Salvar Nome da Aplicação'
+                           )}
+                         </Button>
+                       </div>
+                     </div>
 
-                       {/* Features Section */}
-                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
-                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Seção de Recursos</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-4 pt-6">
-                           <div>
-                             <Label htmlFor="features_title" className="text-foreground font-medium">Título</Label>
-                             <Input
-                               id="features_title"
-                               value={appSettingsForm.features_title}
-                               onChange={(e) => handleAppInputChange('features_title', e.target.value)}
-                               placeholder="Tudo que você precisa em uma plataforma"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                           <div>
-                             <Label htmlFor="features_subtitle" className="text-foreground font-medium">Subtítulo</Label>
-                             <Textarea
-                               id="features_subtitle"
-                               value={appSettingsForm.features_subtitle}
-                               onChange={(e) => handleAppInputChange('features_subtitle', e.target.value)}
-                               placeholder="Recursos pensados especialmente para o seu tipo de negócio"
-                               rows={2}
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                         </CardContent>
-                       </Card>
+                      <div className="border-t pt-6 space-y-4">
+                        <h3 className="text-lg font-semibold border-b pb-2">Configurações do Sistema</h3>
 
-                       {/* Testimonials Section */}
-                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
-                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Seção de Depoimentos</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-4 pt-6">
-                           <div>
-                             <Label htmlFor="testimonials_title" className="text-foreground font-medium">Título</Label>
-                             <Input
-                               id="testimonials_title"
-                               value={appSettingsForm.testimonials_title}
-                               onChange={(e) => handleAppInputChange('testimonials_title', e.target.value)}
-                               placeholder="O que nossos clientes dizem"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                           <div>
-                             <Label htmlFor="testimonials_subtitle" className="text-foreground font-medium">Subtítulo</Label>
-                             <Input
-                               id="testimonials_subtitle"
-                               value={appSettingsForm.testimonials_subtitle}
-                               onChange={(e) => handleAppInputChange('testimonials_subtitle', e.target.value)}
-                               placeholder="Histórias reais de sucesso"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                         </CardContent>
-                       </Card>
-
-                       {/* Pricing Section */}
-                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
-                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Seção de Planos</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-4 pt-6">
-                           <div>
-                             <Label htmlFor="pricing_title" className="text-foreground font-medium">Título</Label>
-                             <Input
-                               id="pricing_title"
-                               value={appSettingsForm.pricing_title}
-                               onChange={(e) => handleAppInputChange('pricing_title', e.target.value)}
-                               placeholder="Planos que crescem com seu negócio"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                           <div>
-                             <Label htmlFor="pricing_subtitle" className="text-foreground font-medium">Subtítulo</Label>
-                             <Input
-                               id="pricing_subtitle"
-                               value={appSettingsForm.pricing_subtitle}
-                               onChange={(e) => handleAppInputChange('pricing_subtitle', e.target.value)}
-                               placeholder="Escolha o plano ideal para o seu estabelecimento"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                         </CardContent>
-                       </Card>
-
-                       {/* CTA Section */}
-                       <Card className="bg-gradient-card border-border/50 shadow-sm hover-lift transition-fast">
-                         <CardHeader className="bg-gradient-subtle rounded-t-lg">
-                           <CardTitle className="text-base text-foreground">Seção de Chamada para Ação</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-4 pt-6">
-                           <div>
-                             <Label htmlFor="cta_title" className="text-foreground font-medium">Título</Label>
-                             <Input
-                               id="cta_title"
-                               value={appSettingsForm.cta_title}
-                               onChange={(e) => handleAppInputChange('cta_title', e.target.value)}
-                               placeholder="Pronto para transformar seu negócio?"
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                           <div>
-                             <Label htmlFor="cta_subtitle" className="text-foreground font-medium">Subtítulo</Label>
-                             <Textarea
-                               id="cta_subtitle"
-                               value={appSettingsForm.cta_subtitle}
-                               onChange={(e) => handleAppInputChange('cta_subtitle', e.target.value)}
-                               placeholder="Junte-se a centenas de profissionais que já revolucionaram seus salões"
-                               rows={2}
-                               className="mt-1 transition-fast focus:border-primary/50 focus:shadow-glow"
-                             />
-                           </div>
-                         </CardContent>
-                       </Card>
-                    </div>
-
-                    {/* Platform Settings Section */}
-                    <div className="space-y-4 border-t pt-6">
-                      <h3 className="text-lg font-semibold border-b pb-2">Configurações da Plataforma</h3>
+                        {/* Platform Settings Section */}
+                        <div className="space-y-4">
                       
-                      <div>
-                        <Label htmlFor="platformName" className="text-sm lg:text-base">Nome da Plataforma (Admin)</Label>
-                        <Input
-                          id="platformName"
-                          value={localPlatformSettings.name}
-                          onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, name: e.target.value})}
-                          required
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="platformDescription" className="text-sm lg:text-base">Descrição</Label>
-                        <Textarea
-                          id="platformDescription"
-                          value={localPlatformSettings.description}
-                          onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, description: e.target.value})}
-                          rows={3}
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="supportEmail" className="text-sm lg:text-base">Email de Suporte</Label>
-                        <Input
-                          id="supportEmail"
-                          type="email"
-                          value={localPlatformSettings.supportEmail}
-                          onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, supportEmail: e.target.value})}
-                          required
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div className="space-y-4 lg:space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
-                          <div className="flex-1">
-                            <Label className="font-medium text-sm lg:text-base">Modo de Manutenção</Label>
-                            <p className="text-xs lg:text-sm text-muted-foreground">Bloquear acesso temporariamente</p>
+                          <div>
+                            <Label htmlFor="platformName" className="text-sm lg:text-base">Nome da Plataforma (Admin)</Label>
+                            <Input
+                              id="platformName"
+                              value={localPlatformSettings.name}
+                              onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, name: e.target.value})}
+                              required
+                              className="mt-1"
+                            />
                           </div>
-                          <Switch
-                            checked={localPlatformSettings.maintenanceMode}
-                            onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, maintenanceMode: checked})}
-                          />
-                        </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
-                          <div className="flex-1">
-                            <Label className="font-medium text-sm lg:text-base">Permitir Novos Cadastros</Label>
-                            <p className="text-xs lg:text-sm text-muted-foreground">Habilitar registro de novos usuários</p>
+                          <div>
+                            <Label htmlFor="platformDescription" className="text-sm lg:text-base">Descrição</Label>
+                            <Textarea
+                              id="platformDescription"
+                              value={localPlatformSettings.description}
+                              onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, description: e.target.value})}
+                              rows={3}
+                              className="mt-1"
+                            />
                           </div>
-                          <Switch
-                            checked={localPlatformSettings.allowRegistrations}
-                            onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, allowRegistrations: checked})}
-                          />
-                        </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
-                          <div className="flex-1">
-                            <Label className="font-medium text-sm lg:text-base">Verificação de Email</Label>
-                            <p className="text-xs lg:text-sm text-muted-foreground">Exigir verificação de email no cadastro</p>
+                          <div>
+                            <Label htmlFor="supportEmail" className="text-sm lg:text-base">Email de Suporte</Label>
+                            <Input
+                              id="supportEmail"
+                              type="email"
+                              value={localPlatformSettings.supportEmail}
+                              onChange={(e) => setLocalPlatformSettings({...localPlatformSettings, supportEmail: e.target.value})}
+                              required
+                              className="mt-1"
+                            />
                           </div>
-                          <Switch
-                            checked={localPlatformSettings.requireEmailVerification}
-                            onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, requireEmailVerification: checked})}
-                          />
+
+                          <div className="space-y-4 lg:space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                              <div className="flex-1">
+                                <Label className="font-medium text-sm lg:text-base">Modo de Manutenção</Label>
+                                <p className="text-xs lg:text-sm text-muted-foreground">Bloquear acesso temporariamente</p>
+                              </div>
+                              <Switch
+                                checked={localPlatformSettings.maintenanceMode}
+                                onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, maintenanceMode: checked})}
+                              />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                              <div className="flex-1">
+                                <Label className="font-medium text-sm lg:text-base">Permitir Novos Cadastros</Label>
+                                <p className="text-xs lg:text-sm text-muted-foreground">Habilitar registro de novos usuários</p>
+                              </div>
+                              <Switch
+                                checked={localPlatformSettings.allowRegistrations}
+                                onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, allowRegistrations: checked})}
+                              />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-4">
+                              <div className="flex-1">
+                                <Label className="font-medium text-sm lg:text-base">Verificação de Email</Label>
+                                <p className="text-xs lg:text-sm text-muted-foreground">Exigir verificação de email no cadastro</p>
+                              </div>
+                              <Switch
+                                checked={localPlatformSettings.requireEmailVerification}
+                                onCheckedChange={(checked) => setLocalPlatformSettings({...localPlatformSettings, requireEmailVerification: checked})}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-4">
-                      <Button 
-                        type="button" 
-                        onClick={handleAppSettingsSubmit}
-                        disabled={updateAppSettingsMutation.isPending}
-                        className="flex-1"
-                      >
-                        {updateAppSettingsMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Salvando App...
-                          </>
-                        ) : (
-                          'Salvar Configurações da Aplicação'
-                        )}
-                      </Button>
-                      <Button type="submit" className="flex-1" disabled={isSaving}>
+                      <Button type="submit" className="w-full" disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Salvar Configurações da Plataforma
                       </Button>
-                    </div>
                   </form>
                 </CardContent>
               </Card>
