@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Category {
   id: string;
@@ -18,6 +19,7 @@ export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { profile } = useAuth();
 
   const fetchCategories = async () => {
     try {
@@ -62,9 +64,14 @@ export const useCategories = () => {
 
   const createCategory = async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'services_count'>) => {
     try {
+      const dataToInsert = {
+        ...categoryData,
+        business_id: profile?.business_id || null
+      };
+      
       const { data, error } = await supabase
         .from('categories')
-        .insert([categoryData])
+        .insert([dataToInsert])
         .select()
         .single();
 
@@ -90,9 +97,14 @@ export const useCategories = () => {
 
   const updateCategory = async (id: string, categoryData: Partial<Category>) => {
     try {
+      const dataToUpdate = {
+        ...categoryData,
+        business_id: profile?.business_id || null
+      };
+      
       const { data, error } = await supabase
         .from('categories')
-        .update(categoryData)
+        .update(dataToUpdate)
         .eq('id', id)
         .select()
         .single();
