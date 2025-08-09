@@ -319,8 +319,6 @@ export type Database = {
       services: {
         Row: {
           business_id: string | null
-          category: string | null
-          category_id: string | null
           created_at: string
           description: string | null
           duration: number | null
@@ -333,8 +331,6 @@ export type Database = {
         }
         Insert: {
           business_id?: string | null
-          category?: string | null
-          category_id?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -347,8 +343,6 @@ export type Database = {
         }
         Update: {
           business_id?: string | null
-          category?: string | null
-          category_id?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -365,13 +359,6 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {

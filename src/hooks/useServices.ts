@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Service {
   id: string;
@@ -31,6 +32,7 @@ export const useServices = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { profile } = useAuth();
 
   const fetchServices = async () => {
     try {
@@ -61,9 +63,14 @@ export const useServices = () => {
     try {
       const { category_id, service_categories, ...cleanServiceData } = serviceData;
       
+      const dataToInsert = {
+        ...cleanServiceData,
+        business_id: profile?.business_id || null
+      };
+      
       const { data: service, error: serviceError } = await supabase
         .from('services')
-        .insert([cleanServiceData])
+        .insert([dataToInsert])
         .select()
         .single();
 
@@ -115,9 +122,14 @@ export const useServices = () => {
     try {
       const { category_id, service_categories, ...cleanServiceData } = serviceData;
       
+      const dataToUpdate = {
+        ...cleanServiceData,
+        business_id: profile?.business_id || null
+      };
+      
       const { data: service, error: serviceError } = await supabase
         .from('services')
-        .update(cleanServiceData)
+        .update(dataToUpdate)
         .eq('id', id)
         .select()
         .single();
