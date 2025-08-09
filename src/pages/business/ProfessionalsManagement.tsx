@@ -329,6 +329,23 @@ const ProfessionalsManagement = () => {
                 <div className="flex justify-center p-8">
                   <div className="text-muted-foreground">Carregando profissionais...</div>
                 </div>
+              ) : professionals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <Users className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                    Nenhum profissional cadastrado
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-md">
+                    Adicione profissionais à sua equipe para começar a gerenciar agendamentos e serviços.
+                  </p>
+                  <Button 
+                    onClick={() => setIsDialogOpen(true)}
+                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Primeiro Profissional
+                  </Button>
+                </div>
               ) : (
                 <Table>
                 <TableHeader>
